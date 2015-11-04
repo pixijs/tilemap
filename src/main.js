@@ -22,7 +22,7 @@ function isOptionValid(name) {
 function setupView() {
     var backCanvas = document.querySelector('#backCanvas');
 
-    if (isOptionValid('canvas')) {
+    if (isOptionValid('canvas'))
         renderer = new PIXI.CanvasRenderer(backCanvas.width, backCanvas.height, {view: backCanvas, resolution: 1});
     else
         renderer = PIXI.autoDetectRenderer(backCanvas.width, backCanvas.height, {view: backCanvas, resolution: 1});
