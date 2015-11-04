@@ -1,0 +1,52 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, minimum-scale=1, width=device-width, height=device-height">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <title>Tiles demo</title>
+    <style>
+        body { background: white; margin: 0;}
+
+        canvas {
+        }
+
+        .game-canvas {
+            position: absolute;
+            /*image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: -o-crisp-edges;
+            image-rendering: optimize-contrast;
+            -ms-interpolation-mode: nearest-neighbor;*/
+        }
+
+        .outer-container {
+            position: absolute;
+            left: 0px;
+            right: 0px;
+            top: 0px;
+            bottom: 0px;
+            overflow: hidden;
+        }
+
+        .inner-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        #frontCanvas {
+            pointer-events: none;
+        }
+    </style>
+    <script src="lib/jquery.min.js"></script>
+    <script src="lib/pixi.js"></script>
+    <script src="src/pixi-tilemap.js"></script>
+    <script src="src/rpgmaker.js"></script>
+    <script src="src/main.js"></script>
+</head>
+<body onload="go()">
+   <canvas id="backCanvas" class="game-canvas"></canvas>
+</body>
+</html>
