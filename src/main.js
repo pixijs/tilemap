@@ -15,9 +15,21 @@ function resize() {
     }
 }
 
+function isOptionValid(name) {
+    return location.search.slice(1).split('&').contains(name);
+};
+
 function setupView() {
     var backCanvas = document.querySelector('#backCanvas');
-    renderer = PIXI.autoDetectRenderer(backCanvas.width, backCanvas.height, {view: backCanvas, resolution: 1});
+
+    if (isOptionValid('canvas')) {
+        renderer = new PIXI.CanvasRenderer(backCanvas.width, backCanvas.height, {view: backCanvas, resolution: 1});
+    else
+        renderer = PIXI.autoDetectRenderer(backCanvas.width, backCanvas.height, {view: backCanvas, resolution: 1});
+
+    if (Utils.isOptionValid('canvas')) {
+        return 'canvas';
+
     resize();
     window.addEventListener('resize', resize)
 }
