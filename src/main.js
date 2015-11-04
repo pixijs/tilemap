@@ -26,10 +26,6 @@ function setupView() {
         renderer = new PIXI.CanvasRenderer(backCanvas.width, backCanvas.height, {view: backCanvas, resolution: 1});
     else
         renderer = PIXI.autoDetectRenderer(backCanvas.width, backCanvas.height, {view: backCanvas, resolution: 1});
-
-    if (Utils.isOptionValid('canvas')) {
-        return 'canvas';
-
     resize();
     window.addEventListener('resize', resize)
 }
