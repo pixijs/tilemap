@@ -8,7 +8,7 @@ var rpgMakerLoader = requireRpgMaker();
 var stage = null;
 var tilemap = null;
 
-var scale = 1;
+var scale = +(getOptionValue("scale") || 1);
 
 function resizeTilemap() {
     if (!tilemap) return;
@@ -23,6 +23,16 @@ function resize() {
     renderer.resize(window.innerWidth, window.innerHeight);
     resizeTilemap();
 }
+
+function getOptionValue(name) {
+    var params = location.search.slice(1).split('&');
+    for (var i=0;i<params.length;i++) {
+        if (params[i].substring(0, name.length) === name && params[i][name.length] === "=") {
+            return params[i].substring(name.length+1);
+        }
+    };
+    return null;
+};
 
 function isOptionValid(name) {
     return location.search.slice(1).split('&').indexOf(name) >= 0;
