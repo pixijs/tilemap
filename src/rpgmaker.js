@@ -21,11 +21,11 @@ function requireRpgMaker() {
         this.initialize.apply(this, arguments);
     }
 
-    Tilemap.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
+    Tilemap.prototype = Object.create(PIXI.Container.prototype);
     Tilemap.prototype.constructor = Tilemap;
 
     Tilemap.prototype.initialize = function() {
-        PIXI.DisplayObjectContainer.call(this);
+        PIXI.Container.call(this);
 
         this._margin = 20;
         this._width = Graphics.width + this._margin * 2;
@@ -223,8 +223,10 @@ function requireRpgMaker() {
      * @private
      */
     Tilemap.prototype.updateTransform = function() {
-        var ox = Math.floor(this.origin.x);
-        var oy = Math.floor(this.origin.y);
+        //var ox = Math.floor(this.origin.x);
+        //var oy = Math.floor(this.origin.y);
+        var ox = this.origin.x;
+        var oy = this.origin.y;
         var startX = Math.floor((ox - this._margin) / this._tileWidth);
         var startY = Math.floor((oy - this._margin) / this._tileHeight);
         this._updateLayerPositions(startX, startY);
@@ -238,7 +240,7 @@ function requireRpgMaker() {
             this._needsRepaint = false;
         }
         this._sortChildren();
-        PIXI.DisplayObjectContainer.prototype.updateTransform.call(this);
+        PIXI.Container.prototype.updateTransform.call(this);
     };
 
     /**
@@ -933,6 +935,7 @@ function requireRpgMaker() {
      */
     function ShaderTilemap() {
         Tilemap.apply(this, arguments);
+        this.roundPixels = true;
     };
 
     ShaderTilemap.prototype = Object.create(Tilemap.prototype);
@@ -1007,8 +1010,13 @@ function requireRpgMaker() {
      * @private
      */
     ShaderTilemap.prototype.updateTransform = function() {
-        var ox = Math.floor(this.origin.x);
-        var oy = Math.floor(this.origin.y);
+        if (this.roundPixels) {
+            var ox = Math.floor(this.origin.x);
+            var oy = Math.floor(this.origin.y);
+        } else {
+            var ox = this.origin.x;
+            var oy = this.origin.y;
+        }
         var startX = Math.floor((ox - this._margin) / this._tileWidth);
         var startY = Math.floor((oy - this._margin) / this._tileHeight);
         this._updateLayerPositions(startX, startY);
@@ -1043,7 +1051,7 @@ function requireRpgMaker() {
             this.addChild(this.upperZLayer = new PIXI.tilemap.ZLayer(this, 4));
 
             var parameters = PluginManager.parameters('ShaderTilemap');
-            var useSquareShader = Number(parameters['squareShader'] || 1);
+            var useSquareShader = Number(parameters.hasOwnProperty('squareShader') ? parameters['squareShader'] : 1);
 
             this.lowerZLayer.addChild(this.lowestLayer = new PIXI.tilemap.CompositeRectTileLayer(0, [], useSquareShader));
             this.lowerZLayer.addChild(this._shadowLayer = new PIXI.tilemap.GraphicsLayer());
@@ -1059,8 +1067,13 @@ function requireRpgMaker() {
      * @private
      */
     ShaderTilemap.prototype._updateLayerPositions = function(startX, startY) {
-        var ox = Math.floor(this.origin.x);
-        var oy = Math.floor(this.origin.y);
+        if (this.roundPixels) {
+            var ox = Math.floor(this.origin.x);
+            var oy = Math.floor(this.origin.y);
+        } else {
+            ox = this.origin.x;
+            oy = this.origin.y;
+        }
         this.lowerZLayer.position.x = startX * this._tileWidth - ox;
         this.lowerZLayer.position.y = startY * this._tileHeight - oy;
         this.upperZLayer.position.x = startX * this._tileWidth - ox;
@@ -1385,7 +1398,9 @@ function requireRpgMaker() {
             loader.load(function(loader, resources) {
                 var result = new ShaderTilemap(300, 300);
                 for (var i=0;i<tilesetNames.length;i++) {
-                    result.bitmaps.push(resources[tilesetNames[i]] && resources[tilesetNames[i]].texture);
+                    var tex = resources[tilesetNames[i]] && resources[tilesetNames[i]].texture;
+                    result.bitmaps.push(tex);
+                    if (tex) tex.baseTexture.mipmap = true;
                 }
                 while (result.bitmaps.length>0 && !result.bitmaps[result.bitmaps.length-1]) {
                     result.bitmaps.pop();
