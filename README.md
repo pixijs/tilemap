@@ -28,7 +28,6 @@ document.body.appendChild(renderer.view);
 var loader = new PIXI.loaders.Loader();
 loader.add('atlas', 'basic/atlas.json');
 loader.load(function(loader, resources) {
-    var stage = new PIXI.Container();
 	var tilemap = new PIXI.tilemap.CompositeRectTileLayer(0, [resources['atlas_image'].texture], true);
     var size = 32;
     // bah, im too lazy, i just want to specify filenames from atlas
