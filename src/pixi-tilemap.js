@@ -11,7 +11,8 @@
             projectionMatrix:   { type: 'mat3', value: new Float32Array([1, 0, 0,
                 0, 1, 0,
                 0, 0, 1]) },
-            pointScale:         { type: '2f', value: new Float32Array([0, 0]) }
+            pointScale:         { type: '2f', value: new Float32Array([0, 0])},
+            projectionScale:    { type: 'f', value: 1 }
         };
         if (customUniforms)
         {
@@ -59,15 +60,16 @@
         'uniform mat3 projectionMatrix;',
         'uniform vec2 samplerSize;',
         'uniform vec2 animationFrame;',
+        'uniform float projectionScale;',
 
         'varying vec2 vTextureCoord;',
-        'varying vec2 vSize;',
+        'varying float vSize;',
 
         'void main(void){',
         '   gl_Position = vec4((projectionMatrix * vec3(aVertexPosition.xy + aSize.x * 0.5, 1.0)).xy, 0.0, 1.0);',
-        '   gl_PointSize = aSize.x;',
+        '   gl_PointSize = aSize.x * projectionScale;',
         '   vTextureCoord = (aVertexPosition.zw + aSize.yz * animationFrame ) * samplerSize;',
-        '   vSize = aSize.x * samplerSize;',
+        '   vSize = aSize.x;',
         '}'
     ].join('\n');
 
@@ -75,13 +77,16 @@
         'precision lowp float;',
 
         'varying vec2 vTextureCoord;',
-        'varying vec2 vSize;',
+        'varying float vSize;',
+        'uniform vec2 samplerSize;',
 
         'uniform sampler2D uSampler;',
         'uniform vec2 pointScale;',
 
         'void main(void){',
-        '   gl_FragColor = texture2D(uSampler, ((gl_PointCoord - 0.5) * pointScale + 0.5) * vSize + vTextureCoord);',
+        '   float margin = 1.0/vSize;',
+        '   vec2 clamped = vec2(clamp(gl_PointCoord.x, margin, 1.0 - margin), clamp(gl_PointCoord.y, margin, 1.0 - margin));',
+        '   gl_FragColor = texture2D(uSampler, ((clamped-0.5) * pointScale + 0.5) * vSize * samplerSize + vTextureCoord);',
         '}'
     ].join('\n');
 
@@ -464,6 +469,32 @@
             this.children[num].addRect(x, y, u, v, tileWidth, tileHeight);
     };
 
+    /**
+     * "hello world!" of pixi-tilemap library. Pass it texture and it will be added
+     * @param texture
+     * @param x
+     * @param y
+     * @returns {boolean}
+     */
+    CompositeRectTileLayer.prototype.addFrame = function (texture, x, y) {
+        if (typeof texture === "string") {
+            texture = PIXI.Texture.fromImage(texture);
+        }
+        var children = this.children;
+        var layer = null;
+        for (var i=0;i<children.length; i++) {
+            if (children[i].texture.baseTexture == texture.baseTexture) {
+                layer = children[i];
+                break;
+            }
+        }
+        if (!layer) {
+            children.push(layer = new RectTileLayer(this.zIndex, texture));
+        }
+        layer.addRect(texture.frame.x, texture.frame.y, x, y, texture.frame.width, texture.frame.height);
+        return true;
+    };
+
     CompositeRectTileLayer.prototype.renderCanvas = function (renderer) {
         if (!renderer.dontUseTransform) {
             var wt = this.worldTransform;
@@ -496,6 +527,8 @@
             var ps = shader.uniforms.pointScale;
             ps.value[0] = this._globalMat.a >= 0?1:-1;
             ps.value[1] = this._globalMat.d < 0?1:-1;
+            ps = shader.uniforms.projectionScale;
+            ps.value = Math.abs(this.worldTransform.a);
         }
         var af = shader.uniforms.animationFrame.value;
         af[0] = renderer.tileAnimX | 0;
@@ -566,12 +599,12 @@
     };
 
     function ZLayer() {
-        PIXI.Container.apply(this, arguments);
         this.initialize.apply(this, arguments);
     };
 
     ZLayer.prototype = Object.create(PIXI.Container.prototype);
     ZLayer.prototype.initialize = function(tilemap, zIndex) {
+        PIXI.Container.apply(this, arguments);
         this.tilemap = tilemap;
         this.z = zIndex;
     };
