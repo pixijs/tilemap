@@ -8,7 +8,7 @@ var rpgMakerLoader = requireRpgMaker();
 var stage = null;
 var tilemap = null;
 
-var scale = location.search.slice(1).split('&').indexOf(name) >= 0;
+var scale = 1;
 
 function resizeTilemap() {
     if (!tilemap) return;

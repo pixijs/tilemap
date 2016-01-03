@@ -223,10 +223,8 @@ function requireRpgMaker() {
      * @private
      */
     Tilemap.prototype.updateTransform = function() {
-        //var ox = Math.floor(this.origin.x);
-        //var oy = Math.floor(this.origin.y);
-        var ox = this.origin.x;
-        var oy = this.origin.y;
+        var ox = Math.floor(this.origin.x);
+        var oy = Math.floor(this.origin.y);
         var startX = Math.floor((ox - this._margin) / this._tileWidth);
         var startY = Math.floor((oy - this._margin) / this._tileHeight);
         this._updateLayerPositions(startX, startY);
