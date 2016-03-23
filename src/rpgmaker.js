@@ -1012,8 +1012,8 @@ function requireRpgMaker() {
             var ox = Math.floor(this.origin.x);
             var oy = Math.floor(this.origin.y);
         } else {
-            var ox = this.origin.x;
-            var oy = this.origin.y;
+            ox = this.origin.x;
+            oy = this.origin.y;
         }
         var startX = Math.floor((ox - this._margin) / this._tileWidth);
         var startY = Math.floor((oy - this._margin) / this._tileHeight);
