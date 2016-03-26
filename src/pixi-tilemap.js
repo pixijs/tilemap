@@ -464,9 +464,9 @@
         this.modificationMarker = 0;
     };
 
-    CompositeRectTileLayer.prototype.addRect = function (num, x, y, u, v, tileWidth, tileHeight) {
+    CompositeRectTileLayer.prototype.addRect = function (num, u, v, x, y, tileWidth, tileHeight) {
         if (this.children[num] && this.children[num].texture)
-            this.children[num].addRect(x, y, u, v, tileWidth, tileHeight);
+            this.children[num].addRect(u, v, x, y, tileWidth, tileHeight);
     };
 
     /**
