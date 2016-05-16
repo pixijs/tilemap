@@ -1,139 +1,110 @@
 (function() {
-    function SquareTileShader(shaderManager, vertexSrc, fragmentSrc, customUniforms, customAttributes)
-    {
+    //TODO: multi-texturing!!!
+    //TODO: make it look like v4 SpriteRenderer
+    //TODO: add index for rectsz
+
+    function SquareTileShader(gl) {
+        PIXI.Shader.call(this, gl,
+            [
+                'attribute vec4 aVertexPosition;',
+                'attribute vec3 aSize;',
+
+                'uniform mat3 projectionMatrix;',
+                'uniform vec2 samplerSize;',
+                'uniform vec2 animationFrame;',
+                'uniform float projectionScale;',
+
+                'varying vec2 vTextureCoord;',
+                'varying float vSize;',
+
+                'void main(void){',
+                '   gl_Position = vec4((projectionMatrix * vec3(aVertexPosition.xy + aSize.x * 0.5, 1.0)).xy, 0.0, 1.0);',
+                '   gl_PointSize = aSize.x * projectionScale;',
+                '   vTextureCoord = (aVertexPosition.zw + aSize.yz * animationFrame ) * samplerSize;',
+                '   vSize = aSize.x;',
+                '}'
+            ].join("\n"),
+            [
+                'varying vec2 vTextureCoord;',
+                'varying float vSize;',
+                'uniform vec2 samplerSize;',
+
+                'uniform sampler2D uSampler;',
+                'uniform vec2 pointScale;',
+
+                'void main(void){',
+                '   float margin = 1.0/vSize;',
+                '   vec2 clamped = vec2(clamp(gl_PointCoord.x, margin, 1.0 - margin), clamp(gl_PointCoord.y, margin, 1.0 - margin));',
+                '   gl_FragColor = texture2D(uSampler, ((clamped-0.5) * pointScale + 0.5) * vSize * samplerSize + vTextureCoord);',
+                '}'
+            ].join('\n')
+        );
         this.vertSize = 7;
         this.vertPerQuad = 1;
         this.stride = this.vertSize * 4;
-        var uniforms = {
-            uSampler:           { type: 'sampler2D', value: 0 },
-            animationFrame:     { type: '2f', value: new Float32Array([0, 0]) },
-            samplerSize:        { type: '2f', value: new Float32Array([0, 0]) },
-            projectionMatrix:   { type: 'mat3', value: new Float32Array([1, 0, 0,
-                0, 1, 0,
-                0, 0, 1]) },
-            pointScale:         { type: '2f', value: new Float32Array([0, 0])},
-            projectionScale:    { type: 'f', value: 1 }
-        };
-        if (customUniforms)
-        {
-            for (var u in customUniforms)
-            {
-                uniforms[u] = customUniforms[u];
-            }
-        }
-        var attributes = {
-            aVertexPosition:    0,
-            aSize:              0
-        };
-        if (customAttributes)
-        {
-            for (var a in customAttributes)
-            {
-                attributes[a] = customAttributes[a];
-            }
-        }
-        vertexSrc = vertexSrc || SquareTileShader.defaultVertexSrc;
-        fragmentSrc = fragmentSrc || SquareTileShader.defaultFragmentSrc;
-        PIXI.Shader.call(this, shaderManager, vertexSrc, fragmentSrc, uniforms, attributes);
     }
 
-// constructor
     SquareTileShader.prototype = Object.create(PIXI.Shader.prototype);
     SquareTileShader.prototype.constructor = SquareTileShader;
-    SquareTileShader.prototype.bindBuffer = function (gl, vb) {
-        gl.bindBuffer(gl.ARRAY_BUFFER, vb);
-        gl.vertexAttribPointer(this.attributes.aVertexPosition, 4, gl.FLOAT, false, this.stride, 0);
-        gl.vertexAttribPointer(this.attributes.aSize, 3, gl.FLOAT, false, this.stride, 4 * 4);
+    SquareTileShader.prototype.createVao = function (renderer, vb) {
+        var gl = renderer.gl;
+        return renderer.createVao()
+            .addIndex(this.indexBuffer)
+            .addAttribute(vb, this.attributes.aVertexPosition, gl.FLOAT, false, this.stride, 0)
+            .addAttribute(vb, this.attributes.aSize, gl.FLOAT, false, this.stride, 4 * 4);
     };
 
-    /**
-     * The default vertex shader source
-     *
-     * @static
-     * @constant
-     */
-    SquareTileShader.defaultVertexSrc = [
-        'precision lowp float;',
-        'attribute vec4 aVertexPosition;',
-        'attribute vec3 aSize;',
 
-        'uniform mat3 projectionMatrix;',
-        'uniform vec2 samplerSize;',
-        'uniform vec2 animationFrame;',
-        'uniform float projectionScale;',
-
-        'varying vec2 vTextureCoord;',
-        'varying float vSize;',
-
-        'void main(void){',
-        '   gl_Position = vec4((projectionMatrix * vec3(aVertexPosition.xy + aSize.x * 0.5, 1.0)).xy, 0.0, 1.0);',
-        '   gl_PointSize = aSize.x * projectionScale;',
-        '   vTextureCoord = (aVertexPosition.zw + aSize.yz * animationFrame ) * samplerSize;',
-        '   vSize = aSize.x;',
-        '}'
-    ].join('\n');
-
-    SquareTileShader.defaultFragmentSrc = [
-        'precision lowp float;',
-
-        'varying vec2 vTextureCoord;',
-        'varying float vSize;',
-        'uniform vec2 samplerSize;',
-
-        'uniform sampler2D uSampler;',
-        'uniform vec2 pointScale;',
-
-        'void main(void){',
-        '   float margin = 1.0/vSize;',
-        '   vec2 clamped = vec2(clamp(gl_PointCoord.x, margin, 1.0 - margin), clamp(gl_PointCoord.y, margin, 1.0 - margin));',
-        '   gl_FragColor = texture2D(uSampler, ((clamped-0.5) * pointScale + 0.5) * vSize * samplerSize + vTextureCoord);',
-        '}'
-    ].join('\n');
-
-    function RectTileShader(shaderManager, vertexSrc, fragmentSrc, customUniforms, customAttributes)
+    function RectTileShader(gl)
     {
+        PIXI.Shader.call(this, gl,
+            [
+                'precision lowp float;',
+                'attribute vec4 aVertexPosition;',
+                'attribute vec2 aAnim;',
+
+                'uniform mat3 projectionMatrix;',
+                'uniform vec2 samplerSize;',
+                'uniform vec2 animationFrame;',
+
+                'varying vec2 vTextureCoord;',
+
+                'void main(void){',
+                '   gl_Position = vec4((projectionMatrix * vec3(aVertexPosition.xy, 1.0)).xy, 0.0, 1.0);',
+                '   vTextureCoord = (aVertexPosition.zw + aAnim * animationFrame ) * samplerSize;',
+                '}'
+            ].join('\n'),
+            [
+                'precision lowp float;',
+                'varying vec2 vTextureCoord;',
+                'uniform sampler2D uSampler;',
+                'void main(void){',
+                '   gl_FragColor = texture2D(uSampler, vTextureCoord);',
+                '}'
+            ].join('\n')
+        );
         this.vertSize = 6;
         this.vertPerQuad = 6;
         this.stride = this.vertSize * 4;
-        var uniforms = {
-            uSampler:           { type: 'sampler2D', value: 0 },
-            animationFrame:     { type: '2f', value: new Float32Array([0, 0]) },
-            samplerSize:        { type: '2f', value: new Float32Array([0, 0]) },
-            projectionMatrix:   { type: 'mat3', value: new Float32Array([1, 0, 0,
-                0, 1, 0,
-                0, 0, 1]) }
-        };
-        if (customUniforms)
-        {
-            for (var u in customUniforms)
-            {
-                uniforms[u] = customUniforms[u];
-            }
-        }
-        var attributes = {
-            aVertexPosition:    0,
-            aAnim:              0
-        };
-        if (customAttributes)
-        {
-            for (var a in customAttributes)
-            {
-                attributes[a] = customAttributes[a];
-            }
-        }
-        vertexSrc = vertexSrc || RectTileShader.defaultVertexSrc;
-        fragmentSrc = fragmentSrc || RectTileShader.defaultFragmentSrc;
-        PIXI.Shader.call(this, shaderManager, vertexSrc, fragmentSrc, uniforms, attributes);
     }
 
-// constructor
     RectTileShader.prototype = Object.create(PIXI.Shader.prototype);
     RectTileShader.prototype.constructor = RectTileShader;
-    RectTileShader.prototype.bindBuffer = function (gl, vb) {
-        gl.bindBuffer(gl.ARRAY_BUFFER, vb);
-        gl.vertexAttribPointer(this.attributes.aVertexPosition, 4, gl.FLOAT, false, this.stride, 0);
-        gl.vertexAttribPointer(this.attributes.aAnim, 2, gl.FLOAT, false, this.stride, 4 * 4);
+    RectTileShader.prototype.createVao = function (renderer, vb) {
+        var gl = renderer.gl;
+        return renderer.createVao()
+            .addIndex(this.indexBuffer)
+            .addAttribute(vb, this.attributes.aVertexPosition, gl.FLOAT, false, this.stride, 0)
+            .addAttribute(vb, this.attributes.aAnim, gl.FLOAT, false, this.stride, 4 * 4);
     };
+
+
+    function CanvasTileRenderer(renderer) {
+        this.renderer = renderer;
+        this.tileAnim = [0, 0];
+    }
+
+    PIXI.CanvasRenderer.registerPlugin('sprite', CanvasTileRenderer);
 
     /**
      * The default vertex shader source
@@ -141,36 +112,13 @@
      * @static
      * @constant
      */
-    RectTileShader.defaultVertexSrc = [
-        'precision lowp float;',
-        'attribute vec4 aVertexPosition;',
-        'attribute vec2 aAnim;',
-
-        'uniform mat3 projectionMatrix;',
-        'uniform vec2 samplerSize;',
-        'uniform vec2 animationFrame;',
-
-        'varying vec2 vTextureCoord;',
-
-        'void main(void){',
-        '   gl_Position = vec4((projectionMatrix * vec3(aVertexPosition.xy, 1.0)).xy, 0.0, 1.0);',
-        '   vTextureCoord = (aVertexPosition.zw + aAnim * animationFrame ) * samplerSize;',
-        '}'
-    ].join('\n');
-
-    RectTileShader.defaultFragmentSrc = [
-        'precision lowp float;',
-        'varying vec2 vTextureCoord;',
-        'uniform sampler2D uSampler;',
-        'void main(void){',
-        '   gl_FragColor = texture2D(uSampler, vTextureCoord);',
-        '}'
-    ].join('\n');
 
     function TileRenderer(renderer) {
         PIXI.ObjectRenderer.call(this, renderer);
         this.vbs = {};
         this.lastTimeCheck = 0;
+        this.tileAnim = [0, 0];
+        this.indices = new Uint16Array([0, 1, 2, 0, 2, 3]);
     }
 
     TileRenderer.prototype = Object.create(PIXI.ObjectRenderer.prototype);
@@ -178,8 +126,12 @@
     TileRenderer.vbAutoincrement = 0;
 
     TileRenderer.prototype.onContextChange = function() {
-        this.rectShader = new RectTileShader(this.renderer.shaderManager);
-        this.squareShader = new SquareTileShader(this.renderer.shaderManager);
+        var gl = this.renderer.gl;
+        this.rectShader = new RectTileShader(gl);
+        this.squareShader = new SquareTileShader(gl);
+        this.indexBuffer = PIXI.glCore.GLBuffer.createIndexBuffer(gl, this.indices, gl.STATIC_DRAW);
+        this.rectShader.indexBuffer = this.indexBuffer;
+        this.squareShader.indexBuffer = this.indexBuffer;
         this.vbs = {};
     };
 
@@ -193,15 +145,14 @@
             var vbs = this.vbs;
             for (var key in vbs) {
                 if (vbs[key].lastTimeAccess < old) {
-                    this.renderer.gl.deleteBuffer(vbs[key].vb);
-                    delete vbs[key];
+                    this.removeVb(key);
                 }
             }
         }
     };
 
     TileRenderer.prototype.start = function() {
-        this.renderer.blendModeManager.setBlendMode( PIXI.BLEND_MODES.NORMAL );
+        this.renderer.state.setBlendMode( PIXI.BLEND_MODES.NORMAL );
         //sorry, nothing
     };
 
@@ -215,15 +166,25 @@
         return null;
     };
 
-    TileRenderer.prototype.createVb = function() {
+    TileRenderer.prototype.createVb = function(useSquare) {
         var id = ++TileRenderer.vbAutoincrement;
-        var vb = this.renderer.gl.createBuffer();
-        return this.vbs[id] = { id: id, vb: vb, lastTimeAccess: Date.now() };
+        var shader = this.getShader(useSquare);
+        var gl = this.renderer.gl;
+        var vb = PIXI.glCore.GLBuffer.createVertexBuffer(gl, null, gl.STREAM_DRAW);
+        return this.vbs[id] = {
+            id: id,
+            vb: vb,
+            vao: shader.createVao(this.renderer, vb),
+            lastTimeAccess: Date.now(),
+            useSquare: useSquare,
+            shader: shader
+        };
     };
 
     TileRenderer.prototype.removeVb = function(id) {
         if (this.vbs[id]) {
-            this.renderer.gl.deleteBuffer(this.vbs[id]);
+            this.vbs[id].vb.destroy();
+            this.vbs[id].vao.destroy();
             delete this.vbs[id];
         }
     };
@@ -271,8 +232,8 @@
             var x2 = points[i+2], y2 = points[i+3];
             var w = points[i+4];
             var h = points[i+5];
-            x1 += points[i+6] * (renderer.tileAnimX | 0);
-            y1 += points[i+7] * (renderer.tileAnimY | 0);
+            x1 += points[i+6] * renderer.plugins.tile.tileAnim[0];
+            y1 += points[i+7] * renderer.plugins.tile.tileAnim[1];
             renderer.context.drawImage(this.texture.baseTexture.source, x1, y1, w, h, x2, y2, w, h);
         }
     };
@@ -321,36 +282,33 @@
         var points = this.pointsBuf;
         if (points.length == 0) return;
 
-        var gl = renderer.gl;
         var tile = renderer.plugins.tile;
+        var gl = renderer.gl;
         var shader = tile.getShader(useSquare);
-        gl.activeTexture(gl.TEXTURE0);
         var texture = this.texture.baseTexture;
-        if (!texture._glTextures[gl.id])
-            renderer.updateTexture(texture);
-        else
-            gl.bindTexture(gl.TEXTURE_2D, texture._glTextures[gl.id]);
-        var ss =  shader.uniforms.samplerSize;
-        ss.value[0] = 1.0 / texture.width;
-        ss.value[1] = 1.0 / texture.height;
-        shader.syncUniform(ss);
+        renderer.bindTexture(texture, 0);
+        var tempSize = this._tempSize = (this._tempSize || [0, 0]);
+        tempSize[0] = 1.0 / texture.width;
+        tempSize[1] = 1.0 / texture.height;
+        shader.uniforms.samplerSize = tempSize;
         //lost context! recover!
         var vb = tile.getVb(this.vbId);
         if (!vb) {
-            vb = tile.createVb();
+            vb = tile.createVb(useSquare);
             this.vbId = vb.id;
             this.vbBuffer = null;
             this.modificationMarker = 0;
         }
+        var vao = vb.vao.bind();
         vb = vb.vb;
-        //if layer was changed, reupload vertices
-        shader.bindBuffer(gl, vb);
+        //if layer was changed, re-upload vertices
+        vb.bind();
         var vertices = points.length / 8 * shader.vertPerQuad;
         if (this.modificationMarker != vertices) {
             this.modificationMarker = vertices;
             var vs = shader.stride * vertices;
             if (!this.vbBuffer || this.vbBuffer.byteLength < vs) {
-                //!@#$
+                //!@#$ happens, need resize
                 var bk = shader.stride;
                 while (bk < vs) {
                     bk *= 2;
@@ -358,7 +316,7 @@
                 this.vbBuffer = new ArrayBuffer(bk);
                 this.vbArray = new Float32Array(this.vbBuffer);
                 this.vbInts = new Uint32Array(this.vbBuffer);
-                gl.bufferData(gl.ARRAY_BUFFER, this.vbArray, gl.DYNAMIC_DRAW);
+                vb.upload(this.vbBuffer, 0, true);
             }
 
             var arr = this.vbArray, ints = this.vbInts;
@@ -422,12 +380,12 @@
                     arr[sz++] = animY;
                 }
             }
-            if (vs > this.vbArray.length/2 ) {
-                gl.bufferSubData(gl.ARRAY_BUFFER, 0, arr);
-            } else {
-                var view = arr.subarray(0, vs)
-                gl.bufferSubData(gl.ARRAY_BUFFER, 0, view);
-            }
+            // if (vs > this.vbArray.length/2 ) {
+            vb.upload(arr, 0, true);
+            // } else {
+            //     var view = arr.subarray(0, vs);
+            //     vb.upload(view, 0);
+            // }
         }
         if (useSquare)
             gl.drawArrays(gl.POINTS, 0, vertices);
@@ -517,24 +475,20 @@
         var gl = renderer.gl;
         var shader = renderer.plugins.tile.getShader(this.useSquare);
         renderer.setObjectRenderer(renderer.plugins.tile);
-        renderer.shaderManager.setShader(shader);
-        var tm = shader.uniforms.projectionMatrix;
+        renderer.bindShader(shader);
         //TODO: dont create new array, please
         this._globalMat = this._globalMat || new PIXI.Matrix();
-        renderer.currentRenderTarget.projectionMatrix.copy(this._globalMat).append(this.worldTransform);
-        tm.value = this._globalMat.toArray(true);
+        renderer._activeRenderTarget.projectionMatrix.copy(this._globalMat).append(this.worldTransform);
+        shader.uniforms.projectionMatrix = this._globalMat.toArray(true);
         if (this.useSquare) {
-            var ps = shader.uniforms.pointScale;
-            ps.value[0] = this._globalMat.a >= 0?1:-1;
-            ps.value[1] = this._globalMat.d < 0?1:-1;
-            ps = shader.uniforms.projectionScale;
-            ps.value = Math.abs(this.worldTransform.a);
+            var tempScale = this._tempScale = (this._tempScale || [0, 0]);
+            tempScale[0] = this._globalMat.a >= 0?1:-1;
+            tempScale[1] = this._globalMat.d < 0?1:-1;
+            var ps = shader.uniforms.pointScale = tempScale;
+            shader.uniforms.projectionScale = Math.abs(this.worldTransform.a);
         }
-        var af = shader.uniforms.animationFrame.value;
-        af[0] = renderer.tileAnimX | 0;
-        af[1] = renderer.tileAnimY | 0;
+        var af = shader.uniforms.animationFrame = renderer.plugins.tile.tileAnim;
         //shader.syncUniform(shader.uniforms.animationFrame);
-        shader.syncUniforms();
         var layers = this.children;
         for (var i = 0; i < layers.length; i++)
             layers[i].renderWebGL(renderer, this.useSquare);

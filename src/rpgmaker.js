@@ -924,7 +924,7 @@ function requireRpgMaker() {
         [[2,0],[3,0],[2,1],[3,1]],[[0,0],[3,0],[0,1],[3,1]]
     ];
 
-//-----------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------
     /**
      * The tilemap which displays 2D tile-based game map using shaders
      *
@@ -948,8 +948,8 @@ function requireRpgMaker() {
     ShaderTilemap.prototype._hackRenderer = function(renderer) {
         var af = this.animationFrame % 4;
         if (af==3) af = 1;
-        renderer.tileAnimX = af * this._tileWidth;
-        renderer.tileAnimY = (this.animationFrame % 3) * this._tileHeight;
+        renderer.plugins.tile.tileAnim[0] = af * this._tileWidth;
+        renderer.plugins.tile.tileAnim[1] = (this.animationFrame % 3) * this._tileHeight;
         return renderer;
     };
 

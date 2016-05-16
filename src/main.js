@@ -3,7 +3,7 @@
  */
 
 
-var renderer;
+var _renderer;
 var rpgMakerLoader = requireRpgMaker();
 var stage = null;
 var tilemap = null;
@@ -12,15 +12,15 @@ var scale = +(getOptionValue("scale") || 1);
 
 function resizeTilemap() {
     if (!tilemap) return;
-    tilemap.width = (renderer.width + 2*tilemap._margin) * scale;
-    tilemap.height = (renderer.height + 2*tilemap._margin) * scale;
+    tilemap.width = (_renderer.width + 2*tilemap._margin) * scale;
+    tilemap.height = (_renderer.height + 2*tilemap._margin) * scale;
     stage.scale.x = 1.0/scale;
     stage.scale.y = 1.0/scale;
-    stage.filterArea = new PIXI.Rectangle(0, 0, renderer.width*scale, renderer.height*scale);
+    stage.filterArea = new PIXI.Rectangle(0, 0, _renderer.width*scale, _renderer.height*scale);
 }
 
 function resize() {
-    renderer.resize(window.innerWidth, window.innerHeight);
+    _renderer.resize(window.innerWidth, window.innerHeight);
     resizeTilemap();
 }
 
@@ -42,9 +42,9 @@ function setupView() {
     var backCanvas = document.querySelector('#backCanvas');
 
     if (isOptionValid('canvas'))
-        renderer = new PIXI.CanvasRenderer(backCanvas.width, backCanvas.height, {view: backCanvas, resolution: 1, antialias: 1});
+        _renderer = new PIXI.CanvasRenderer(backCanvas.width, backCanvas.height, {view: backCanvas, resolution: 1, antialias: 1});
     else
-        renderer = PIXI.autoDetectRenderer(backCanvas.width, backCanvas.height, {view: backCanvas, resolution: 1, antialias: 1});
+        _renderer = PIXI.autoDetectRenderer(backCanvas.width, backCanvas.height, {view: backCanvas, resolution: 1, antialias: 1});
     resize();
     window.addEventListener('resize', resize)
 }
@@ -83,8 +83,8 @@ function update() {
         var x2=0, y2=0;
         for (var i=0;i<30;i++) {
             var at2 = animTime + dt2;
-            x2 = Math.max(0, w1 - renderer.width * scale) * (Math.cos(at2*0.5) + 1)/2;
-            y2 = Math.max(0, h1 - renderer.height * scale) * (Math.sin(at2*0.4) + 1)/2;
+            x2 = Math.max(0, w1 - _renderer.width * scale) * (Math.cos(at2*0.5) + 1)/2;
+            y2 = Math.max(0, h1 - _renderer.height * scale) * (Math.sin(at2*0.4) + 1)/2;
             var d = Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
             if (d>5*scale) {
                 dt2 = dt2 / (d/5/scale);
@@ -93,7 +93,7 @@ function update() {
         animTime += dt2;
         tilemap.origin.x = x2;
         tilemap.origin.y = y2;
-        renderer.render(stage);
+        _renderer.render(stage);
     }
     requestAnimationFrame(update);
 }
