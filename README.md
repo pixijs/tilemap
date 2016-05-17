@@ -1,9 +1,13 @@
 # pixi-tilemap
-Library that will help with tilemaps, provide special shaders and canvas fallback. Works with pixiV3.
+Library that will help with tilemaps, provide special shaders and canvas fallback. Works only with pixi V4.
 
-Rpgmaker MV - check. 
+Please use [v3 branch](https://github.com/pixijs/pixi-tilemap/tree/gh-pages) for pixi V3.
 
-Tiled, gameofbombs - in progress.
+Rpgmaker MV - check.
+
+TODO: multitexturing - in progress
+
+TODO: Tiled, gameofbombs - in progress.
 
 Canvas fallback is 5x slower than vanilla rpgmaker. Webgl version is faster and doesnt use extra textures.
 
