@@ -10,6 +10,7 @@ var tilemap = null;
 
 var scale = +(getOptionValue('scale') || 1);
 var resolution = +(getOptionValue('resolution') || 1);
+var ratio = window.devicePixelRatio / resolution;
 
 function resizeTilemap() {
     if (!tilemap) return;
@@ -21,7 +22,7 @@ function resizeTilemap() {
 }
 
 function resize() {
-    var r = window.devicePixelRatio / resolution;
+    var r = ratio;
     _renderer.resize(window.innerWidth * r | 0, window.innerHeight * r | 0);
     resizeTilemap();
 }
@@ -87,8 +88,8 @@ function update() {
             x2 = Math.max(0, w1 - _renderer.width * scale / resolution) * (Math.cos(at2*0.5) + 1)/2;
             y2 = Math.max(0, h1 - _renderer.height * scale / resolution) * (Math.sin(at2*0.4) + 1)/2;
             var d = Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
-            if (d>5*scale) {
-                dt2 = dt2 / (d/5/scale);
+            if (d>5*scale / resolution) {
+                dt2 = dt2 / (d / 5 / scale / ratio );
             } else break;
         }
         animTime += dt2;
