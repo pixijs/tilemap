@@ -33,7 +33,7 @@
                 'uniform vec2 pointScale;',
 
                 'void main(void){',
-                '   float margin = 1.0/vSize;',
+                '   float margin = 0.5/vSize;',
                 '   vec2 clamped = vec2(clamp(gl_PointCoord.x, margin, 1.0 - margin), clamp(gl_PointCoord.y, margin, 1.0 - margin));',
                 '   gl_FragColor = texture2D(uSampler, ((clamped-0.5) * pointScale + 0.5) * vSize * samplerSize + vTextureCoord);',
                 '}'
@@ -485,7 +485,7 @@
             tempScale[0] = this._globalMat.a >= 0?1:-1;
             tempScale[1] = this._globalMat.d < 0?1:-1;
             var ps = shader.uniforms.pointScale = tempScale;
-            shader.uniforms.projectionScale = Math.abs(this.worldTransform.a);
+            shader.uniforms.projectionScale = Math.abs(this.worldTransform.a) * renderer.resolution;
         }
         var af = shader.uniforms.animationFrame = renderer.plugins.tile.tileAnim;
         //shader.syncUniform(shader.uniforms.animationFrame);

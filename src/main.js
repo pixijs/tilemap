@@ -8,7 +8,8 @@ var rpgMakerLoader = requireRpgMaker();
 var stage = null;
 var tilemap = null;
 
-var scale = +(getOptionValue("scale") || 1);
+var scale = +(getOptionValue('scale') || 1);
+var resolution = +(getOptionValue('resolution') || 1);
 
 function resizeTilemap() {
     if (!tilemap) return;
@@ -20,7 +21,8 @@ function resizeTilemap() {
 }
 
 function resize() {
-    _renderer.resize(window.innerWidth, window.innerHeight);
+    var r = window.devicePixelRatio / resolution;
+    _renderer.resize(window.innerWidth * r | 0, window.innerHeight * r | 0);
     resizeTilemap();
 }
 
@@ -40,11 +42,10 @@ function isOptionValid(name) {
 
 function setupView() {
     var backCanvas = document.querySelector('#backCanvas');
-
     if (isOptionValid('canvas'))
-        _renderer = new PIXI.CanvasRenderer(backCanvas.width, backCanvas.height, {view: backCanvas, resolution: 1, antialias: 1});
+        _renderer = new PIXI.CanvasRenderer(backCanvas.width, backCanvas.height, {view: backCanvas, resolution: resolution, antialias: 1, autoresize: true});
     else
-        _renderer = PIXI.autoDetectRenderer(backCanvas.width, backCanvas.height, {view: backCanvas, resolution: 1, antialias: 1});
+        _renderer = PIXI.autoDetectRenderer(backCanvas.width, backCanvas.height, {view: backCanvas, resolution: resolution, antialias: 1, autoresize: true});
     resize();
     window.addEventListener('resize', resize)
 }
@@ -83,8 +84,8 @@ function update() {
         var x2=0, y2=0;
         for (var i=0;i<30;i++) {
             var at2 = animTime + dt2;
-            x2 = Math.max(0, w1 - _renderer.width * scale) * (Math.cos(at2*0.5) + 1)/2;
-            y2 = Math.max(0, h1 - _renderer.height * scale) * (Math.sin(at2*0.4) + 1)/2;
+            x2 = Math.max(0, w1 - _renderer.width * scale / resolution) * (Math.cos(at2*0.5) + 1)/2;
+            y2 = Math.max(0, h1 - _renderer.height * scale / resolution) * (Math.sin(at2*0.4) + 1)/2;
             var d = Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
             if (d>5*scale) {
                 dt2 = dt2 / (d/5/scale);
