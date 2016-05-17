@@ -258,7 +258,7 @@
                     pb.push(v);
                     pb.push(x + i * tileHeight);
                     pb.push(y);
-                    pb.push(tileWidth);
+                    pb.push(tileHeight);
                     pb.push(tileHeight);
                     pb.push(animX | 0);
                     pb.push(animY | 0);
