@@ -104,7 +104,7 @@
         this.tileAnim = [0, 0];
     }
 
-    PIXI.CanvasRenderer.registerPlugin('sprite', CanvasTileRenderer);
+    PIXI.CanvasRenderer.registerPlugin('tile', CanvasTileRenderer);
 
     /**
      * The default vertex shader source
@@ -525,18 +525,15 @@
     GraphicsLayer.prototype = Object.create(PIXI.Graphics.prototype);
     GraphicsLayer.prototype.constructor = GraphicsLayer;
     GraphicsLayer.prototype.renderCanvas = function (renderer) {
-        if (!renderer.dontUseTransform) {
-            var wt = this.worldTransform;
-            renderer.context.setTransform(
-                wt.a,
-                wt.b,
-                wt.c,
-                wt.d,
-                wt.tx * renderer.resolution,
-                wt.ty * renderer.resolution
-            );
+        var wt = null;
+        if (renderer.dontUseTransform) {
+            wt = this.transform.worldTransform;
+            this.transform.worldTransform = PIXI.Matrix.IDENTITY;
         }
-        PIXI.CanvasGraphics.renderGraphics(this, renderer.context);
+        renderer.plugins.graphics.render(this);
+        if (renderer.dontUseTransform) {
+            this.transform.worldTransform = wt;
+        }
         renderer.context.globalAlpha = 1.0;
     };
     GraphicsLayer.prototype.renderWebGL = function(renderer) {
@@ -576,8 +573,12 @@
         var modified = this._previousLayers != layers.length;
         this._previousLayers = layers.length;
         var buf = this.canvasBuffer;
+        var tempRender = this._tempRender;
         if (!buf) {
             buf = this.canvasBuffer = document.createElement('canvas');
+            tempRender = this._tempRender = new PIXI.CanvasRenderer(100, 100, { view: buf });
+            tempRender.context = tempRender.rootContext;
+            tempRender.dontUseTransform = true;
         }
         if (buf.width != tilemap._layerWidth ||
             buf.height != tilemap._layerHeight) {
@@ -595,12 +596,11 @@
         }
         this._lastAnimationFrame = tilemap.animationFrame;
         if (modified) {
-            var render = { context: buf.getContext("2d"), dontUseTransform: true };
-            tilemap._hackRenderer && tilemap._hackRenderer(render);
-            render.context.clearRect(0, 0, buf.width, buf.height);
+            tilemap._hackRenderer && tilemap._hackRenderer(tempRender);
+            tempRender.context.clearRect(0, 0, buf.width, buf.height);
             for (var i=0;i<layers.length;i++) {
                 layers[i].clearModify();
-                layers[i].renderCanvas(render);
+                layers[i].renderCanvas(tempRender);
             }
         }
         this.layerTransform = this.worldTransform;
