@@ -1,5 +1,5 @@
 # pixi-tilemap
-Library that will help with tilemaps, provide special shaders and canvas fallback. Works only with pixi V4.
+Library that helps with tilemaps, provide special shaders and canvas fallback. Works only with pixi V4.
 
 Please use [v3 branch](https://github.com/pixijs/pixi-tilemap/tree/pixiv3) for pixi V3.
 
