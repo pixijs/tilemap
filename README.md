@@ -15,6 +15,8 @@ Canvas fallback is 5x slower than vanilla rpgmaker. Webgl version is faster and 
 
 [webgl](https://pixijs.github.io/pixi-tilemap/): [zoomin](https://pixijs.github.io/pixi-tilemap/?scale=0.6) and [zoomout](https://pixijs.github.io/pixi-tilemap/?scale=1.4)
 
+[retina webgl](https://pixijs.github.io/pixi-tilemap/?resolution=2): [zoomin](https://pixijs.github.io/pixi-tilemap/?resolution=2&scale=0.6) and [zoomout](https://pixijs.github.io/pixi-tilemap/?resolution=2&scale=1.4)
+
 [canvas](https://pixijs.github.io/pixi-tilemap/?canvas)
 
 ### Basic demo
