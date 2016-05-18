@@ -24,6 +24,7 @@ CompositeRectTileLayer.prototype.updateTransform = CompositeRectTileLayer.protot
 CompositeRectTileLayer.prototype.initialize = function(zIndex, bitmaps, useSquare) {
     this.z = this.zIndex = zIndex;
     this.useSquare = useSquare;
+    this.shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
     if (bitmaps) {
         this.setBitmaps(bitmaps);
     }
@@ -31,8 +32,7 @@ CompositeRectTileLayer.prototype.initialize = function(zIndex, bitmaps, useSquar
 
 CompositeRectTileLayer.prototype.setBitmaps = function(bitmaps) {
     this.removeChildren();
-    for (var i=0;i<bitmaps.length;i++)
-        this.addChild(new RectTileLayer(this.zIndex, bitmaps[i]));
+    this.addChild(new RectTileLayer(this.zIndex, bitmaps));
     this.modificationMarker = 0;
 };
 
@@ -100,6 +100,7 @@ CompositeRectTileLayer.prototype.renderWebGL = function(renderer) {
     this._globalMat = this._globalMat || new PIXI.Matrix();
     renderer._activeRenderTarget.projectionMatrix.copy(this._globalMat).append(this.worldTransform);
     shader.uniforms.projectionMatrix = this._globalMat.toArray(true);
+    shader.uniforms.shadowColor = this.shadowColor;
     if (this.useSquare) {
         var tempScale = this._tempScale = (this._tempScale || [0, 0]);
         tempScale[0] = this._globalMat.a >= 0?1:-1;
@@ -183,11 +184,18 @@ function RectTileLayer(zIndex, texture) {
 RectTileLayer.prototype = Object.create(PIXI.DisplayObject.prototype);
 RectTileLayer.prototype.constructor = RectTileLayer;
 
-RectTileLayer.prototype.initialize = function(zIndex, texture) {
-    this.texture = texture;
+RectTileLayer.prototype.initialize = function(zIndex, textures) {
+    if (!textures) {
+        textures = [];
+    } else if (!(textures instanceof Array) && textures.baseTexture) {
+        textures = [textures];
+    }
+    this.textures = textures;
     this.z = this.zIndex = zIndex;
     this.pointsBuf = [];
     this.visible = false;
+    this._tempSize = new Float32Array([0, 0]);
+    this._tempTexSize = 1;
 };
 
 RectTileLayer.prototype.clear = function () {
@@ -197,20 +205,28 @@ RectTileLayer.prototype.clear = function () {
 };
 
 RectTileLayer.prototype.renderCanvas = function (renderer) {
-    if (!this.texture || !this.texture.valid) return;
+    if (this.textures.length === 0) return;
     var points = this.pointsBuf;
-    for (var i = 0, n = points.length; i < n; i += 8) {
+    renderer.context.fillStyle = '#000000';
+    for (var i = 0, n = points.length; i < n; i += 9) {
         var x1 = points[i], y1 = points[i+1];
         var x2 = points[i+2], y2 = points[i+3];
         var w = points[i+4];
         var h = points[i+5];
         x1 += points[i+6] * renderer.plugins.tile.tileAnim[0];
         y1 += points[i+7] * renderer.plugins.tile.tileAnim[1];
-        renderer.context.drawImage(this.texture.baseTexture.source, x1, y1, w, h, x2, y2, w, h);
+        var textureId = points[i+8];
+        if (textureId >= 0) {
+            renderer.context.drawImage(this.textures[textureId].baseTexture.source, x1, y1, w, h, x2, y2, w, h);
+        } else {
+            renderer.context.globalAlpha = 0.5;
+            renderer.context.fillRect(x2, y2, w, h);
+            renderer.context.globalAlpha = 1;
+        }
     }
 };
 
-RectTileLayer.prototype.addRect = function (u, v, x, y, tileWidth, tileHeight, animX, animY) {
+RectTileLayer.prototype.addRect = function (textureId, u, v, x, y, tileWidth, tileHeight, animX, animY) {
     var pb = this.pointsBuf;
     this.hasAnim = this.hasAnim || animX > 0 || animY > 0;
     if (tileWidth == tileHeight) {
@@ -222,10 +238,12 @@ RectTileLayer.prototype.addRect = function (u, v, x, y, tileWidth, tileHeight, a
         pb.push(tileHeight);
         pb.push(animX | 0);
         pb.push(animY | 0);
+        pb.push(textureId);
     } else {
-        //horizontal line on squares
+        var i;
         if (tileWidth % tileHeight === 0) {
-            for (var i=0;i<tileWidth/tileHeight;i++) {
+            //horizontal line on squares
+            for (i=0;i<tileWidth/tileHeight;i++) {
                 pb.push(u + i * tileHeight);
                 pb.push(v);
                 pb.push(x + i * tileHeight);
@@ -234,6 +252,20 @@ RectTileLayer.prototype.addRect = function (u, v, x, y, tileWidth, tileHeight, a
                 pb.push(tileHeight);
                 pb.push(animX | 0);
                 pb.push(animY | 0);
+                pb.push(textureId);
+            }
+        } else if (tileHeight % tileWidth === 0) {
+            //vertical line on squares
+            for (i=0;i<tileHeight/tileWidth;i++) {
+                pb.push(u);
+                pb.push(v + i * tileWidth);
+                pb.push(x);
+                pb.push(y + i * tileWidth);
+                pb.push(tileWidth);
+                pb.push(tileWidth);
+                pb.push(animX | 0);
+                pb.push(animY | 0);
+                pb.push(textureId);
             }
         } else {
             //ok, ok, lets use rectangle. but its not working with square shader yet
@@ -245,24 +277,34 @@ RectTileLayer.prototype.addRect = function (u, v, x, y, tileWidth, tileHeight, a
             pb.push(tileHeight);
             pb.push(animX | 0);
             pb.push(animY | 0);
+            pb.push(textureId);
         }
     }
 };
 
 RectTileLayer.prototype.renderWebGL = function(renderer, useSquare) {
-    if (!this.texture || !this.texture.valid) return;
     var points = this.pointsBuf;
     if (points.length === 0) return;
 
     var tile = renderer.plugins.tile;
     var gl = renderer.gl;
     var shader = tile.getShader(useSquare);
-    var texture = this.texture.baseTexture;
-    renderer.bindTexture(texture, 0);
-    var tempSize = this._tempSize = (this._tempSize || [0, 0]);
-    tempSize[0] = 1.0 / texture.width;
-    tempSize[1] = 1.0 / texture.height;
-    shader.uniforms.samplerSize = tempSize;
+    var textures = this.textures;
+    if (textures.length === 0) return;
+    var len = textures.length;
+    if (this._tempTexSize < shader.maxTextures) {
+        this._tempTexSize = shader.maxTextures;
+        this._tempSize = new Float32Array(2*shader.maxTextures);
+    }
+    // var samplerSize = this._tempSize;
+    for (var i=0;i<len;i++) {
+        if (!textures[i] || !textures[i].valid) return;
+        var texture = textures[i].baseTexture;
+        // samplerSize[i * 2] = 1.0 / texture.width;
+        // samplerSize[i * 2 + 1] = 1.0 / texture.height;
+    }
+    tile.bindTextures(renderer, textures);
+    // shader.uniforms.uSamplerSize = samplerSize;
     //lost context! recover!
     var vb = tile.getVb(this.vbId);
     if (!vb) {
@@ -275,7 +317,7 @@ RectTileLayer.prototype.renderWebGL = function(renderer, useSquare) {
     vb = vb.vb;
     //if layer was changed, re-upload vertices
     vb.bind();
-    var vertices = points.length / 8 * shader.vertPerQuad;
+    var vertices = points.length / 9 * shader.vertPerQuad;
     if (this.modificationMarker != vertices) {
         this.modificationMarker = vertices;
         var vs = shader.stride * vertices;
@@ -295,62 +337,75 @@ RectTileLayer.prototype.renderWebGL = function(renderer, useSquare) {
         //upload vertices!
         var sz = 0;
         //var tint = 0xffffffff;
-        var i;
+        var textureId, shiftU, shiftV;
         if (useSquare) {
-            for (i = 0; i < points.length; i += 8) {
+            for (i = 0; i < points.length; i += 9) {
+                textureId = (points[i+8] >> 2);
+                shiftU = 1024 * (points[i+8] & 1);
+                shiftV = 1024 * ((points[i+8] >> 1) & 1);
                 arr[sz++] = points[i + 2];
                 arr[sz++] = points[i + 3];
-                arr[sz++] = points[i + 0];
-                arr[sz++] = points[i + 1];
+                arr[sz++] = points[i + 0] + shiftU;
+                arr[sz++] = points[i + 1] + shiftV;
                 arr[sz++] = points[i + 4];
                 arr[sz++] = points[i + 6];
                 arr[sz++] = points[i + 7];
+                arr[sz++] = textureId;
             }
         } else {
-            var ww = texture.width, hh = texture.height;
             //var tint = 0xffffffff;
             var tint = -1;
-            for (i = 0;i<points.length;i += 8) {
+            for (i = 0;i<points.length;i += 9) {
+                textureId = (points[i+8] >> 2);
+                shiftU = 1024 * (points[i+8] & 1);
+                shiftV = 1024 * ((points[i+8] >> 1) & 1);
                 var x = points[i+2], y = points[i+3];
                 var w = points[i+4], h = points[i+5];
-                var u = points[i], v = points[i+1];
+                var u = points[i] + shiftU, v = points[i+1] + shiftV;
                 var animX = points[i+6], animY = points[i+7];
+                textureId >>= 2;
                 arr[sz++] = x;
                 arr[sz++] = y;
                 arr[sz++] = u;
                 arr[sz++] = v;
                 arr[sz++] = animX;
                 arr[sz++] = animY;
+                arr[sz++] = textureId;
                 arr[sz++] = x + w;
                 arr[sz++] = y;
                 arr[sz++] = u + w;
                 arr[sz++] = v;
                 arr[sz++] = animX;
                 arr[sz++] = animY;
+                arr[sz++] = textureId;
                 arr[sz++] = x + w;
                 arr[sz++] = y + h;
                 arr[sz++] = u + w;
                 arr[sz++] = v + h;
                 arr[sz++] = animX;
                 arr[sz++] = animY;
+                arr[sz++] = textureId;
                 arr[sz++] = x;
                 arr[sz++] = y;
                 arr[sz++] = u;
                 arr[sz++] = v;
                 arr[sz++] = animX;
                 arr[sz++] = animY;
+                arr[sz++] = textureId;
                 arr[sz++] = x + w;
                 arr[sz++] = y + h;
                 arr[sz++] = u + w;
                 arr[sz++] = v + h;
                 arr[sz++] = animX;
                 arr[sz++] = animY;
+                arr[sz++] = textureId;
                 arr[sz++] = x;
                 arr[sz++] = y + h;
                 arr[sz++] = u;
                 arr[sz++] = v + h;
                 arr[sz++] = animX;
                 arr[sz++] = animY;
+                arr[sz++] = textureId;
             }
         }
         // if (vs > this.vbArray.length/2 ) {
@@ -369,37 +424,19 @@ RectTileLayer.prototype.renderWebGL = function(renderer, useSquare) {
 module.exports = RectTileLayer;
 
 },{}],5:[function(require,module,exports){
-function RectTileShader(gl)
+var shaderGenerator = require('./shaderGenerator');
+
+function RectTileShader(gl, maxTextures)
 {
     PIXI.Shader.call(this, gl,
-        [
-            'precision lowp float;',
-            'attribute vec4 aVertexPosition;',
-            'attribute vec2 aAnim;',
-
-            'uniform mat3 projectionMatrix;',
-            'uniform vec2 samplerSize;',
-            'uniform vec2 animationFrame;',
-
-            'varying vec2 vTextureCoord;',
-
-            'void main(void){',
-            '   gl_Position = vec4((projectionMatrix * vec3(aVertexPosition.xy, 1.0)).xy, 0.0, 1.0);',
-            '   vTextureCoord = (aVertexPosition.zw + aAnim * animationFrame ) * samplerSize;',
-            '}'
-        ].join('\n'),
-        [
-            'precision lowp float;',
-            'varying vec2 vTextureCoord;',
-            'uniform sampler2D uSampler;',
-            'void main(void){',
-            '   gl_FragColor = texture2D(uSampler, vTextureCoord);',
-            '}'
-        ].join('\n')
+        "#define GLSLIFY 1\nattribute vec2 aVertexPosition;\n\nattribute vec2 aTextureCoord;\n\nattribute vec2 aAnim;\n\nattribute float aTextureId;\n\nuniform mat3 projectionMatrix;\n\nuniform vec2 animationFrame;\n\nvarying vec2 vTextureCoord;\n\nvarying float vTextureId;\n\nvoid main(void){\n\n   gl_Position = vec4((projectionMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);\n\n   vTextureCoord = aTextureCoord + aAnim * animationFrame;\n\n   vTextureId = aTextureId;\n\n}\n\n",
+        shaderGenerator.generateFragmentSrc(maxTextures, "#define GLSLIFY 1\nvarying vec2 vTextureCoord;\n\nvarying float vTextureId;\n\nuniform vec4 shadowColor;\n\nuniform sampler2D uSamplers[%count%];\n\nuniform vec2 uSamplerSize[%count%];\n\nvoid main(void){\n\n   vec2 textureCoord = vTextureCoord;\n\n   vec4 color;\n\n   %forloop%\n\n   gl_FragColor = color;\n\n}\n\n")
     );
-    this.vertSize = 6;
+    this.maxTextures = maxTextures;
+    this.vertSize = 7;
     this.vertPerQuad = 6;
     this.stride = this.vertSize * 4;
+    shaderGenerator.fillSamplers(this, this.maxTextures);
 }
 
 RectTileShader.prototype = Object.create(PIXI.Shader.prototype);
@@ -409,51 +446,27 @@ RectTileShader.prototype.createVao = function (renderer, vb) {
     return renderer.createVao()
         .addIndex(this.indexBuffer)
         .addAttribute(vb, this.attributes.aVertexPosition, gl.FLOAT, false, this.stride, 0)
-        .addAttribute(vb, this.attributes.aAnim, gl.FLOAT, false, this.stride, 4 * 4);
+        .addAttribute(vb, this.attributes.aTextureCoord, gl.FLOAT, false, this.stride, 2 * 4)
+        .addAttribute(vb, this.attributes.aAnim, gl.FLOAT, false, this.stride, 4 * 4)
+        .addAttribute(vb, this.attributes.aTextureId, gl.FLOAT, false, this.stride, 6 * 4);
 };
 
 module.exports = RectTileShader;
 
-},{}],6:[function(require,module,exports){
-function SquareTileShader(gl) {
+},{"./shaderGenerator":10}],6:[function(require,module,exports){
+var shaderGenerator = require('./shaderGenerator');
+
+
+function SquareTileShader(gl, maxTextures) {
     PIXI.Shader.call(this, gl,
-        [
-            'attribute vec4 aVertexPosition;',
-            'attribute vec3 aSize;',
-
-            'uniform mat3 projectionMatrix;',
-            'uniform vec2 samplerSize;',
-            'uniform vec2 animationFrame;',
-            'uniform float projectionScale;',
-
-            'varying vec2 vTextureCoord;',
-            'varying float vSize;',
-
-            'void main(void){',
-            '   gl_Position = vec4((projectionMatrix * vec3(aVertexPosition.xy + aSize.x * 0.5, 1.0)).xy, 0.0, 1.0);',
-            '   gl_PointSize = aSize.x * projectionScale;',
-            '   vTextureCoord = (aVertexPosition.zw + aSize.yz * animationFrame ) * samplerSize;',
-            '   vSize = aSize.x;',
-            '}'
-        ].join("\n"),
-        [
-            'varying vec2 vTextureCoord;',
-            'varying float vSize;',
-            'uniform vec2 samplerSize;',
-
-            'uniform sampler2D uSampler;',
-            'uniform vec2 pointScale;',
-
-            'void main(void){',
-            '   float margin = 0.5/vSize;',
-            '   vec2 clamped = vec2(clamp(gl_PointCoord.x, margin, 1.0 - margin), clamp(gl_PointCoord.y, margin, 1.0 - margin));',
-            '   gl_FragColor = texture2D(uSampler, ((clamped-0.5) * pointScale + 0.5) * vSize * samplerSize + vTextureCoord);',
-            '}'
-        ].join('\n')
+        "#define GLSLIFY 1\nattribute vec2 aVertexPosition;\n\nattribute vec2 aTextureCoord;\n\nattribute vec2 aAnim;\n\nattribute float aTextureId;\n\nattribute float aSize;\n\nuniform mat3 projectionMatrix;\n\nuniform vec2 samplerSize;\n\nuniform vec2 animationFrame;\n\nuniform float projectionScale;\n\nvarying vec2 vTextureCoord;\n\nvarying float vSize;\n\nvarying float vTextureId;\n\nvoid main(void){\n\n   gl_Position = vec4((projectionMatrix * vec3(aVertexPosition + aSize * 0.5, 1.0)).xy, 0.0, 1.0);\n\n   gl_PointSize = aSize * projectionScale;\n\n   vTextureCoord = aTextureCoord + aAnim * animationFrame;\n\n   vTextureId = aTextureId;\n\n   vSize = aSize;\n\n}\n\n",
+        shaderGenerator.generateFragmentSrc(maxTextures, "#define GLSLIFY 1\nvarying vec2 vTextureCoord;\n\nvarying float vSize;\n\nvarying float vTextureId;\n\nuniform vec4 shadowColor;\n\nuniform sampler2D uSamplers[%count%];\n\nuniform vec2 uSamplerSize[%count%];\n\nuniform vec2 pointScale;\n\nvoid main(void){\n\n   float margin = 0.5/vSize;\n\n   vec2 clamped = vec2(clamp(gl_PointCoord.x, margin, 1.0 - margin), clamp(gl_PointCoord.y, margin, 1.0 - margin));\n\n   vec2 textureCoord = ((clamped-0.5) * pointScale + 0.5) * vSize + vTextureCoord;\n\n   vec4 color;\n\n   %forloop%\n\n   gl_FragColor = color;\n\n}\n\n")
     );
-    this.vertSize = 7;
+    this.maxTextures = maxTextures;
+    this.vertSize = 8;
     this.vertPerQuad = 1;
     this.stride = this.vertSize * 4;
+    shaderGenerator.fillSamplers(this, this.maxTextures);
 }
 
 SquareTileShader.prototype = Object.create(PIXI.Shader.prototype);
@@ -463,14 +476,18 @@ SquareTileShader.prototype.createVao = function (renderer, vb) {
     return renderer.createVao()
         .addIndex(this.indexBuffer)
         .addAttribute(vb, this.attributes.aVertexPosition, gl.FLOAT, false, this.stride, 0)
-        .addAttribute(vb, this.attributes.aSize, gl.FLOAT, false, this.stride, 4 * 4);
+        .addAttribute(vb, this.attributes.aTextureCoord, gl.FLOAT, false, this.stride, 2 * 4)
+        .addAttribute(vb, this.attributes.aSize, gl.FLOAT, false, this.stride, 4 * 4)
+        .addAttribute(vb, this.attributes.aAnim, gl.FLOAT, false, this.stride, 5 * 4)
+        .addAttribute(vb, this.attributes.aTextureId, gl.FLOAT, false, this.stride, 7 * 4);
 };
 
 module.exports = SquareTileShader;
 
-},{}],7:[function(require,module,exports){
+},{"./shaderGenerator":10}],7:[function(require,module,exports){
 var RectTileShader = require('./RectTileShader'),
-    SquareTileShader = require('./SquareTileShader');
+    SquareTileShader = require('./SquareTileShader'),
+    glCore = PIXI.glCore;
 
 /**
  * The default vertex shader source
@@ -483,6 +500,7 @@ function TileRenderer(renderer) {
     this.vbs = {};
     this.lastTimeCheck = 0;
     this.tileAnim = [0, 0];
+    this.maxTextures = 4;
     this.indices = new Uint16Array([0, 1, 2, 0, 2, 3]);
 }
 
@@ -492,14 +510,73 @@ TileRenderer.vbAutoincrement = 0;
 
 TileRenderer.prototype.onContextChange = function() {
     var gl = this.renderer.gl;
-    this.rectShader = new RectTileShader(gl);
-    this.squareShader = new SquareTileShader(gl);
-    this.indexBuffer = PIXI.glCore.GLBuffer.createIndexBuffer(gl, this.indices, gl.STATIC_DRAW);
+    var maxTextures = this.maxTextures;
+    this.rectShader = new RectTileShader(gl, maxTextures);
+    this.squareShader = new SquareTileShader(gl, maxTextures);
+    this.indexBuffer = glCore.GLBuffer.createIndexBuffer(gl, this.indices, gl.STATIC_DRAW);
     this.rectShader.indexBuffer = this.indexBuffer;
     this.squareShader.indexBuffer = this.indexBuffer;
     this.vbs = {};
+    this.glTextures = [];
+    this.boundSprites = [];
+    this.initBounds();
 };
 
+TileRenderer.prototype.initBounds = function() {
+    var gl = this.renderer.gl;
+    var tempCanvas = document.createElement('canvas');
+    tempCanvas.width = 2048;
+    tempCanvas.height = 2048;
+    // tempCanvas.getContext('2d').clearRect(0, 0, 2048, 2048);
+    for (var i=0;i<this.maxTextures; i++) {
+        var glt = new glCore.GLTexture(gl, 2048, 2048);
+        glt.premultiplyAlpha = true;
+        glt.upload(tempCanvas);
+        glt.enableWrapClamp();
+        glt.enableLinearScaling();
+        this.glTextures.push(glt);
+        var bs = [];
+        for (var j=0;j<4;j++) {
+            var spr = new PIXI.Sprite();
+            spr.position.x = 1024 * (j & 1);
+            spr.position.y = 1024 * (j >> 1);
+            bs.push(spr);
+        }
+        this.boundSprites.push(bs);
+    }
+};
+
+glCore.GLTexture.prototype._hackSubImage = function(sprite) {
+    this.bind();
+    var gl = this.gl;
+    var baseTex = sprite.texture.baseTexture;
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, sprite.position.x, sprite.position.y, this.format, this.type, baseTex.source);
+};
+
+TileRenderer.prototype.bindTextures = function(renderer, textures) {
+    var bounds = this.boundSprites;
+    var glts = this.glTextures;
+    var len = textures.length;
+    var maxTextures = this.maxTextures;
+    if (len >= 4 * maxTextures) {
+        return;
+    }
+    var i;
+    for (i=0;i<len;i++) {
+        var texture = textures[i];
+        if (!texture || !textures[i].valid) continue;
+        var bs = bounds[i >> 2][i & 3];
+        if (bs.texture !== texture) {
+            bs.texture = texture;
+            var glt = glts[ i >> 2 ];
+            glt._hackSubImage(bs);
+        }
+    }
+    for (i = 0; i < maxTextures; i++) {
+        glts[i].bind(i);
+    }
+    renderer._activeTextureLocation = maxTextures - 1;
+};
 
 TileRenderer.prototype.checkLeaks = function() {
     var now = Date.now();
@@ -666,7 +743,62 @@ PIXI.tilemap = {
 
 module.exports = PIXI.tilemap;
 
-},{"./CanvasTileRenderer":1,"./CompositeRectTileLayer":2,"./GraphicsLayer":3,"./RectTileLayer":4,"./TileRenderer":7,"./ZLayer":8}]},{},[9])
+},{"./CanvasTileRenderer":1,"./CompositeRectTileLayer":2,"./GraphicsLayer":3,"./RectTileLayer":4,"./TileRenderer":7,"./ZLayer":8}],10:[function(require,module,exports){
+var shaderGenerator = {
+    fillSamplers: function(shader, maxTextures) {
+        var sampleValues = [];
+        for (var i = 0; i < maxTextures; i++)
+        {
+            sampleValues[i] = i;
+        }
+        shader.bind();
+        shader.uniforms.uSamplers = sampleValues;
+
+        var samplerSize = [];
+        for (i = 0; i < maxTextures; i++) {
+            samplerSize.push(1.0 / 2048);
+            samplerSize.push(1.0 / 2048);
+        }
+        shader.uniforms.uSamplerSize = samplerSize;
+    },
+    generateFragmentSrc: function(maxTextures, fragmentSrc) {
+        return fragmentSrc.replace(/%count%/gi, maxTextures)
+            .replace(/%forloop%/gi, this.generateSampleSrc(maxTextures));
+    },
+    generateSampleSrc: function(maxTextures) {
+        var src = '';
+
+        src += '\n';
+        src += '\n';
+
+        src += 'if(vTextureId <= -1.0) {';
+        src += '\n\tcolor = shadowColor;';
+        src += '\n}';
+
+        for (var i = 0; i < maxTextures; i++)
+        {
+            src += '\nelse ';
+
+            if(i < maxTextures-1)
+            {
+                src += 'if(vTextureId == ' + i + '.0)';
+            }
+
+            src += '\n{';
+            src += '\n\tcolor = texture2D(uSamplers['+i+'], textureCoord * uSamplerSize['+i+']);';
+            src += '\n}';
+        }
+
+        src += '\n';
+        src += '\n';
+
+        return src;
+    }
+};
+
+module.exports = shaderGenerator;
+
+},{}]},{},[9])
 
 
 //# sourceMappingURL=pixi-tilemap.js.map

@@ -1,6 +1,12 @@
-precision lowp float;
 varying vec2 vTextureCoord;
-uniform sampler2D uSampler;
+varying float vTextureId;
+uniform vec4 shadowColor;
+uniform sampler2D uSamplers[%count%];
+uniform vec2 uSamplerSize[%count%];
+
 void main(void){
-   gl_FragColor = texture2D(uSampler, vTextureCoord);
+   vec2 textureCoord = vTextureCoord;
+   vec4 color;
+   %forloop%
+   gl_FragColor = color;
 }

@@ -997,10 +997,8 @@ function requireRpgMaker() {
      */
     ShaderTilemap.prototype._updateBitmaps = function() {
         var bitmaps = this.bitmaps.map(function(x) { return x._baseTexture ? new PIXI.Texture(x._baseTexture) : x; } );
-        this.lowestLayer.setBitmaps(bitmaps);
         this.lowerLayer.setBitmaps(bitmaps);
         this.upperLayer.setBitmaps(bitmaps);
-        this._shadowLayer.clear();
     };
 
     /**
@@ -1051,9 +1049,8 @@ function requireRpgMaker() {
             var parameters = PluginManager.parameters('ShaderTilemap');
             var useSquareShader = Number(parameters.hasOwnProperty('squareShader') ? parameters['squareShader'] : 1);
 
-            this.lowerZLayer.addChild(this.lowestLayer = new PIXI.tilemap.CompositeRectTileLayer(0, [], useSquareShader));
-            this.lowerZLayer.addChild(this._shadowLayer = new PIXI.tilemap.GraphicsLayer());
             this.lowerZLayer.addChild(this.lowerLayer = new PIXI.tilemap.CompositeRectTileLayer(0, [], useSquareShader));
+            this.lowerLayer.shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
             this.upperZLayer.addChild(this.upperLayer = new PIXI.tilemap.CompositeRectTileLayer(4, [], useSquareShader));
         }
     };
@@ -1087,7 +1084,6 @@ function requireRpgMaker() {
     ShaderTilemap.prototype._paintAllTiles = function(startX, startY) {
         this.lowerZLayer.clear();
         this.upperZLayer.clear();
-        this._shadowLayer.beginFill(0, 0.5);
         var tileCols = Math.ceil(this._width / this._tileWidth) + 1;
         var tileRows = Math.ceil(this._height / this._tileHeight) + 1;
         for (var y = 0; y < tileRows; y++) {
@@ -1095,7 +1091,6 @@ function requireRpgMaker() {
                 this._paintTiles(startX, startY, x, y);
             }
         }
-        this._shadowLayer.endFill();
     };
 
     /**
@@ -1116,41 +1111,40 @@ function requireRpgMaker() {
         var tileId3 = this._readMapData(mx, my, 3);
         var shadowBits = this._readMapData(mx, my, 4);
         var upperTileId1 = this._readMapData(mx, my - 1, 1);
-        var lowestLayers = this.lowestLayer.children;
-        var lowerLayers = this.lowerLayer.children;
-        var upperLayers = this.upperLayer.children;
+        var lowerLayer = this.lowerLayer.children[0];
+        var upperLayer = this.upperLayer.children[0];
 
         if (this._isHigherTile(tileId0)) {
-            this._drawTile(upperLayers, tileId0, dx, dy);
+            this._drawTile(upperLayer, tileId0, dx, dy);
         } else {
-            this._drawTile(lowestLayers, tileId0, dx, dy);
+            this._drawTile(lowerLayer, tileId0, dx, dy);
         }
         if (this._isHigherTile(tileId1)) {
-            this._drawTile(upperLayers, tileId1, dx, dy);
+            this._drawTile(upperLayer, tileId1, dx, dy);
         } else {
-            this._drawTile(lowestLayers, tileId1, dx, dy);
+            this._drawTile(lowerLayer, tileId1, dx, dy);
         }
 
-        this._drawShadow(shadowBits, dx, dy);
+        this._drawShadow(lowerLayer, shadowBits, dx, dy);
         if (this._isTableTile(upperTileId1) && !this._isTableTile(tileId1)) {
             if (!Tilemap.isShadowingTile(tileId0)) {
-                this._drawTableEdge(lowerLayers, upperTileId1, dx, dy);
+                this._drawTableEdge(lowerLayer, upperTileId1, dx, dy);
             }
         }
 
         if (this._isOverpassPosition(mx, my)) {
-            this._drawTile(upperLayers, tileId2, dx, dy);
-            this._drawTile(upperLayers, tileId3, dx, dy);
+            this._drawTile(upperLayer, tileId2, dx, dy);
+            this._drawTile(upperLayer, tileId3, dx, dy);
         } else {
             if (this._isHigherTile(tileId2)) {
-                this._drawTile(upperLayers, tileId2, dx, dy);
+                this._drawTile(upperLayer, tileId2, dx, dy);
             } else {
-                this._drawTile(lowerLayers, tileId2, dx, dy);
+                this._drawTile(lowerLayer, tileId2, dx, dy);
             }
             if (this._isHigherTile(tileId3)) {
-                this._drawTile(upperLayers, tileId3, dx, dy);
+                this._drawTile(upperLayer, tileId3, dx, dy);
             } else {
-                this._drawTile(lowerLayers, tileId3, dx, dy);
+                this._drawTile(lowerLayer, tileId3, dx, dy);
             }
         }
     };
@@ -1163,12 +1157,12 @@ function requireRpgMaker() {
      * @param {Number} dy
      * @private
      */
-    ShaderTilemap.prototype._drawTile = function(layers, tileId, dx, dy) {
+    ShaderTilemap.prototype._drawTile = function(layer, tileId, dx, dy) {
         if (Tilemap.isVisibleTile(tileId)) {
             if (Tilemap.isAutotile(tileId)) {
-                this._drawAutotile(layers, tileId, dx, dy);
+                this._drawAutotile(layer, tileId, dx, dy);
             } else {
-                this._drawNormalTile(layers, tileId, dx, dy);
+                this._drawNormalTile(layer, tileId, dx, dy);
             }
         }
     };
@@ -1181,7 +1175,7 @@ function requireRpgMaker() {
      * @param {Number} dy
      * @private
      */
-    ShaderTilemap.prototype._drawNormalTile = function(layers, tileId, dx, dy) {
+    ShaderTilemap.prototype._drawNormalTile = function(layer, tileId, dx, dy) {
         var setNumber = 0;
 
         if (Tilemap.isTileA5(tileId)) {
@@ -1195,10 +1189,7 @@ function requireRpgMaker() {
         var sx = (Math.floor(tileId / 128) % 2 * 8 + tileId % 8) * w;
         var sy = (Math.floor(tileId % 256 / 8) % 16) * h;
 
-        var layer = layers[setNumber];
-        if (layer) {
-            layer.addRect(sx, sy, dx, dy, w, h);
-        }
+        layer.addRect(setNumber, sx, sy, dx, dy, w, h);
     };
 
     /**
@@ -1209,7 +1200,7 @@ function requireRpgMaker() {
      * @param {Number} dy
      * @private
      */
-    ShaderTilemap.prototype._drawAutotile = function(layers, tileId, dx, dy) {
+    ShaderTilemap.prototype._drawAutotile = function(layer, tileId, dx, dy) {
         var autotileTable = Tilemap.FLOOR_AUTOTILE_TABLE;
         var kind = Tilemap.getAutotileKind(tileId);
         var shape = Tilemap.getAutotileShape(tileId);
@@ -1267,31 +1258,28 @@ function requireRpgMaker() {
         }
 
         var table = autotileTable[shape];
-        var layer = layers[setNumber];
-        if (table && layer) {
-            var w1 = this._tileWidth / 2;
-            var h1 = this._tileHeight / 2;
-            for (var i = 0; i < 4; i++) {
-                var qsx = table[i][0];
-                var qsy = table[i][1];
-                var sx1 = (bx * 2 + qsx) * w1;
-                var sy1 = (by * 2 + qsy) * h1;
-                var dx1 = dx + (i % 2) * w1;
-                var dy1 = dy + Math.floor(i / 2) * h1;
-                if (isTable && (qsy === 1 || qsy === 5)) {
-                    var qsx2 = qsx;
-                    var qsy2 = 3;
-                    if (qsy === 1) {
-                        //qsx2 = [0, 3, 2, 1][qsx];
-                        qsx2 = (4-qsx)%4;
-                    }
-                    var sx2 = (bx * 2 + qsx2) * w1;
-                    var sy2 = (by * 2 + qsy2) * h1;
-                    layer.addRect(sx2, sy2, dx1, dy1, w1, h1, animX, animY);
-                    layer.addRect(sx1, sy1, dx1, dy1+h1/2, w1, h1/2, animX, animY);
-                } else {
-                    layer.addRect(sx1, sy1, dx1, dy1, w1, h1, animX, animY);
+        var w1 = this._tileWidth / 2;
+        var h1 = this._tileHeight / 2;
+        for (var i = 0; i < 4; i++) {
+            var qsx = table[i][0];
+            var qsy = table[i][1];
+            var sx1 = (bx * 2 + qsx) * w1;
+            var sy1 = (by * 2 + qsy) * h1;
+            var dx1 = dx + (i % 2) * w1;
+            var dy1 = dy + Math.floor(i / 2) * h1;
+            if (isTable && (qsy === 1 || qsy === 5)) {
+                var qsx2 = qsx;
+                var qsy2 = 3;
+                if (qsy === 1) {
+                    //qsx2 = [0, 3, 2, 1][qsx];
+                    qsx2 = (4-qsx)%4;
                 }
+                var sx2 = (bx * 2 + qsx2) * w1;
+                var sy2 = (by * 2 + qsy2) * h1;
+                layer.addRect(setNumber, sx2, sy2, dx1, dy1, w1, h1, animX, animY);
+                layer.addRect(setNumber, sx1, sy1, dx1, dy1+h1/2, w1, h1/2, animX, animY);
+            } else {
+                layer.addRect(setNumber, sx1, sy1, dx1, dy1, w1, h1, animX, animY);
             }
         }
     };
@@ -1304,7 +1292,7 @@ function requireRpgMaker() {
      * @param {Number} dy
      * @private
      */
-    ShaderTilemap.prototype._drawTableEdge = function(layers, tileId, dx, dy) {
+    ShaderTilemap.prototype._drawTableEdge = function(layer, tileId, dx, dy) {
         if (Tilemap.isTileA2(tileId)) {
             var autotileTable = Tilemap.FLOOR_AUTOTILE_TABLE;
             var kind = Tilemap.getAutotileKind(tileId);
@@ -1315,19 +1303,16 @@ function requireRpgMaker() {
             var bx = tx * 2;
             var by = (ty - 2) * 3;
             var table = autotileTable[shape];
-            var layer = layers[setNumber];
-            if (table && layer) {
-                var w1 = this._tileWidth / 2;
-                var h1 = this._tileHeight / 2;
-                for (var i = 0; i < 2; i++) {
-                    var qsx = table[2 + i][0];
-                    var qsy = table[2 + i][1];
-                    var sx1 = (bx * 2 + qsx) * w1;
-                    var sy1 = (by * 2 + qsy) * h1 + h1 / 2;
-                    var dx1 = dx + (i % 2) * w1;
-                    var dy1 = dy + Math.floor(i / 2) * h1;
-                    layer.addRect(sx1, sy1, dx1, dy1, w1, h1/2);
-                }
+            var w1 = this._tileWidth / 2;
+            var h1 = this._tileHeight / 2;
+            for (var i = 0; i < 2; i++) {
+                var qsx = table[2 + i][0];
+                var qsy = table[2 + i][1];
+                var sx1 = (bx * 2 + qsx) * w1;
+                var sy1 = (by * 2 + qsy) * h1 + h1 / 2;
+                var dx1 = dx + (i % 2) * w1;
+                var dy1 = dy + Math.floor(i / 2) * h1;
+                layer.addRect(setNumber, sx1, sy1, dx1, dy1, w1, h1/2);
             }
         }
     };
@@ -1339,8 +1324,7 @@ function requireRpgMaker() {
      * @param {Number} dy
      * @private
      */
-    ShaderTilemap.prototype._drawShadow = function(shadowBits, dx, dy) {
-        var shadowLayer = this._shadowLayer;
+    ShaderTilemap.prototype._drawShadow = function(layer, shadowBits, dx, dy) {
         if (shadowBits & 0x0f) {
             var w1 = this._tileWidth / 2;
             var h1 = this._tileHeight / 2;
@@ -1348,7 +1332,7 @@ function requireRpgMaker() {
                 if (shadowBits & (1 << i)) {
                     var dx1 = dx + (i % 2) * w1;
                     var dy1 = dy + Math.floor(i / 2) * h1;
-                    shadowLayer.drawRect(dx1, dy1, w1, h1);
+                    layer.addRect(-1, 0, 0, dx1, dy1, w1, h1);
                 }
             }
         }

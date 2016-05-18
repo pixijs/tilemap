@@ -13,6 +13,7 @@ CompositeRectTileLayer.prototype.updateTransform = CompositeRectTileLayer.protot
 CompositeRectTileLayer.prototype.initialize = function(zIndex, bitmaps, useSquare) {
     this.z = this.zIndex = zIndex;
     this.useSquare = useSquare;
+    this.shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
     if (bitmaps) {
         this.setBitmaps(bitmaps);
     }
@@ -20,8 +21,7 @@ CompositeRectTileLayer.prototype.initialize = function(zIndex, bitmaps, useSquar
 
 CompositeRectTileLayer.prototype.setBitmaps = function(bitmaps) {
     this.removeChildren();
-    for (var i=0;i<bitmaps.length;i++)
-        this.addChild(new RectTileLayer(this.zIndex, bitmaps[i]));
+    this.addChild(new RectTileLayer(this.zIndex, bitmaps));
     this.modificationMarker = 0;
 };
 
@@ -89,6 +89,7 @@ CompositeRectTileLayer.prototype.renderWebGL = function(renderer) {
     this._globalMat = this._globalMat || new PIXI.Matrix();
     renderer._activeRenderTarget.projectionMatrix.copy(this._globalMat).append(this.worldTransform);
     shader.uniforms.projectionMatrix = this._globalMat.toArray(true);
+    shader.uniforms.shadowColor = this.shadowColor;
     if (this.useSquare) {
         var tempScale = this._tempScale = (this._tempScale || [0, 0]);
         tempScale[0] = this._globalMat.a >= 0?1:-1;

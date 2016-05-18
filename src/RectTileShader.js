@@ -1,14 +1,16 @@
-var glslify  = require('glslify');
+var glslify  = require('glslify'), shaderGenerator = require('./shaderGenerator');
 
-function RectTileShader(gl)
+function RectTileShader(gl, maxTextures)
 {
     PIXI.Shader.call(this, gl,
         glslify('./rect.vert', 'utf8'),
-        glslify('./rect.frag', 'utf8')
+        shaderGenerator.generateFragmentSrc(maxTextures, glslify('./rect.frag', 'utf8'))
     );
-    this.vertSize = 6;
+    this.maxTextures = maxTextures;
+    this.vertSize = 7;
     this.vertPerQuad = 6;
     this.stride = this.vertSize * 4;
+    shaderGenerator.fillSamplers(this, this.maxTextures);
 }
 
 RectTileShader.prototype = Object.create(PIXI.Shader.prototype);
@@ -18,7 +20,9 @@ RectTileShader.prototype.createVao = function (renderer, vb) {
     return renderer.createVao()
         .addIndex(this.indexBuffer)
         .addAttribute(vb, this.attributes.aVertexPosition, gl.FLOAT, false, this.stride, 0)
-        .addAttribute(vb, this.attributes.aAnim, gl.FLOAT, false, this.stride, 4 * 4);
+        .addAttribute(vb, this.attributes.aTextureCoord, gl.FLOAT, false, this.stride, 2 * 4)
+        .addAttribute(vb, this.attributes.aAnim, gl.FLOAT, false, this.stride, 4 * 4)
+        .addAttribute(vb, this.attributes.aTextureId, gl.FLOAT, false, this.stride, 6 * 4);
 };
 
 module.exports = RectTileShader;
