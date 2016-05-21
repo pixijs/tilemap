@@ -2,12 +2,18 @@ var RectTileShader = require('./RectTileShader'),
     SquareTileShader = require('./SquareTileShader'),
     glCore = PIXI.glCore;
 
-/**
- * The default vertex shader source
- *
- * @static
- * @constant
- */
+/*
+* Renderer for square and rectangle tiles.
+* Squares cannot be rotated, skewed.
+* For container with squares, scale.x must be equals to scale.y, matrix.a to matrix.d
+* Rectangles do not care about that.
+*
+* @class
+* @memberof PIXI.tilemap
+* @extends PIXI.ObjectRenderer
+* @param renderer {PIXI.WebGLRenderer} The renderer this sprite batch works for.
+*/
+
 function TileRenderer(renderer) {
     PIXI.ObjectRenderer.call(this, renderer);
     this.vbs = {};

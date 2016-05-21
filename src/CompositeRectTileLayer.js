@@ -32,8 +32,8 @@ CompositeRectTileLayer.prototype.clear = function () {
 };
 
 CompositeRectTileLayer.prototype.addRect = function (num, u, v, x, y, tileWidth, tileHeight) {
-    if (this.children[num] && this.children[num].texture)
-        this.children[num].addRect(u, v, x, y, tileWidth, tileHeight);
+    if (this.children[num] && this.children[num].textures)
+        this.children[num].addRect(0, u, v, x, y, tileWidth, tileHeight);
 };
 
 /**
@@ -48,17 +48,35 @@ CompositeRectTileLayer.prototype.addFrame = function (texture, x, y) {
         texture = PIXI.Texture.fromImage(texture);
     }
     var children = this.children;
-    var layer = null;
+    var layer = null, ind = 0;
     for (var i=0;i<children.length; i++) {
-        if (children[i].texture.baseTexture == texture.baseTexture) {
-            layer = children[i];
+        var tex = children[i].textures;
+        for (var j=0;j < tex.length;j++) {
+            if (tex[j].baseTexture == texture.baseTexture) {
+                layer = children[i];
+                ind = j;
+                break;
+            }
+        }
+        if (layer) {
             break;
         }
     }
     if (!layer) {
-        children.push(layer = new RectTileLayer(this.zIndex, texture));
+        for (i=0;i<children.length;i++) {
+            var child = children[i];
+            if (child.textures.length < 16) {
+                layer = child;
+                ind = child.textures.length;
+                child.textures.push(texture);
+            }
+        }
+        if (!layer) {
+            children.push(layer = new RectTileLayer(this.zIndex, texture));
+            ind = 0;
+        }
     }
-    layer.addRect(texture.frame.x, texture.frame.y, x, y, texture.frame.width, texture.frame.height);
+    layer.addRect(ind, texture.frame.x, texture.frame.y, x, y, texture.frame.width, texture.frame.height);
     return true;
 };
 
