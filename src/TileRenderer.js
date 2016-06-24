@@ -83,6 +83,7 @@ TileRenderer.prototype.bindTextures = function(renderer, textures) {
     var i;
     for (i=0;i<len;i++) {
         var texture = textures[i];
+        renderer.bindTexture(texture);
         if (!texture || !textures[i].valid) continue;
         var bs = bounds[i >> 2][i & 3];
         if (bs.texture !== texture) {
