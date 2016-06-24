@@ -185,7 +185,6 @@ RectTileLayer.prototype.renderWebGL = function(renderer, useSquare) {
                 var w = points[i+4], h = points[i+5];
                 var u = points[i] + shiftU, v = points[i+1] + shiftV;
                 var animX = points[i+6], animY = points[i+7];
-                textureId >>= 2;
                 arr[sz++] = x;
                 arr[sz++] = y;
                 arr[sz++] = u;

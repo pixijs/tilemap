@@ -9,7 +9,7 @@ var stage = null;
 var tilemap = null;
 
 var scale = +(getOptionValue('scale') || 1);
-var resolution = +(getOptionValue('resolution') || 1);
+var resolution = +(getOptionValue('resolution') || window.devicePixelRatio);
 var ratio = window.devicePixelRatio / resolution;
 
 function resizeTilemap() {
