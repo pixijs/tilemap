@@ -16,6 +16,7 @@ RectTileLayer.prototype.initialize = function(zIndex, textures) {
     this.z = this.zIndex = zIndex;
     this.pointsBuf = [];
     this.visible = false;
+    this.tileAnim = [0,0];
     this._tempSize = new Float32Array([0, 0]);
     this._tempTexSize = 1;
 };
@@ -35,8 +36,8 @@ RectTileLayer.prototype.renderCanvas = function (renderer) {
         var x2 = points[i+2], y2 = points[i+3];
         var w = points[i+4];
         var h = points[i+5];
-        x1 += points[i+6] * renderer.plugins.tile.tileAnim[0];
-        y1 += points[i+7] * renderer.plugins.tile.tileAnim[1];
+        x1 += points[i+6] * this.tileAnim[0];
+        y1 += points[i+7] * this.tileAnim[1];
         var textureId = points[i+8];
         if (textureId >= 0) {
             renderer.context.drawImage(this.textures[textureId].baseTexture.source, x1, y1, w, h, x2, y2, w, h);

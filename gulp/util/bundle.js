@@ -10,7 +10,8 @@ var fs          = require('fs'),
     buffer      = require('vinyl-buffer'),
     browserify  = require('browserify'),
     watchify    = require('watchify'),
-    handleErrors = require('../util/handleErrors');
+    handleErrors = require('../util/handleErrors'),
+    glslify = require('glslify');
 
 // TODO - Concat license header to dev/prod build files.
 function rebundle(devBundle) {
@@ -49,6 +50,7 @@ function rebundle(devBundle) {
 function createBundler(args) {
     args = args || {};
     args.debug = true;
+    args.transform = [glslify];
 
     return browserify(paths.jsEntry, args);
 }

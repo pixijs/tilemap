@@ -14,6 +14,7 @@ CompositeRectTileLayer.prototype.initialize = function(zIndex, bitmaps, useSquar
     this.z = this.zIndex = zIndex;
     this.useSquare = useSquare;
     this.shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
+    this.tileAnim = [0, 0];
     if (bitmaps) {
         this.setBitmaps(bitmaps);
     }
@@ -93,8 +94,10 @@ CompositeRectTileLayer.prototype.renderCanvas = function (renderer) {
         );
     }
     var layers = this.children;
-    for (var i = 0; i < layers.length; i++)
+    for (var i = 0; i < layers.length; i++) {
         layers[i].renderCanvas(renderer);
+        layers[i].tileAnim = this.tileAnim;
+    }
 };
 
 
@@ -115,13 +118,13 @@ CompositeRectTileLayer.prototype.renderWebGL = function(renderer) {
         var ps = shader.uniforms.pointScale = tempScale;
         shader.uniforms.projectionScale = Math.abs(this.worldTransform.a) * renderer.resolution;
     }
-    var af = shader.uniforms.animationFrame = renderer.plugins.tile.tileAnim;
+    // var af = shader.uniforms.animationFrame = renderer.plugins.tile.tileAnim;
+    var af = shader.uniforms.animationFrame = this.tileAnim;
     //shader.syncUniform(shader.uniforms.animationFrame);
     var layers = this.children;
     for (var i = 0; i < layers.length; i++)
         layers[i].renderWebGL(renderer, this.useSquare);
 };
-
 
 CompositeRectTileLayer.prototype.isModified = function(anim) {
     var layers = this.children;
