@@ -43,8 +43,8 @@ CompositeRectTileLayer.prototype.clear = function () {
 };
 
 CompositeRectTileLayer.prototype.addRect = function (num, u, v, x, y, tileWidth, tileHeight) {
-    if (this.children[num] && this.children[num].texture)
-        this.children[num].addRect(u, v, x, y, tileWidth, tileHeight);
+    if (this.children[num] && this.children[num].textures)
+        this.children[num].addRect(0, u, v, x, y, tileWidth, tileHeight);
 };
 
 /**
@@ -59,17 +59,35 @@ CompositeRectTileLayer.prototype.addFrame = function (texture, x, y) {
         texture = PIXI.Texture.fromImage(texture);
     }
     var children = this.children;
-    var layer = null;
+    var layer = null, ind = 0;
     for (var i=0;i<children.length; i++) {
-        if (children[i].texture.baseTexture == texture.baseTexture) {
-            layer = children[i];
+        var tex = children[i].textures;
+        for (var j=0;j < tex.length;j++) {
+            if (tex[j].baseTexture == texture.baseTexture) {
+                layer = children[i];
+                ind = j;
+                break;
+            }
+        }
+        if (layer) {
             break;
         }
     }
     if (!layer) {
-        children.push(layer = new RectTileLayer(this.zIndex, texture));
+        for (i=0;i<children.length;i++) {
+            var child = children[i];
+            if (child.textures.length < 16) {
+                layer = child;
+                ind = child.textures.length;
+                child.textures.push(texture);
+            }
+        }
+        if (!layer) {
+            children.push(layer = new RectTileLayer(this.zIndex, texture));
+            ind = 0;
+        }
     }
-    layer.addRect(texture.frame.x, texture.frame.y, x, y, texture.frame.width, texture.frame.height);
+    layer.addRect(ind, texture.frame.x, texture.frame.y, x, y, texture.frame.width, texture.frame.height);
     return true;
 };
 
@@ -363,7 +381,6 @@ RectTileLayer.prototype.renderWebGL = function(renderer, useSquare) {
                 var w = points[i+4], h = points[i+5];
                 var u = points[i] + shiftU, v = points[i+1] + shiftV;
                 var animX = points[i+6], animY = points[i+7];
-                textureId >>= 2;
                 arr[sz++] = x;
                 arr[sz++] = y;
                 arr[sz++] = u;
@@ -460,7 +477,7 @@ var shaderGenerator = require('./shaderGenerator');
 function SquareTileShader(gl, maxTextures) {
     PIXI.Shader.call(this, gl,
         "#define GLSLIFY 1\nattribute vec2 aVertexPosition;\n\nattribute vec2 aTextureCoord;\n\nattribute vec2 aAnim;\n\nattribute float aTextureId;\n\nattribute float aSize;\n\nuniform mat3 projectionMatrix;\n\nuniform vec2 samplerSize;\n\nuniform vec2 animationFrame;\n\nuniform float projectionScale;\n\nvarying vec2 vTextureCoord;\n\nvarying float vSize;\n\nvarying float vTextureId;\n\nvoid main(void){\n\n   gl_Position = vec4((projectionMatrix * vec3(aVertexPosition + aSize * 0.5, 1.0)).xy, 0.0, 1.0);\n\n   gl_PointSize = aSize * projectionScale;\n\n   vTextureCoord = aTextureCoord + aAnim * animationFrame;\n\n   vTextureId = aTextureId;\n\n   vSize = aSize;\n\n}\n\n",
-        shaderGenerator.generateFragmentSrc(maxTextures, "#define GLSLIFY 1\nvarying vec2 vTextureCoord;\n\nvarying float vSize;\n\nvarying float vTextureId;\n\nuniform vec4 shadowColor;\n\nuniform sampler2D uSamplers[%count%];\n\nuniform vec2 uSamplerSize[%count%];\n\nuniform vec2 pointScale;\n\nvoid main(void){\n\n   float margin = 0.5/vSize;\n\n   vec2 clamped = vec2(clamp(gl_PointCoord.x, margin, 1.0 - margin), clamp(gl_PointCoord.y, margin, 1.0 - margin));\n\n   vec2 textureCoord = ((clamped-0.5) * pointScale + 0.5) * vSize + vTextureCoord;\n\n   vec4 color;\n\n   %forloop%\n\n   gl_FragColor = color;\n\n}\n\n")
+        shaderGenerator.generateFragmentSrc(maxTextures, "#define GLSLIFY 1\nvarying vec2 vTextureCoord;\n\nvarying float vSize;\n\nvarying float vTextureId;\n\nuniform vec4 shadowColor;\n\nuniform sampler2D uSamplers[%count%];\n\nuniform vec2 uSamplerSize[%count%];\n\nuniform vec2 pointScale;\n\nvoid main(void){\n\n   float margin = 1.0/vSize;\n\n   vec2 clamped = vec2(clamp(gl_PointCoord.x, margin, 1.0 - margin), clamp(gl_PointCoord.y, margin, 1.0 - margin));\n\n   vec2 textureCoord = ((clamped-0.5) * pointScale + 0.5) * vSize + vTextureCoord;\n\n   vec4 color;\n\n   %forloop%\n\n   gl_FragColor = color;\n\n}\n\n")
     );
     this.maxTextures = maxTextures;
     this.vertSize = 8;
@@ -489,12 +506,18 @@ var RectTileShader = require('./RectTileShader'),
     SquareTileShader = require('./SquareTileShader'),
     glCore = PIXI.glCore;
 
-/**
- * The default vertex shader source
- *
- * @static
- * @constant
- */
+/*
+* Renderer for square and rectangle tiles.
+* Squares cannot be rotated, skewed.
+* For container with squares, scale.x must be equals to scale.y, matrix.a to matrix.d
+* Rectangles do not care about that.
+*
+* @class
+* @memberof PIXI.tilemap
+* @extends PIXI.ObjectRenderer
+* @param renderer {PIXI.WebGLRenderer} The renderer this sprite batch works for.
+*/
+
 function TileRenderer(renderer) {
     PIXI.ObjectRenderer.call(this, renderer);
     this.vbs = {};
@@ -564,6 +587,7 @@ TileRenderer.prototype.bindTextures = function(renderer, textures) {
     var i;
     for (i=0;i<len;i++) {
         var texture = textures[i];
+        renderer.bindTexture(texture);
         if (!texture || !textures[i].valid) continue;
         var bs = bounds[i >> 2][i & 3];
         if (bs.texture !== texture) {
