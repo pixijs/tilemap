@@ -107,9 +107,13 @@ RectTileLayer.prototype.addRect = function (textureId, u, v, x, y, tileWidth, ti
 RectTileLayer.prototype.renderWebGL = function(renderer, useSquare) {
     var points = this.pointsBuf;
     if (points.length === 0) return;
-
+    var rectsCount = points.length / 9;
     var tile = renderer.plugins.tile;
     var gl = renderer.gl;
+    if (!useSquare) {
+        tile.checkIndexBuffer(rectsCount);
+    }
+
     var shader = tile.getShader(useSquare);
     var textures = this.textures;
     if (textures.length === 0) return;
@@ -139,7 +143,7 @@ RectTileLayer.prototype.renderWebGL = function(renderer, useSquare) {
     vb = vb.vb;
     //if layer was changed, re-upload vertices
     vb.bind();
-    var vertices = points.length / 9 * shader.vertPerQuad;
+    var vertices = rectsCount * shader.vertPerQuad;
     if (this.modificationMarker != vertices) {
         this.modificationMarker = vertices;
         var vs = shader.stride * vertices;
@@ -178,6 +182,7 @@ RectTileLayer.prototype.renderWebGL = function(renderer, useSquare) {
             //var tint = 0xffffffff;
             var tint = -1;
             for (i = 0;i<points.length;i += 9) {
+                var eps = 0.5;
                 textureId = (points[i+8] >> 2);
                 shiftU = 1024 * (points[i+8] & 1);
                 shiftV = 1024 * ((points[i+8] >> 1) & 1);
@@ -189,6 +194,10 @@ RectTileLayer.prototype.renderWebGL = function(renderer, useSquare) {
                 arr[sz++] = y;
                 arr[sz++] = u;
                 arr[sz++] = v;
+                arr[sz++] = u + eps;
+                arr[sz++] = v + eps;
+                arr[sz++] = u + w - eps;
+                arr[sz++] = v + h - eps;
                 arr[sz++] = animX;
                 arr[sz++] = animY;
                 arr[sz++] = textureId;
@@ -196,6 +205,10 @@ RectTileLayer.prototype.renderWebGL = function(renderer, useSquare) {
                 arr[sz++] = y;
                 arr[sz++] = u + w;
                 arr[sz++] = v;
+                arr[sz++] = u + eps;
+                arr[sz++] = v + eps;
+                arr[sz++] = u + w - eps;
+                arr[sz++] = v + h - eps;
                 arr[sz++] = animX;
                 arr[sz++] = animY;
                 arr[sz++] = textureId;
@@ -203,20 +216,10 @@ RectTileLayer.prototype.renderWebGL = function(renderer, useSquare) {
                 arr[sz++] = y + h;
                 arr[sz++] = u + w;
                 arr[sz++] = v + h;
-                arr[sz++] = animX;
-                arr[sz++] = animY;
-                arr[sz++] = textureId;
-                arr[sz++] = x;
-                arr[sz++] = y;
-                arr[sz++] = u;
-                arr[sz++] = v;
-                arr[sz++] = animX;
-                arr[sz++] = animY;
-                arr[sz++] = textureId;
-                arr[sz++] = x + w;
-                arr[sz++] = y + h;
-                arr[sz++] = u + w;
-                arr[sz++] = v + h;
+                arr[sz++] = u + eps;
+                arr[sz++] = v + eps;
+                arr[sz++] = u + w - eps;
+                arr[sz++] = v + h - eps;
                 arr[sz++] = animX;
                 arr[sz++] = animY;
                 arr[sz++] = textureId;
@@ -224,6 +227,10 @@ RectTileLayer.prototype.renderWebGL = function(renderer, useSquare) {
                 arr[sz++] = y + h;
                 arr[sz++] = u;
                 arr[sz++] = v + h;
+                arr[sz++] = u + eps;
+                arr[sz++] = v + eps;
+                arr[sz++] = u + w - eps;
+                arr[sz++] = v + h - eps;
                 arr[sz++] = animX;
                 arr[sz++] = animY;
                 arr[sz++] = textureId;
@@ -239,7 +246,7 @@ RectTileLayer.prototype.renderWebGL = function(renderer, useSquare) {
     if (useSquare)
         gl.drawArrays(gl.POINTS, 0, vertices);
     else
-        gl.drawArrays(gl.TRIANGLES, 0, vertices);
+        gl.drawElements(gl.TRIANGLES, rectsCount * 6, gl.UNSIGNED_SHORT, 0);
 };
 
 module.exports = RectTileLayer;

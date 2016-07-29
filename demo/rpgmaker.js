@@ -6,7 +6,7 @@ function requireRpgMaker() {
     var PluginManager= {
         parameters : function() {
             return {
-                "squareShader": 1
+                "squareShader": 0
             }
         }
     };

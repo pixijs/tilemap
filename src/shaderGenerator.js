@@ -35,7 +35,7 @@ var shaderGenerator = {
 
             if(i < maxTextures-1)
             {
-                src += 'if(vTextureId == ' + i + '.0)';
+                src += 'if(textureId == ' + i + '.0)';
             }
 
             src += '\n{';

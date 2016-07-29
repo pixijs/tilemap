@@ -20,7 +20,7 @@ function TileRenderer(renderer) {
     this.lastTimeCheck = 0;
     this.tileAnim = [0, 0];
     this.maxTextures = 4;
-    this.indices = new Uint16Array([0, 1, 2, 0, 2, 3]);
+    this.indices = [];
 }
 
 TileRenderer.prototype = Object.create(PIXI.ObjectRenderer.prototype);
@@ -33,6 +33,7 @@ TileRenderer.prototype.onContextChange = function() {
     this.rectShader = new RectTileShader(gl, maxTextures);
     this.squareShader = new SquareTileShader(gl, maxTextures);
     this.indexBuffer = glCore.GLBuffer.createIndexBuffer(gl, this.indices, gl.STATIC_DRAW);
+    this.checkIndexBuffer(2000);
     this.rectShader.indexBuffer = this.indexBuffer;
     this.squareShader.indexBuffer = this.indexBuffer;
     this.vbs = {};
@@ -151,6 +152,35 @@ TileRenderer.prototype.removeVb = function(id) {
         this.vbs[id].vao.destroy();
         delete this.vbs[id];
     }
+};
+
+TileRenderer.prototype.checkIndexBuffer = function(size) {
+    // the total number of indices in our array, there are 6 points per quad.
+    var totalIndices = size * 6;
+    var indices = this.indices;
+    if (totalIndices <= indices.length) {
+        return;
+    }
+    var len = indices.length || totalIndices;
+    while (len < totalIndices) {
+        len <<= 1;
+    }
+
+    indices = new Uint16Array(len);
+    this.indices = indices;
+
+    // fill the indices with the quads to draw
+    for (var i=0, j=0; i < totalIndices; i += 6, j += 4)
+    {
+        indices[i + 0] = j + 0;
+        indices[i + 1] = j + 1;
+        indices[i + 2] = j + 2;
+        indices[i + 3] = j + 0;
+        indices[i + 4] = j + 2;
+        indices[i + 5] = j + 3;
+    }
+
+    this.indexBuffer.upload(indices);
 };
 
 TileRenderer.prototype.getShader = function(useSquare) {

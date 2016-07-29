@@ -7,8 +7,8 @@ function RectTileShader(gl, maxTextures)
         shaderGenerator.generateFragmentSrc(maxTextures, glslify('./rect.frag', 'utf8'))
     );
     this.maxTextures = maxTextures;
-    this.vertSize = 7;
-    this.vertPerQuad = 6;
+    this.vertSize = 11;
+    this.vertPerQuad = 4;
     this.stride = this.vertSize * 4;
     shaderGenerator.fillSamplers(this, this.maxTextures);
 }
@@ -21,8 +21,9 @@ RectTileShader.prototype.createVao = function (renderer, vb) {
         .addIndex(this.indexBuffer)
         .addAttribute(vb, this.attributes.aVertexPosition, gl.FLOAT, false, this.stride, 0)
         .addAttribute(vb, this.attributes.aTextureCoord, gl.FLOAT, false, this.stride, 2 * 4)
-        .addAttribute(vb, this.attributes.aAnim, gl.FLOAT, false, this.stride, 4 * 4)
-        .addAttribute(vb, this.attributes.aTextureId, gl.FLOAT, false, this.stride, 6 * 4);
+        .addAttribute(vb, this.attributes.aFrame, gl.FLOAT, false, this.stride, 4 * 4)
+        .addAttribute(vb, this.attributes.aAnim, gl.FLOAT, false, this.stride, 8 * 4)
+        .addAttribute(vb, this.attributes.aTextureId, gl.FLOAT, false, this.stride, 10 * 4);
 };
 
 module.exports = RectTileShader;
