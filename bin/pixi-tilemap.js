@@ -21,23 +21,31 @@ CompositeRectTileLayer.prototype.constructor = RectTileLayer;
 CompositeRectTileLayer.prototype.updateTransform = CompositeRectTileLayer.prototype.displayObjectUpdateTransform;
 
 //can be initialized multiple times
-CompositeRectTileLayer.prototype.initialize = function(zIndex, bitmaps, useSquare) {
+CompositeRectTileLayer.prototype.initialize = function (zIndex, bitmaps, useSquare, texPerChild) {
     this.z = this.zIndex = zIndex;
     this.useSquare = useSquare;
     this.shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
+    this.texPerChild = texPerChild || 16;
     if (bitmaps) {
         this.setBitmaps(bitmaps);
     }
 };
 
-CompositeRectTileLayer.prototype.setBitmaps = function(bitmaps) {
-    this.removeChildren();
-    this.addChild(new RectTileLayer(this.zIndex, bitmaps));
-    this.modificationMarker = 0;
+CompositeRectTileLayer.prototype.setBitmaps = function (bitmaps) {
+    var texPerChild = this.texPerChild;
+    var len1 = this.children.length;
+    var len2 = Math.ceil(bitmaps.length / texPerChild);
+    var i;
+    for (i = 0; i < len1; i++) {
+        this.children[i].textures = bitmaps.slice(i * texPerChild, (i + 1) * texPerChild);
+    }
+    for (i = len1; i < len2; i++) {
+        this.addChild(new RectTileLayer(this.zIndex, bitmaps.slice(i * texPerChild, (i + 1) * texPerChild)));
+    }
 };
 
 CompositeRectTileLayer.prototype.clear = function () {
-    for (var i=0;i<this.children.length;i++)
+    for (var i = 0; i < this.children.length; i++)
         this.children[i].clear();
     this.modificationMarker = 0;
 };
@@ -60,9 +68,9 @@ CompositeRectTileLayer.prototype.addFrame = function (texture, x, y) {
     }
     var children = this.children;
     var layer = null, ind = 0;
-    for (var i=0;i<children.length; i++) {
+    for (var i = 0; i < children.length; i++) {
         var tex = children[i].textures;
-        for (var j=0;j < tex.length;j++) {
+        for (var j = 0; j < tex.length; j++) {
             if (tex[j].baseTexture == texture.baseTexture) {
                 layer = children[i];
                 ind = j;
@@ -74,7 +82,7 @@ CompositeRectTileLayer.prototype.addFrame = function (texture, x, y) {
         }
     }
     if (!layer) {
-        for (i=0;i<children.length;i++) {
+        for (i = 0; i < children.length; i++) {
             var child = children[i];
             if (child.textures.length < 16) {
                 layer = child;
@@ -109,7 +117,7 @@ CompositeRectTileLayer.prototype.renderCanvas = function (renderer) {
 };
 
 
-CompositeRectTileLayer.prototype.renderWebGL = function(renderer) {
+CompositeRectTileLayer.prototype.renderWebGL = function (renderer) {
     var gl = renderer.gl;
     var shader = renderer.plugins.tile.getShader(this.useSquare);
     renderer.setObjectRenderer(renderer.plugins.tile);
@@ -121,8 +129,8 @@ CompositeRectTileLayer.prototype.renderWebGL = function(renderer) {
     shader.uniforms.shadowColor = this.shadowColor;
     if (this.useSquare) {
         var tempScale = this._tempScale = (this._tempScale || [0, 0]);
-        tempScale[0] = this._globalMat.a >= 0?1:-1;
-        tempScale[1] = this._globalMat.d < 0?1:-1;
+        tempScale[0] = this._globalMat.a >= 0 ? 1 : -1;
+        tempScale[1] = this._globalMat.d < 0 ? 1 : -1;
         var ps = shader.uniforms.pointScale = tempScale;
         shader.uniforms.projectionScale = Math.abs(this.worldTransform.a) * renderer.resolution;
     }
@@ -134,12 +142,12 @@ CompositeRectTileLayer.prototype.renderWebGL = function(renderer) {
 };
 
 
-CompositeRectTileLayer.prototype.isModified = function(anim) {
+CompositeRectTileLayer.prototype.isModified = function (anim) {
     var layers = this.children;
     if (this.modificationMarker != layers.length) {
         return true;
     }
-    for (var i=0;i<layers.length;i++) {
+    for (var i = 0; i < layers.length; i++) {
         if (layers[i].modificationMarker != layers[i].pointsBuf.length ||
             anim && layers[i].hasAnim) {
             return true;
@@ -148,7 +156,7 @@ CompositeRectTileLayer.prototype.isModified = function(anim) {
     return false;
 };
 
-CompositeRectTileLayer.prototype.clearModify = function() {
+CompositeRectTileLayer.prototype.clearModify = function () {
     var layers = this.children;
     this.modificationMarker = layers.length;
     for (var i = 0; i < layers.length; i++) {
@@ -340,6 +348,7 @@ RectTileLayer.prototype.renderWebGL = function(renderer, useSquare) {
     //if layer was changed, re-upload vertices
     vb.bind();
     var vertices = rectsCount * shader.vertPerQuad;
+    if (vertices === 0) return;
     if (this.modificationMarker != vertices) {
         this.modificationMarker = vertices;
         var vs = shader.stride * vertices;
@@ -515,16 +524,16 @@ var RectTileShader = require('./RectTileShader'),
     glCore = PIXI.glCore;
 
 /*
-* Renderer for square and rectangle tiles.
-* Squares cannot be rotated, skewed.
-* For container with squares, scale.x must be equals to scale.y, matrix.a to matrix.d
-* Rectangles do not care about that.
-*
-* @class
-* @memberof PIXI.tilemap
-* @extends PIXI.ObjectRenderer
-* @param renderer {PIXI.WebGLRenderer} The renderer this sprite batch works for.
-*/
+ * Renderer for square and rectangle tiles.
+ * Squares cannot be rotated, skewed.
+ * For container with squares, scale.x must be equals to scale.y, matrix.a to matrix.d
+ * Rectangles do not care about that.
+ *
+ * @class
+ * @memberof PIXI.tilemap
+ * @extends PIXI.ObjectRenderer
+ * @param renderer {PIXI.WebGLRenderer} The renderer this sprite batch works for.
+ */
 
 function TileRenderer(renderer) {
     PIXI.ObjectRenderer.call(this, renderer);
@@ -533,18 +542,19 @@ function TileRenderer(renderer) {
     this.tileAnim = [0, 0];
     this.maxTextures = 4;
     this.indices = [];
+    this.indexBuffer = null;
 }
 
 TileRenderer.prototype = Object.create(PIXI.ObjectRenderer.prototype);
 TileRenderer.prototype.constructor = TileRenderer;
 TileRenderer.vbAutoincrement = 0;
+TileRenderer.SCALE_MODE = PIXI.SCALE_MODES.DEFAULT;
 
-TileRenderer.prototype.onContextChange = function() {
+TileRenderer.prototype.onContextChange = function () {
     var gl = this.renderer.gl;
     var maxTextures = this.maxTextures;
     this.rectShader = new RectTileShader(gl, maxTextures);
     this.squareShader = new SquareTileShader(gl, maxTextures);
-    this.indexBuffer = glCore.GLBuffer.createIndexBuffer(gl, this.indices, gl.STATIC_DRAW);
     this.checkIndexBuffer(2000);
     this.rectShader.indexBuffer = this.indexBuffer;
     this.squareShader.indexBuffer = this.indexBuffer;
@@ -554,21 +564,27 @@ TileRenderer.prototype.onContextChange = function() {
     this.initBounds();
 };
 
-TileRenderer.prototype.initBounds = function() {
+TileRenderer.prototype.initBounds = function () {
     var gl = this.renderer.gl;
     var tempCanvas = document.createElement('canvas');
     tempCanvas.width = 2048;
     tempCanvas.height = 2048;
     // tempCanvas.getContext('2d').clearRect(0, 0, 2048, 2048);
-    for (var i=0;i<this.maxTextures; i++) {
+    for (var i = 0; i < this.maxTextures; i++) {
         var glt = new glCore.GLTexture(gl, 2048, 2048);
         glt.premultiplyAlpha = true;
         glt.upload(tempCanvas);
         glt.enableWrapClamp();
-        glt.enableLinearScaling();
+
+        if (TileRenderer.SCALE_MODE === PIXI.SCALE_MODES.LINEAR) {
+            glt.enableLinearScaling();
+        } else {
+            glt.enableNearestScaling();
+        }
+
         this.glTextures.push(glt);
         var bs = [];
-        for (var j=0;j<4;j++) {
+        for (var j = 0; j < 4; j++) {
             var spr = new PIXI.Sprite();
             spr.position.x = 1024 * (j & 1);
             spr.position.y = 1024 * (j >> 1);
@@ -578,14 +594,15 @@ TileRenderer.prototype.initBounds = function() {
     }
 };
 
-glCore.GLTexture.prototype._hackSubImage = function(sprite) {
+glCore.GLTexture.prototype._hackSubImage = function (sprite) {
     this.bind();
     var gl = this.gl;
     var baseTex = sprite.texture.baseTexture;
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
     gl.texSubImage2D(gl.TEXTURE_2D, 0, sprite.position.x, sprite.position.y, this.format, this.type, baseTex.source);
 };
 
-TileRenderer.prototype.bindTextures = function(renderer, textures) {
+TileRenderer.prototype.bindTextures = function (renderer, textures) {
     var bounds = this.boundSprites;
     var glts = this.glTextures;
     var len = textures.length;
@@ -594,14 +611,15 @@ TileRenderer.prototype.bindTextures = function(renderer, textures) {
         return;
     }
     var i;
-    for (i=0;i<len;i++) {
+    for (i = 0; i < len; i++) {
         var texture = textures[i];
         renderer.bindTexture(texture);
         if (!texture || !textures[i].valid) continue;
         var bs = bounds[i >> 2][i & 3];
-        if (bs.texture !== texture) {
+        if (!bs.texture ||
+            bs.texture.baseTexture !== texture.baseTexture) {
             bs.texture = texture;
-            var glt = glts[ i >> 2 ];
+            var glt = glts[i >> 2];
             glt._hackSubImage(bs);
         }
     }
@@ -611,7 +629,7 @@ TileRenderer.prototype.bindTextures = function(renderer, textures) {
     renderer._activeTextureLocation = maxTextures - 1;
 };
 
-TileRenderer.prototype.checkLeaks = function() {
+TileRenderer.prototype.checkLeaks = function () {
     var now = Date.now();
     var old = now - 10000;
     if (this.lastTimeCheck < old ||
@@ -626,12 +644,12 @@ TileRenderer.prototype.checkLeaks = function() {
     }
 };
 
-TileRenderer.prototype.start = function() {
-    this.renderer.state.setBlendMode( PIXI.BLEND_MODES.NORMAL );
+TileRenderer.prototype.start = function () {
+    this.renderer.state.setBlendMode(PIXI.BLEND_MODES.NORMAL);
     //sorry, nothing
 };
 
-TileRenderer.prototype.getVb = function(id) {
+TileRenderer.prototype.getVb = function (id) {
     this.checkLeaks();
     var vb = this.vbs[id];
     if (vb) {
@@ -641,7 +659,7 @@ TileRenderer.prototype.getVb = function(id) {
     return null;
 };
 
-TileRenderer.prototype.createVb = function(useSquare) {
+TileRenderer.prototype.createVb = function (useSquare) {
     var id = ++TileRenderer.vbAutoincrement;
     var shader = this.getShader(useSquare);
     var gl = this.renderer.gl;
@@ -658,7 +676,7 @@ TileRenderer.prototype.createVb = function(useSquare) {
     return stuff;
 };
 
-TileRenderer.prototype.removeVb = function(id) {
+TileRenderer.prototype.removeVb = function (id) {
     if (this.vbs[id]) {
         this.vbs[id].vb.destroy();
         this.vbs[id].vao.destroy();
@@ -666,7 +684,7 @@ TileRenderer.prototype.removeVb = function(id) {
     }
 };
 
-TileRenderer.prototype.checkIndexBuffer = function(size) {
+TileRenderer.prototype.checkIndexBuffer = function (size) {
     // the total number of indices in our array, there are 6 points per quad.
     var totalIndices = size * 6;
     var indices = this.indices;
@@ -682,8 +700,7 @@ TileRenderer.prototype.checkIndexBuffer = function(size) {
     this.indices = indices;
 
     // fill the indices with the quads to draw
-    for (var i=0, j=0; i < totalIndices; i += 6, j += 4)
-    {
+    for (var i = 0, j = 0; i + 5 < indices.length; i += 6, j += 4) {
         indices[i + 0] = j + 0;
         indices[i + 1] = j + 1;
         indices[i + 2] = j + 2;
@@ -692,10 +709,15 @@ TileRenderer.prototype.checkIndexBuffer = function(size) {
         indices[i + 5] = j + 3;
     }
 
-    this.indexBuffer.upload(indices);
+    if (this.indexBuffer) {
+        this.indexBuffer.upload(indices);
+    } else {
+        var gl = this.renderer.gl;
+        this.indexBuffer = glCore.GLBuffer.createIndexBuffer(gl, this.indices, gl.STATIC_DRAW);
+    }
 };
 
-TileRenderer.prototype.getShader = function(useSquare) {
+TileRenderer.prototype.getShader = function (useSquare) {
     return useSquare ? this.squareShader : this.rectShader;
 };
 

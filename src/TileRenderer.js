@@ -3,16 +3,16 @@ var RectTileShader = require('./RectTileShader'),
     glCore = PIXI.glCore;
 
 /*
-* Renderer for square and rectangle tiles.
-* Squares cannot be rotated, skewed.
-* For container with squares, scale.x must be equals to scale.y, matrix.a to matrix.d
-* Rectangles do not care about that.
-*
-* @class
-* @memberof PIXI.tilemap
-* @extends PIXI.ObjectRenderer
-* @param renderer {PIXI.WebGLRenderer} The renderer this sprite batch works for.
-*/
+ * Renderer for square and rectangle tiles.
+ * Squares cannot be rotated, skewed.
+ * For container with squares, scale.x must be equals to scale.y, matrix.a to matrix.d
+ * Rectangles do not care about that.
+ *
+ * @class
+ * @memberof PIXI.tilemap
+ * @extends PIXI.ObjectRenderer
+ * @param renderer {PIXI.WebGLRenderer} The renderer this sprite batch works for.
+ */
 
 function TileRenderer(renderer) {
     PIXI.ObjectRenderer.call(this, renderer);
@@ -21,18 +21,19 @@ function TileRenderer(renderer) {
     this.tileAnim = [0, 0];
     this.maxTextures = 4;
     this.indices = [];
+    this.indexBuffer = null;
 }
 
 TileRenderer.prototype = Object.create(PIXI.ObjectRenderer.prototype);
 TileRenderer.prototype.constructor = TileRenderer;
 TileRenderer.vbAutoincrement = 0;
+TileRenderer.SCALE_MODE = PIXI.SCALE_MODES.DEFAULT;
 
-TileRenderer.prototype.onContextChange = function() {
+TileRenderer.prototype.onContextChange = function () {
     var gl = this.renderer.gl;
     var maxTextures = this.maxTextures;
     this.rectShader = new RectTileShader(gl, maxTextures);
     this.squareShader = new SquareTileShader(gl, maxTextures);
-    this.indexBuffer = glCore.GLBuffer.createIndexBuffer(gl, this.indices, gl.STATIC_DRAW);
     this.checkIndexBuffer(2000);
     this.rectShader.indexBuffer = this.indexBuffer;
     this.squareShader.indexBuffer = this.indexBuffer;
@@ -42,21 +43,27 @@ TileRenderer.prototype.onContextChange = function() {
     this.initBounds();
 };
 
-TileRenderer.prototype.initBounds = function() {
+TileRenderer.prototype.initBounds = function () {
     var gl = this.renderer.gl;
     var tempCanvas = document.createElement('canvas');
     tempCanvas.width = 2048;
     tempCanvas.height = 2048;
     // tempCanvas.getContext('2d').clearRect(0, 0, 2048, 2048);
-    for (var i=0;i<this.maxTextures; i++) {
+    for (var i = 0; i < this.maxTextures; i++) {
         var glt = new glCore.GLTexture(gl, 2048, 2048);
         glt.premultiplyAlpha = true;
         glt.upload(tempCanvas);
         glt.enableWrapClamp();
-        glt.enableLinearScaling();
+
+        if (TileRenderer.SCALE_MODE === PIXI.SCALE_MODES.LINEAR) {
+            glt.enableLinearScaling();
+        } else {
+            glt.enableNearestScaling();
+        }
+
         this.glTextures.push(glt);
         var bs = [];
-        for (var j=0;j<4;j++) {
+        for (var j = 0; j < 4; j++) {
             var spr = new PIXI.Sprite();
             spr.position.x = 1024 * (j & 1);
             spr.position.y = 1024 * (j >> 1);
@@ -66,14 +73,15 @@ TileRenderer.prototype.initBounds = function() {
     }
 };
 
-glCore.GLTexture.prototype._hackSubImage = function(sprite) {
+glCore.GLTexture.prototype._hackSubImage = function (sprite) {
     this.bind();
     var gl = this.gl;
     var baseTex = sprite.texture.baseTexture;
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
     gl.texSubImage2D(gl.TEXTURE_2D, 0, sprite.position.x, sprite.position.y, this.format, this.type, baseTex.source);
 };
 
-TileRenderer.prototype.bindTextures = function(renderer, textures) {
+TileRenderer.prototype.bindTextures = function (renderer, textures) {
     var bounds = this.boundSprites;
     var glts = this.glTextures;
     var len = textures.length;
@@ -82,14 +90,15 @@ TileRenderer.prototype.bindTextures = function(renderer, textures) {
         return;
     }
     var i;
-    for (i=0;i<len;i++) {
+    for (i = 0; i < len; i++) {
         var texture = textures[i];
         renderer.bindTexture(texture);
         if (!texture || !textures[i].valid) continue;
         var bs = bounds[i >> 2][i & 3];
-        if (bs.texture !== texture) {
+        if (!bs.texture ||
+            bs.texture.baseTexture !== texture.baseTexture) {
             bs.texture = texture;
-            var glt = glts[ i >> 2 ];
+            var glt = glts[i >> 2];
             glt._hackSubImage(bs);
         }
     }
@@ -99,7 +108,7 @@ TileRenderer.prototype.bindTextures = function(renderer, textures) {
     renderer._activeTextureLocation = maxTextures - 1;
 };
 
-TileRenderer.prototype.checkLeaks = function() {
+TileRenderer.prototype.checkLeaks = function () {
     var now = Date.now();
     var old = now - 10000;
     if (this.lastTimeCheck < old ||
@@ -114,12 +123,12 @@ TileRenderer.prototype.checkLeaks = function() {
     }
 };
 
-TileRenderer.prototype.start = function() {
-    this.renderer.state.setBlendMode( PIXI.BLEND_MODES.NORMAL );
+TileRenderer.prototype.start = function () {
+    this.renderer.state.setBlendMode(PIXI.BLEND_MODES.NORMAL);
     //sorry, nothing
 };
 
-TileRenderer.prototype.getVb = function(id) {
+TileRenderer.prototype.getVb = function (id) {
     this.checkLeaks();
     var vb = this.vbs[id];
     if (vb) {
@@ -129,7 +138,7 @@ TileRenderer.prototype.getVb = function(id) {
     return null;
 };
 
-TileRenderer.prototype.createVb = function(useSquare) {
+TileRenderer.prototype.createVb = function (useSquare) {
     var id = ++TileRenderer.vbAutoincrement;
     var shader = this.getShader(useSquare);
     var gl = this.renderer.gl;
@@ -146,7 +155,7 @@ TileRenderer.prototype.createVb = function(useSquare) {
     return stuff;
 };
 
-TileRenderer.prototype.removeVb = function(id) {
+TileRenderer.prototype.removeVb = function (id) {
     if (this.vbs[id]) {
         this.vbs[id].vb.destroy();
         this.vbs[id].vao.destroy();
@@ -154,7 +163,7 @@ TileRenderer.prototype.removeVb = function(id) {
     }
 };
 
-TileRenderer.prototype.checkIndexBuffer = function(size) {
+TileRenderer.prototype.checkIndexBuffer = function (size) {
     // the total number of indices in our array, there are 6 points per quad.
     var totalIndices = size * 6;
     var indices = this.indices;
@@ -170,8 +179,7 @@ TileRenderer.prototype.checkIndexBuffer = function(size) {
     this.indices = indices;
 
     // fill the indices with the quads to draw
-    for (var i=0, j=0; i < totalIndices; i += 6, j += 4)
-    {
+    for (var i = 0, j = 0; i + 5 < indices.length; i += 6, j += 4) {
         indices[i + 0] = j + 0;
         indices[i + 1] = j + 1;
         indices[i + 2] = j + 2;
@@ -180,10 +188,15 @@ TileRenderer.prototype.checkIndexBuffer = function(size) {
         indices[i + 5] = j + 3;
     }
 
-    this.indexBuffer.upload(indices);
+    if (this.indexBuffer) {
+        this.indexBuffer.upload(indices);
+    } else {
+        var gl = this.renderer.gl;
+        this.indexBuffer = glCore.GLBuffer.createIndexBuffer(gl, this.indices, gl.STATIC_DRAW);
+    }
 };
 
-TileRenderer.prototype.getShader = function(useSquare) {
+TileRenderer.prototype.getShader = function (useSquare) {
     return useSquare ? this.squareShader : this.rectShader;
 };
 

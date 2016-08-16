@@ -144,6 +144,7 @@ RectTileLayer.prototype.renderWebGL = function(renderer, useSquare) {
     //if layer was changed, re-upload vertices
     vb.bind();
     var vertices = rectsCount * shader.vertPerQuad;
+    if (vertices === 0) return;
     if (this.modificationMarker != vertices) {
         this.modificationMarker = vertices;
         var vs = shader.stride * vertices;

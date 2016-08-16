@@ -10,23 +10,31 @@ CompositeRectTileLayer.prototype.constructor = RectTileLayer;
 CompositeRectTileLayer.prototype.updateTransform = CompositeRectTileLayer.prototype.displayObjectUpdateTransform;
 
 //can be initialized multiple times
-CompositeRectTileLayer.prototype.initialize = function(zIndex, bitmaps, useSquare) {
+CompositeRectTileLayer.prototype.initialize = function (zIndex, bitmaps, useSquare, texPerChild) {
     this.z = this.zIndex = zIndex;
     this.useSquare = useSquare;
     this.shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
+    this.texPerChild = texPerChild || 16;
     if (bitmaps) {
         this.setBitmaps(bitmaps);
     }
 };
 
-CompositeRectTileLayer.prototype.setBitmaps = function(bitmaps) {
-    this.removeChildren();
-    this.addChild(new RectTileLayer(this.zIndex, bitmaps));
-    this.modificationMarker = 0;
+CompositeRectTileLayer.prototype.setBitmaps = function (bitmaps) {
+    var texPerChild = this.texPerChild;
+    var len1 = this.children.length;
+    var len2 = Math.ceil(bitmaps.length / texPerChild);
+    var i;
+    for (i = 0; i < len1; i++) {
+        this.children[i].textures = bitmaps.slice(i * texPerChild, (i + 1) * texPerChild);
+    }
+    for (i = len1; i < len2; i++) {
+        this.addChild(new RectTileLayer(this.zIndex, bitmaps.slice(i * texPerChild, (i + 1) * texPerChild)));
+    }
 };
 
 CompositeRectTileLayer.prototype.clear = function () {
-    for (var i=0;i<this.children.length;i++)
+    for (var i = 0; i < this.children.length; i++)
         this.children[i].clear();
     this.modificationMarker = 0;
 };
@@ -49,9 +57,9 @@ CompositeRectTileLayer.prototype.addFrame = function (texture, x, y) {
     }
     var children = this.children;
     var layer = null, ind = 0;
-    for (var i=0;i<children.length; i++) {
+    for (var i = 0; i < children.length; i++) {
         var tex = children[i].textures;
-        for (var j=0;j < tex.length;j++) {
+        for (var j = 0; j < tex.length; j++) {
             if (tex[j].baseTexture == texture.baseTexture) {
                 layer = children[i];
                 ind = j;
@@ -63,7 +71,7 @@ CompositeRectTileLayer.prototype.addFrame = function (texture, x, y) {
         }
     }
     if (!layer) {
-        for (i=0;i<children.length;i++) {
+        for (i = 0; i < children.length; i++) {
             var child = children[i];
             if (child.textures.length < 16) {
                 layer = child;
@@ -98,7 +106,7 @@ CompositeRectTileLayer.prototype.renderCanvas = function (renderer) {
 };
 
 
-CompositeRectTileLayer.prototype.renderWebGL = function(renderer) {
+CompositeRectTileLayer.prototype.renderWebGL = function (renderer) {
     var gl = renderer.gl;
     var shader = renderer.plugins.tile.getShader(this.useSquare);
     renderer.setObjectRenderer(renderer.plugins.tile);
@@ -110,8 +118,8 @@ CompositeRectTileLayer.prototype.renderWebGL = function(renderer) {
     shader.uniforms.shadowColor = this.shadowColor;
     if (this.useSquare) {
         var tempScale = this._tempScale = (this._tempScale || [0, 0]);
-        tempScale[0] = this._globalMat.a >= 0?1:-1;
-        tempScale[1] = this._globalMat.d < 0?1:-1;
+        tempScale[0] = this._globalMat.a >= 0 ? 1 : -1;
+        tempScale[1] = this._globalMat.d < 0 ? 1 : -1;
         var ps = shader.uniforms.pointScale = tempScale;
         shader.uniforms.projectionScale = Math.abs(this.worldTransform.a) * renderer.resolution;
     }
@@ -123,12 +131,12 @@ CompositeRectTileLayer.prototype.renderWebGL = function(renderer) {
 };
 
 
-CompositeRectTileLayer.prototype.isModified = function(anim) {
+CompositeRectTileLayer.prototype.isModified = function (anim) {
     var layers = this.children;
     if (this.modificationMarker != layers.length) {
         return true;
     }
-    for (var i=0;i<layers.length;i++) {
+    for (var i = 0; i < layers.length; i++) {
         if (layers[i].modificationMarker != layers[i].pointsBuf.length ||
             anim && layers[i].hasAnim) {
             return true;
@@ -137,7 +145,7 @@ CompositeRectTileLayer.prototype.isModified = function(anim) {
     return false;
 };
 
-CompositeRectTileLayer.prototype.clearModify = function() {
+CompositeRectTileLayer.prototype.clearModify = function () {
     var layers = this.children;
     this.modificationMarker = layers.length;
     for (var i = 0; i < layers.length; i++) {
