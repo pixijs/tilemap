@@ -9,8 +9,9 @@ uniform vec2 pointScale;
 
 void main(void){
    float margin = 1.0/vSize;
-   vec2 clamped = vec2(clamp(gl_PointCoord.x, margin, 1.0 - margin), clamp(gl_PointCoord.y, margin, 1.0 - margin));
-   vec2 textureCoord = ((clamped-0.5) * pointScale + 0.5) * vSize + vTextureCoord;
+   vec2 pointCoord = (gl_PointCoord - 0.5) * pointScale + 0.5;
+   vec2 clamped = vec2(clamp(pointCoord.x, 0.0, 1.0 - margin), clamp(pointCoord.y, 0.0, 1.0 - margin));
+   vec2 textureCoord = pointCoord * vSize + vTextureCoord;
    float textureId = vTextureId;
    vec4 color;
    %forloop%
