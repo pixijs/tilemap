@@ -1,0 +1,60 @@
+{
+  "name": "pixi-tilemap",
+  "version": "1.0.1",
+  "description": "Pixi-tilemap provides tilemap shaders and tilemap renderer for pixi.js (v3 and v4). Used in rpgmaker MV.",
+  "author": "Ivan Popelyshev",
+  "contributors": [
+    "Ivan Popelyshev <ivan.popelyshev@gmail.com>"
+  ],
+  "main": "./src/index.js",
+  "homepage": "http://www.rpgmakerweb.com/",
+  "bugs": "https://github.com/pixijs/pixi-tilemap/issues",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pixijs/pixi-tilemap.git"
+  },
+  "scripts": {
+    "clean": "rimraf bin && mkdirp bin",
+    "prestart": "npm run clean",
+    "start": "parallelshell \"npm run watch:lint\" \"npm run watch\"",
+    "watch": "pixify -o pixi-tilemap -w",
+    "watch:lint": "watch \"jshint --reporter=scripts/reporter.js scripts src test || exit 0\" src",
+    "lint": "jshint --reporter=scripts/reporter.js scripts src",
+    "prebuild": "npm run lint && npm run clean",
+    "build": "pixify -o pixi-tilemap",
+    "docs": "jsdoc -c scripts/jsdoc.conf.json -R README.md"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "CONTRIBUTING.md",
+    "LICENSE",
+    "package.json",
+    "README.md"
+  ],
+  "dependencies": {
+    "glslify": "^5.0.2"
+  },
+  "devDependencies": {
+    "browserify-versionify": "^1.0.6",
+    "del": "^2.2.0",
+    "jaguarjs-jsdoc": "^1.0.1",
+    "jsdoc": "^3.4.0",
+    "jshint": "^2.9.2",
+    "jshint-stylish": "^2.2.0",
+    "jshint-stylish-summary": "^0.1.2",
+    "minimist": "^1.2.0",
+    "mkdirp": "^0.5.1",
+    "parallelshell": "^2.0.0",
+    "pixify": "^1.4.0",
+    "rimraf": "^2.5.3",
+    "watch": "^0.19.1"
+  },
+  "browserify": {
+    "transform": [
+      "glslify",
+      "browserify-versionify"
+    ]
+  }
+}

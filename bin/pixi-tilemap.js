@@ -1,4 +1,11 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/*!
+ * pixi-tilemap - v1.0.1
+ * Compiled Sat Oct 01 2016 00:14:49 GMT+0300 (RTZ 2 (зима))
+ *
+ * pixi-tilemap is licensed under the MIT License.
+ * http://www.opensource.org/licenses/mit-license
+ */
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.pixiTilemap = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 function CanvasTileRenderer(renderer) {
     this.renderer = renderer;
     this.tileAnim = [0, 0];
@@ -462,8 +469,8 @@ var shaderGenerator = require('./shaderGenerator');
 function RectTileShader(gl, maxTextures)
 {
     PIXI.Shader.call(this, gl,
-        "#define GLSLIFY 1\nattribute vec2 aVertexPosition;\n\nattribute vec2 aTextureCoord;\n\nattribute vec4 aFrame;\n\nattribute vec2 aAnim;\n\nattribute float aTextureId;\n\nuniform mat3 projectionMatrix;\n\nuniform vec2 animationFrame;\n\nvarying vec2 vTextureCoord;\n\nvarying float vTextureId;\n\nvarying vec4 vFrame;\n\nvoid main(void){\n\n   gl_Position = vec4((projectionMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);\n\n   vec2 anim = aAnim * animationFrame;\n\n   vTextureCoord = aTextureCoord + anim;\n\n   vFrame = aFrame + vec4(anim, anim);\n\n   vTextureId = aTextureId;\n\n}\n\n",
-        shaderGenerator.generateFragmentSrc(maxTextures, "#define GLSLIFY 1\nvarying vec2 vTextureCoord;\n\nvarying vec4 vFrame;\n\nvarying float vTextureId;\n\nuniform vec4 shadowColor;\n\nuniform sampler2D uSamplers[%count%];\n\nuniform vec2 uSamplerSize[%count%];\n\nvoid main(void){\n\n   vec2 textureCoord = clamp(vTextureCoord, vFrame.xy, vFrame.zw);\n\n   float textureId = floor(vTextureId + 0.5);\n\n   vec4 color;\n\n   %forloop%\n\n   gl_FragColor = color;\n\n}\n\n")
+        "#define GLSLIFY 1\nattribute vec2 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec4 aFrame;\nattribute vec2 aAnim;\nattribute float aTextureId;\n\nuniform mat3 projectionMatrix;\nuniform vec2 animationFrame;\n\nvarying vec2 vTextureCoord;\nvarying float vTextureId;\nvarying vec4 vFrame;\n\nvoid main(void){\n   gl_Position = vec4((projectionMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);\n   vec2 anim = aAnim * animationFrame;\n   vTextureCoord = aTextureCoord + anim;\n   vFrame = aFrame + vec4(anim, anim);\n   vTextureId = aTextureId;\n}\n",
+        shaderGenerator.generateFragmentSrc(maxTextures, "#define GLSLIFY 1\nvarying vec2 vTextureCoord;\nvarying vec4 vFrame;\nvarying float vTextureId;\nuniform vec4 shadowColor;\nuniform sampler2D uSamplers[%count%];\nuniform vec2 uSamplerSize[%count%];\n\nvoid main(void){\n   vec2 textureCoord = clamp(vTextureCoord, vFrame.xy, vFrame.zw);\n   float textureId = floor(vTextureId + 0.5);\n\n   vec4 color;\n   %forloop%\n   gl_FragColor = color;\n}\n")
     );
     this.maxTextures = maxTextures;
     this.vertSize = 11;
@@ -487,14 +494,14 @@ RectTileShader.prototype.createVao = function (renderer, vb) {
 
 module.exports = RectTileShader;
 
-},{"./shaderGenerator":10}],6:[function(require,module,exports){
+},{"./shaderGenerator":9}],6:[function(require,module,exports){
 var shaderGenerator = require('./shaderGenerator');
 
 
 function SquareTileShader(gl, maxTextures) {
     PIXI.Shader.call(this, gl,
-        "#define GLSLIFY 1\nattribute vec2 aVertexPosition;\n\nattribute vec2 aTextureCoord;\n\nattribute vec2 aAnim;\n\nattribute float aTextureId;\n\nattribute float aSize;\n\nuniform mat3 projectionMatrix;\n\nuniform vec2 samplerSize;\n\nuniform vec2 animationFrame;\n\nuniform float projectionScale;\n\nvarying vec2 vTextureCoord;\n\nvarying float vSize;\n\nvarying float vTextureId;\n\nvoid main(void){\n\n   gl_Position = vec4((projectionMatrix * vec3(aVertexPosition + aSize * 0.5, 1.0)).xy, 0.0, 1.0);\n\n   gl_PointSize = aSize * projectionScale;\n\n   vTextureCoord = aTextureCoord + aAnim * animationFrame;\n\n   vTextureId = aTextureId;\n\n   vSize = aSize;\n\n}\n\n",
-        shaderGenerator.generateFragmentSrc(maxTextures, "#define GLSLIFY 1\nvarying vec2 vTextureCoord;\n\nvarying float vSize;\n\nvarying float vTextureId;\n\nuniform vec4 shadowColor;\n\nuniform sampler2D uSamplers[%count%];\n\nuniform vec2 uSamplerSize[%count%];\n\nuniform vec2 pointScale;\n\nvoid main(void){\n\n   float margin = 1.0/vSize;\n\n   vec2 pointCoord = (gl_PointCoord - 0.5) * pointScale + 0.5;\n\n   vec2 clamped = vec2(clamp(pointCoord.x, 0.0, 1.0 - margin), clamp(pointCoord.y, 0.0, 1.0 - margin));\n\n   vec2 textureCoord = pointCoord * vSize + vTextureCoord;\n\n   float textureId = vTextureId;\n\n   vec4 color;\n\n   %forloop%\n\n   gl_FragColor = color;\n\n}\n\n")
+        "#define GLSLIFY 1\nattribute vec2 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec2 aAnim;\nattribute float aTextureId;\nattribute float aSize;\n\nuniform mat3 projectionMatrix;\nuniform vec2 samplerSize;\nuniform vec2 animationFrame;\nuniform float projectionScale;\n\nvarying vec2 vTextureCoord;\nvarying float vSize;\nvarying float vTextureId;\n\nvoid main(void){\n   gl_Position = vec4((projectionMatrix * vec3(aVertexPosition + aSize * 0.5, 1.0)).xy, 0.0, 1.0);\n   gl_PointSize = aSize * projectionScale;\n   vTextureCoord = aTextureCoord + aAnim * animationFrame;\n   vTextureId = aTextureId;\n   vSize = aSize;\n}\n",
+        shaderGenerator.generateFragmentSrc(maxTextures, "#define GLSLIFY 1\nvarying vec2 vTextureCoord;\nvarying float vSize;\nvarying float vTextureId;\n\nuniform vec4 shadowColor;\nuniform sampler2D uSamplers[%count%];\nuniform vec2 uSamplerSize[%count%];\nuniform vec2 pointScale;\n\nvoid main(void){\n   float margin = 1.0/vSize;\n   vec2 pointCoord = (gl_PointCoord - 0.5) * pointScale + 0.5;\n   vec2 clamped = vec2(clamp(pointCoord.x, 0.0, 1.0 - margin), clamp(pointCoord.y, 0.0, 1.0 - margin));\n   vec2 textureCoord = pointCoord * vSize + vTextureCoord;\n   float textureId = vTextureId;\n   vec4 color;\n   %forloop%\n   gl_FragColor = color;\n}\n")
     );
     this.maxTextures = maxTextures;
     this.vertSize = 8;
@@ -518,7 +525,7 @@ SquareTileShader.prototype.createVao = function (renderer, vb) {
 
 module.exports = SquareTileShader;
 
-},{"./shaderGenerator":10}],7:[function(require,module,exports){
+},{"./shaderGenerator":9}],7:[function(require,module,exports){
 var RectTileShader = require('./RectTileShader'),
     SquareTileShader = require('./SquareTileShader'),
     glCore = PIXI.glCore;
@@ -816,18 +823,6 @@ ZLayer.prototype.renderCanvas = function(renderer) {
 module.exports = ZLayer;
 
 },{}],9:[function(require,module,exports){
-PIXI.tilemap = {
-    ZLayer: require('./ZLayer'),
-    GraphicsLayer: require('./GraphicsLayer'),
-    RectTileLayer: require('./RectTileLayer'),
-    CompositeRectTileLayer: require('./CompositeRectTileLayer'),
-    CanvasTileRenderer: require('./CanvasTileRenderer'),
-    TileRenderer: require('./TileRenderer')
-};
-
-module.exports = PIXI.tilemap;
-
-},{"./CanvasTileRenderer":1,"./CompositeRectTileLayer":2,"./GraphicsLayer":3,"./RectTileLayer":4,"./TileRenderer":7,"./ZLayer":8}],10:[function(require,module,exports){
 var shaderGenerator = {
     fillSamplers: function(shader, maxTextures) {
         var sampleValues = [];
@@ -882,7 +877,20 @@ var shaderGenerator = {
 
 module.exports = shaderGenerator;
 
-},{}]},{},[9])
+},{}],10:[function(require,module,exports){
+PIXI.tilemap = {
+    ZLayer: require('./ZLayer'),
+    GraphicsLayer: require('./GraphicsLayer'),
+    RectTileLayer: require('./RectTileLayer'),
+    CompositeRectTileLayer: require('./CompositeRectTileLayer'),
+    CanvasTileRenderer: require('./CanvasTileRenderer'),
+    TileRenderer: require('./TileRenderer')
+};
+
+module.exports = PIXI.tilemap;
+
+},{"./CanvasTileRenderer":1,"./CompositeRectTileLayer":2,"./GraphicsLayer":3,"./RectTileLayer":4,"./TileRenderer":7,"./ZLayer":8}]},{},[10])(10)
+});
 
 
 //# sourceMappingURL=pixi-tilemap.js.map
