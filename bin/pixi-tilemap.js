@@ -1,6 +1,6 @@
 /*!
  * pixi-tilemap - v1.0.1
- * Compiled Sat Oct 01 2016 00:14:49 GMT+0300 (RTZ 2 (зима))
+ * Compiled Sun Oct 09 2016 01:20:09 GMT+0300 (RTZ 2 (зима))
  *
  * pixi-tilemap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -406,10 +406,10 @@ RectTileLayer.prototype.renderWebGL = function(renderer, useSquare) {
                 arr[sz++] = y;
                 arr[sz++] = u;
                 arr[sz++] = v;
-                arr[sz++] = u;
-                arr[sz++] = v ;
-                arr[sz++] = u + w - 2*eps;
-                arr[sz++] = v + h - 2*eps;
+                arr[sz++] = u + eps;
+                arr[sz++] = v + eps;
+                arr[sz++] = u + w - eps;
+                arr[sz++] = v + h - eps;
                 arr[sz++] = animX;
                 arr[sz++] = animY;
                 arr[sz++] = textureId;
@@ -417,10 +417,10 @@ RectTileLayer.prototype.renderWebGL = function(renderer, useSquare) {
                 arr[sz++] = y;
                 arr[sz++] = u + w;
                 arr[sz++] = v;
-                arr[sz++] = u;
-                arr[sz++] = v;
-                arr[sz++] = u + w - 2*eps;
-                arr[sz++] = v + h - 2*eps;
+                arr[sz++] = u + eps;
+                arr[sz++] = v + eps;
+                arr[sz++] = u + w - eps;
+                arr[sz++] = v + h - eps;
                 arr[sz++] = animX;
                 arr[sz++] = animY;
                 arr[sz++] = textureId;
@@ -428,10 +428,10 @@ RectTileLayer.prototype.renderWebGL = function(renderer, useSquare) {
                 arr[sz++] = y + h;
                 arr[sz++] = u + w;
                 arr[sz++] = v + h;
-                arr[sz++] = u;
-                arr[sz++] = v;
-                arr[sz++] = u + w - 2*eps;
-                arr[sz++] = v + h - 2*eps;
+                arr[sz++] = u + eps;
+                arr[sz++] = v + eps;
+                arr[sz++] = u + w - eps;
+                arr[sz++] = v + h - eps;
                 arr[sz++] = animX;
                 arr[sz++] = animY;
                 arr[sz++] = textureId;
@@ -439,10 +439,10 @@ RectTileLayer.prototype.renderWebGL = function(renderer, useSquare) {
                 arr[sz++] = y + h;
                 arr[sz++] = u;
                 arr[sz++] = v + h;
-                arr[sz++] = u;
-                arr[sz++] = v;
-                arr[sz++] = u + w - 2*eps;
-                arr[sz++] = v + h - 2*eps;
+                arr[sz++] = u + eps;
+                arr[sz++] = v + eps;
+                arr[sz++] = u + w - eps;
+                arr[sz++] = v + h - eps;
                 arr[sz++] = animX;
                 arr[sz++] = animY;
                 arr[sz++] = textureId;
@@ -501,7 +501,7 @@ var shaderGenerator = require('./shaderGenerator');
 function SquareTileShader(gl, maxTextures) {
     PIXI.Shader.call(this, gl,
         "#define GLSLIFY 1\nattribute vec2 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec2 aAnim;\nattribute float aTextureId;\nattribute float aSize;\n\nuniform mat3 projectionMatrix;\nuniform vec2 samplerSize;\nuniform vec2 animationFrame;\nuniform float projectionScale;\n\nvarying vec2 vTextureCoord;\nvarying float vSize;\nvarying float vTextureId;\n\nvoid main(void){\n   gl_Position = vec4((projectionMatrix * vec3(aVertexPosition + aSize * 0.5, 1.0)).xy, 0.0, 1.0);\n   gl_PointSize = aSize * projectionScale;\n   vTextureCoord = aTextureCoord + aAnim * animationFrame;\n   vTextureId = aTextureId;\n   vSize = aSize;\n}\n",
-        shaderGenerator.generateFragmentSrc(maxTextures, "#define GLSLIFY 1\nvarying vec2 vTextureCoord;\nvarying float vSize;\nvarying float vTextureId;\n\nuniform vec4 shadowColor;\nuniform sampler2D uSamplers[%count%];\nuniform vec2 uSamplerSize[%count%];\nuniform vec2 pointScale;\n\nvoid main(void){\n   float margin = 1.0/vSize;\n   vec2 pointCoord = (gl_PointCoord - 0.5) * pointScale + 0.5;\n   vec2 clamped = vec2(clamp(pointCoord.x, 0.0, 1.0 - margin), clamp(pointCoord.y, 0.0, 1.0 - margin));\n   vec2 textureCoord = pointCoord * vSize + vTextureCoord;\n   float textureId = vTextureId;\n   vec4 color;\n   %forloop%\n   gl_FragColor = color;\n}\n")
+        shaderGenerator.generateFragmentSrc(maxTextures, "#define GLSLIFY 1\nvarying vec2 vTextureCoord;\nvarying float vSize;\nvarying float vTextureId;\n\nuniform vec4 shadowColor;\nuniform sampler2D uSamplers[%count%];\nuniform vec2 uSamplerSize[%count%];\nuniform vec2 pointScale;\n\nvoid main(void){\n   float margin = 0.5 / vSize;\n   vec2 pointCoord = (gl_PointCoord - 0.5) * pointScale + 0.5;\n   vec2 clamped = vec2(clamp(pointCoord.x, margin, 1.0 - margin), clamp(pointCoord.y, margin, 1.0 - margin));\n   vec2 textureCoord = pointCoord * vSize + vTextureCoord;\n   float textureId = vTextureId;\n   vec4 color;\n   %forloop%\n   gl_FragColor = color;\n}\n")
     );
     this.maxTextures = maxTextures;
     this.vertSize = 8;
