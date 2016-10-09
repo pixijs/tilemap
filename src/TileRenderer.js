@@ -50,7 +50,7 @@ TileRenderer.prototype.initBounds = function () {
     tempCanvas.height = 2048;
     // tempCanvas.getContext('2d').clearRect(0, 0, 2048, 2048);
     for (var i = 0; i < this.maxTextures; i++) {
-        var glt = new glCore.GLTexture(gl, 2048, 2048);
+        var glt = new glCore.GLTexture(gl);
         glt.premultiplyAlpha = true;
         glt.upload(tempCanvas);
         glt.enableWrapClamp();
