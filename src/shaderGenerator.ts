@@ -1,6 +1,6 @@
-var shaderGenerator = {
-    fillSamplers: function(shader, maxTextures) {
-        var sampleValues = [];
+module PIXI.tilemap.shaderGenerator {
+    export function fillSamplers(shader: TilemapShader, maxTextures: number) {
+        var sampleValues : Array<number> = [];
         for (var i = 0; i < maxTextures; i++)
         {
             sampleValues[i] = i;
@@ -8,18 +8,20 @@ var shaderGenerator = {
         shader.bind();
         shader.uniforms.uSamplers = sampleValues;
 
-        var samplerSize = [];
+        var samplerSize : Array<number> = [];
         for (i = 0; i < maxTextures; i++) {
             samplerSize.push(1.0 / 2048);
             samplerSize.push(1.0 / 2048);
         }
         shader.uniforms.uSamplerSize = samplerSize;
-    },
-    generateFragmentSrc: function(maxTextures, fragmentSrc) {
-        return fragmentSrc.replace(/%count%/gi, maxTextures)
+    }
+
+    export function generateFragmentSrc(maxTextures: number, fragmentSrc: string) {
+        return fragmentSrc.replace(/%count%/gi, maxTextures + "")
             .replace(/%forloop%/gi, this.generateSampleSrc(maxTextures));
-    },
-    generateSampleSrc: function(maxTextures) {
+    }
+
+    export function generateSampleSrc(maxTextures: number) {
         var src = '';
 
         src += '\n';
@@ -48,6 +50,4 @@ var shaderGenerator = {
 
         return src;
     }
-};
-
-module.exports = shaderGenerator;
+}

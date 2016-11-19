@@ -948,8 +948,8 @@ function requireRpgMaker() {
     ShaderTilemap.prototype._hackRenderer = function(renderer) {
         var af = this.animationFrame % 4;
         if (af==3) af = 1;
-        renderer.plugins.tile.tileAnim[0] = af * this._tileWidth;
-        renderer.plugins.tile.tileAnim[1] = (this.animationFrame % 3) * this._tileHeight;
+        renderer.plugins.tilemap.tileAnim[0] = af * this._tileWidth;
+        renderer.plugins.tilemap.tileAnim[1] = (this.animationFrame % 3) * this._tileHeight;
         return renderer;
     };
 

@@ -20,7 +20,7 @@ loader.load(function(loader, resources) {
     var frame = 0;
     buildTilemap(frame++);
 
-    var pic = new PIXI.tilemap.PictureSprite(resources['button'].texture);
+    var pic = new PIXI.Sprite(resources['button'].texture);
     pic.position.set(200, 100);
     stage.addChild(pic);
     //lets animate tilemap every second
