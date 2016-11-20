@@ -1,11 +1,15 @@
 # pixi-tilemap
 Library that helps with tilemaps, provide special shaders and canvas fallback. Works only with pixi > 4.2.4
 
+It has some strict limitations connected to its RPGMV legacy: it uses only up to 16 textures of size 1024x1024, and combines them into 4 render textures of 2k size.
+
+When you render the tilemap with other textures, textures will be re-uploaded.
+
+If that limitation is affecting you somehow, either hack it, either help the project by submitting more general solution.
+
 Please use [v3 branch](https://github.com/pixijs/pixi-tilemap/tree/pixiv3) for pixi V3.
 
 Rpgmaker MV - check.
-
-TODO: multitexturing - in progress
 
 TODO: Tiled, gameofbombs - in progress.
 
