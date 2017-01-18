@@ -658,13 +658,13 @@ var PIXI;
                         bs.texture.baseTexture !== texture.baseTexture) {
                         bs.texture = texture;
                         var glt = glts[i >> 2];
-                        renderer.bindTexture(glt);
+                        renderer.bindTexture(glt, 0, true);
                         _hackSubImage(glt.baseTexture._glTextures[renderer.CONTEXT_UID], bs);
                     }
                 }
                 this.texLoc.length = 0;
                 for (i = 0; i < maxTextures; i++) {
-                    this.texLoc.push(renderer.bindTexture(glts[i]));
+                    this.texLoc.push(renderer.bindTexture(glts[i], i, true));
                 }
                 shader.uniforms.uSamplers = this.texLoc;
             };
