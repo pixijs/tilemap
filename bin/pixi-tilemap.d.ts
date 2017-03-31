@@ -23,7 +23,7 @@ declare module PIXI.tilemap {
         setBitmaps(bitmaps: Array<Texture>): void;
         clear(): void;
         addRect(num: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number): void;
-        addFrame(texture_: PIXI.Texture | String, x: number, y: number): boolean;
+        addFrame(texture_: PIXI.Texture | String, x: number, y: number, animX: number, animY: number): boolean;
         renderCanvas(renderer: CanvasRenderer): void;
         renderWebGL(renderer: WebGLRenderer): void;
         isModified(anim: boolean): boolean;
@@ -70,11 +70,6 @@ declare module PIXI.tilemap {
         constructor(gl: WebGLRenderingContext, maxTextures: number);
         createVao(renderer: WebGLRenderer, vb: GLBuffer): VertexArrayObject;
     }
-}
-declare module PIXI.tilemap.shaderGenerator {
-    function fillSamplers(shader: TilemapShader, maxTextures: number): void;
-    function generateFragmentSrc(maxTextures: number, fragmentSrc: string): string;
-    function generateSampleSrc(maxTextures: number): string;
 }
 declare module PIXI.tilemap {
     import GLBuffer = PIXI.glCore.GLBuffer;
@@ -144,4 +139,9 @@ declare module PIXI.tilemap {
         cacheIfDirty(): void;
         renderCanvas(renderer: PIXI.CanvasRenderer): void;
     }
+}
+declare module PIXI.tilemap.shaderGenerator {
+    function fillSamplers(shader: TilemapShader, maxTextures: number): void;
+    function generateFragmentSrc(maxTextures: number, fragmentSrc: string): string;
+    function generateSampleSrc(maxTextures: number): string;
 }

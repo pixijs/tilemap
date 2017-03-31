@@ -15,11 +15,16 @@ var PIXI;
         PIXI.CanvasRenderer.registerPlugin('tilemap', CanvasTileRenderer);
     })(tilemap = PIXI.tilemap || (PIXI.tilemap = {}));
 })(PIXI || (PIXI = {}));
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var PIXI;
 (function (PIXI) {
     var tilemap;
@@ -27,12 +32,13 @@ var PIXI;
         var CompositeRectTileLayer = (function (_super) {
             __extends(CompositeRectTileLayer, _super);
             function CompositeRectTileLayer(zIndex, bitmaps, useSquare, texPerChild) {
-                _super.call(this);
-                this.shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
-                this.modificationMarker = 0;
-                this._globalMat = null;
-                this._tempScale = null;
-                this.initialize.apply(this, arguments);
+                var _this = _super.call(this) || this;
+                _this.shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
+                _this.modificationMarker = 0;
+                _this._globalMat = null;
+                _this._tempScale = null;
+                _this.initialize.apply(_this, arguments);
+                return _this;
             }
             CompositeRectTileLayer.prototype.updateTransform = function () {
                 _super.prototype.displayObjectUpdateTransform.call(this);
@@ -66,7 +72,7 @@ var PIXI;
                 if (this.children[num] && this.children[num].textures)
                     this.children[num].addRect(0, u, v, x, y, tileWidth, tileHeight);
             };
-            CompositeRectTileLayer.prototype.addFrame = function (texture_, x, y) {
+            CompositeRectTileLayer.prototype.addFrame = function (texture_, x, y, animX, animY) {
                 var texture;
                 if (typeof texture_ === "string") {
                     texture = PIXI.Texture.fromImage(texture_);
@@ -104,7 +110,7 @@ var PIXI;
                         ind = 0;
                     }
                 }
-                layer.addRect(ind, texture.frame.x, texture.frame.y, x, y, texture.frame.width, texture.frame.height);
+                layer.addRect(ind, texture.frame.x, texture.frame.y, x, y, texture.frame.width, texture.frame.height, animX, animY);
                 return true;
             };
             ;
@@ -173,8 +179,9 @@ var PIXI;
         var GraphicsLayer = (function (_super) {
             __extends(GraphicsLayer, _super);
             function GraphicsLayer(zIndex) {
-                _super.call(this);
-                this.z = this.zIndex = zIndex;
+                var _this = _super.call(this) || this;
+                _this.z = _this.zIndex = zIndex;
+                return _this;
             }
             GraphicsLayer.prototype.renderCanvas = function (renderer) {
                 var wt = null;
@@ -209,19 +216,20 @@ var PIXI;
         var RectTileLayer = (function (_super) {
             __extends(RectTileLayer, _super);
             function RectTileLayer(zIndex, texture) {
-                _super.call(this);
-                this.z = 0;
-                this.zIndex = 0;
-                this.pointsBuf = [];
-                this._tempSize = new Float32Array([0, 0]);
-                this._tempTexSize = 1;
-                this.modificationMarker = 0;
-                this.hasAnim = false;
-                this.vbId = 0;
-                this.vbBuffer = null;
-                this.vbArray = null;
-                this.vbInts = null;
-                this.initialize(zIndex, texture);
+                var _this = _super.call(this) || this;
+                _this.z = 0;
+                _this.zIndex = 0;
+                _this.pointsBuf = [];
+                _this._tempSize = new Float32Array([0, 0]);
+                _this._tempTexSize = 1;
+                _this.modificationMarker = 0;
+                _this.hasAnim = false;
+                _this.vbId = 0;
+                _this.vbBuffer = null;
+                _this.vbArray = null;
+                _this.vbInts = null;
+                _this.initialize(zIndex, texture);
+                return _this;
             }
             RectTileLayer.prototype.initialize = function (zIndex, textures) {
                 if (!textures) {
@@ -469,10 +477,11 @@ var PIXI;
         var TilemapShader = (function (_super) {
             __extends(TilemapShader, _super);
             function TilemapShader(gl, maxTextures, shaderVert, shaderFrag) {
-                _super.call(this, gl, shaderVert, shaderFrag);
-                this.maxTextures = 0;
-                this.maxTextures = maxTextures;
-                tilemap.shaderGenerator.fillSamplers(this, this.maxTextures);
+                var _this = _super.call(this, gl, shaderVert, shaderFrag) || this;
+                _this.maxTextures = 0;
+                _this.maxTextures = maxTextures;
+                tilemap.shaderGenerator.fillSamplers(_this, _this.maxTextures);
+                return _this;
             }
             return TilemapShader;
         }(PIXI.Shader));
@@ -480,11 +489,12 @@ var PIXI;
         var RectTileShader = (function (_super) {
             __extends(RectTileShader, _super);
             function RectTileShader(gl, maxTextures) {
-                _super.call(this, gl, maxTextures, rectShaderVert, tilemap.shaderGenerator.generateFragmentSrc(maxTextures, rectShaderFrag));
-                this.vertSize = 11;
-                this.vertPerQuad = 4;
-                this.stride = this.vertSize * 4;
-                tilemap.shaderGenerator.fillSamplers(this, this.maxTextures);
+                var _this = _super.call(this, gl, maxTextures, rectShaderVert, tilemap.shaderGenerator.generateFragmentSrc(maxTextures, rectShaderFrag)) || this;
+                _this.vertSize = 11;
+                _this.vertPerQuad = 4;
+                _this.stride = _this.vertSize * 4;
+                tilemap.shaderGenerator.fillSamplers(_this, _this.maxTextures);
+                return _this;
             }
             RectTileShader.prototype.createVao = function (renderer, vb) {
                 var gl = renderer.gl;
@@ -505,67 +515,18 @@ var PIXI;
 (function (PIXI) {
     var tilemap;
     (function (tilemap) {
-        var shaderGenerator;
-        (function (shaderGenerator) {
-            function fillSamplers(shader, maxTextures) {
-                var sampleValues = [];
-                for (var i = 0; i < maxTextures; i++) {
-                    sampleValues[i] = i;
-                }
-                shader.bind();
-                shader.uniforms.uSamplers = sampleValues;
-                var samplerSize = [];
-                for (i = 0; i < maxTextures; i++) {
-                    samplerSize.push(1.0 / 2048);
-                    samplerSize.push(1.0 / 2048);
-                }
-                shader.uniforms.uSamplerSize = samplerSize;
-            }
-            shaderGenerator.fillSamplers = fillSamplers;
-            function generateFragmentSrc(maxTextures, fragmentSrc) {
-                return fragmentSrc.replace(/%count%/gi, maxTextures + "")
-                    .replace(/%forloop%/gi, this.generateSampleSrc(maxTextures));
-            }
-            shaderGenerator.generateFragmentSrc = generateFragmentSrc;
-            function generateSampleSrc(maxTextures) {
-                var src = '';
-                src += '\n';
-                src += '\n';
-                src += 'if(vTextureId <= -1.0) {';
-                src += '\n\tcolor = shadowColor;';
-                src += '\n}';
-                for (var i = 0; i < maxTextures; i++) {
-                    src += '\nelse ';
-                    if (i < maxTextures - 1) {
-                        src += 'if(textureId == ' + i + '.0)';
-                    }
-                    src += '\n{';
-                    src += '\n\tcolor = texture2D(uSamplers[' + i + '], textureCoord * uSamplerSize[' + i + ']);';
-                    src += '\n}';
-                }
-                src += '\n';
-                src += '\n';
-                return src;
-            }
-            shaderGenerator.generateSampleSrc = generateSampleSrc;
-        })(shaderGenerator = tilemap.shaderGenerator || (tilemap.shaderGenerator = {}));
-    })(tilemap = PIXI.tilemap || (PIXI.tilemap = {}));
-})(PIXI || (PIXI = {}));
-var PIXI;
-(function (PIXI) {
-    var tilemap;
-    (function (tilemap) {
         var squareShaderVert = "\nattribute vec2 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec2 aAnim;\nattribute float aTextureId;\nattribute float aSize;\n\nuniform mat3 projectionMatrix;\nuniform vec2 samplerSize;\nuniform vec2 animationFrame;\nuniform float projectionScale;\n\nvarying vec2 vTextureCoord;\nvarying float vSize;\nvarying float vTextureId;\n\nvoid main(void){\n   gl_Position = vec4((projectionMatrix * vec3(aVertexPosition + aSize * 0.5, 1.0)).xy, 0.0, 1.0);\n   gl_PointSize = aSize * projectionScale;\n   vTextureCoord = aTextureCoord + aAnim * animationFrame;\n   vTextureId = aTextureId;\n   vSize = aSize;\n}\n";
         var squareShaderFrag = "\nvarying vec2 vTextureCoord;\nvarying float vSize;\nvarying float vTextureId;\n\nuniform vec4 shadowColor;\nuniform sampler2D uSamplers[%count%];\nuniform vec2 uSamplerSize[%count%];\nuniform vec2 pointScale;\n\nvoid main(void){\n   float margin = 0.5 / vSize;\n   vec2 pointCoord = (gl_PointCoord - 0.5) * pointScale + 0.5;\n   vec2 clamped = vec2(clamp(pointCoord.x, margin, 1.0 - margin), clamp(pointCoord.y, margin, 1.0 - margin));\n   vec2 textureCoord = pointCoord * vSize + vTextureCoord;\n   float textureId = vTextureId;\n   vec4 color;\n   %forloop%\n   gl_FragColor = color;\n}\n\n";
         var SquareTileShader = (function (_super) {
             __extends(SquareTileShader, _super);
             function SquareTileShader(gl, maxTextures) {
-                _super.call(this, gl, maxTextures, squareShaderVert, tilemap.shaderGenerator.generateFragmentSrc(maxTextures, squareShaderFrag));
-                this.vertSize = 8;
-                this.vertPerQuad = 1;
-                this.stride = this.vertSize * 4;
-                this.maxTextures = maxTextures;
-                tilemap.shaderGenerator.fillSamplers(this, this.maxTextures);
+                var _this = _super.call(this, gl, maxTextures, squareShaderVert, tilemap.shaderGenerator.generateFragmentSrc(maxTextures, squareShaderFrag)) || this;
+                _this.vertSize = 8;
+                _this.vertPerQuad = 1;
+                _this.stride = _this.vertSize * 4;
+                _this.maxTextures = maxTextures;
+                tilemap.shaderGenerator.fillSamplers(_this, _this.maxTextures);
+                return _this;
             }
             SquareTileShader.prototype.createVao = function (renderer, vb) {
                 var gl = renderer.gl;
@@ -597,13 +558,14 @@ var PIXI;
         var TileRenderer = (function (_super) {
             __extends(TileRenderer, _super);
             function TileRenderer(renderer) {
-                _super.call(this, renderer);
-                this.vbs = {};
-                this.indices = new Uint16Array(0);
-                this.lastTimeCheck = 0;
-                this.tileAnim = [0, 0];
-                this.maxTextures = 4;
-                this.texLoc = [];
+                var _this = _super.call(this, renderer) || this;
+                _this.vbs = {};
+                _this.indices = new Uint16Array(0);
+                _this.lastTimeCheck = 0;
+                _this.tileAnim = [0, 0];
+                _this.maxTextures = 4;
+                _this.texLoc = [];
+                return _this;
             }
             TileRenderer.prototype.onContextChange = function () {
                 var gl = this.renderer.gl;
@@ -757,10 +719,10 @@ var PIXI;
                 this.squareShader = null;
             };
             ;
-            TileRenderer.vbAutoincrement = 0;
-            TileRenderer.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
             return TileRenderer;
         }(PIXI.ObjectRenderer));
+        TileRenderer.vbAutoincrement = 0;
+        TileRenderer.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
         tilemap.TileRenderer = TileRenderer;
         PIXI.WebGLRenderer.registerPlugin('tilemap', TileRenderer);
     })(tilemap = PIXI.tilemap || (PIXI.tilemap = {}));
@@ -772,10 +734,11 @@ var PIXI;
         var ZLayer = (function (_super) {
             __extends(ZLayer, _super);
             function ZLayer(tilemap, zIndex) {
-                _super.call(this);
-                this._lastAnimationFrame = -1;
-                this.tilemap = tilemap;
-                this.z = zIndex;
+                var _this = _super.call(this) || this;
+                _this._lastAnimationFrame = -1;
+                _this.tilemap = tilemap;
+                _this.z = zIndex;
+                return _this;
             }
             ZLayer.prototype.clear = function () {
                 var layers = this.children;
@@ -840,6 +803,56 @@ var PIXI;
             return ZLayer;
         }(PIXI.Container));
         tilemap_1.ZLayer = ZLayer;
+    })(tilemap = PIXI.tilemap || (PIXI.tilemap = {}));
+})(PIXI || (PIXI = {}));
+var PIXI;
+(function (PIXI) {
+    var tilemap;
+    (function (tilemap) {
+        var shaderGenerator;
+        (function (shaderGenerator) {
+            function fillSamplers(shader, maxTextures) {
+                var sampleValues = [];
+                for (var i = 0; i < maxTextures; i++) {
+                    sampleValues[i] = i;
+                }
+                shader.bind();
+                shader.uniforms.uSamplers = sampleValues;
+                var samplerSize = [];
+                for (i = 0; i < maxTextures; i++) {
+                    samplerSize.push(1.0 / 2048);
+                    samplerSize.push(1.0 / 2048);
+                }
+                shader.uniforms.uSamplerSize = samplerSize;
+            }
+            shaderGenerator.fillSamplers = fillSamplers;
+            function generateFragmentSrc(maxTextures, fragmentSrc) {
+                return fragmentSrc.replace(/%count%/gi, maxTextures + "")
+                    .replace(/%forloop%/gi, this.generateSampleSrc(maxTextures));
+            }
+            shaderGenerator.generateFragmentSrc = generateFragmentSrc;
+            function generateSampleSrc(maxTextures) {
+                var src = '';
+                src += '\n';
+                src += '\n';
+                src += 'if(vTextureId <= -1.0) {';
+                src += '\n\tcolor = shadowColor;';
+                src += '\n}';
+                for (var i = 0; i < maxTextures; i++) {
+                    src += '\nelse ';
+                    if (i < maxTextures - 1) {
+                        src += 'if(textureId == ' + i + '.0)';
+                    }
+                    src += '\n{';
+                    src += '\n\tcolor = texture2D(uSamplers[' + i + '], textureCoord * uSamplerSize[' + i + ']);';
+                    src += '\n}';
+                }
+                src += '\n';
+                src += '\n';
+                return src;
+            }
+            shaderGenerator.generateSampleSrc = generateSampleSrc;
+        })(shaderGenerator = tilemap.shaderGenerator || (tilemap.shaderGenerator = {}));
     })(tilemap = PIXI.tilemap || (PIXI.tilemap = {}));
 })(PIXI || (PIXI = {}));
 //# sourceMappingURL=pixi-tilemap.js.map

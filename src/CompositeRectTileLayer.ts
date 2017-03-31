@@ -53,7 +53,7 @@ module PIXI.tilemap {
                 (this.children[num] as RectTileLayer).addRect(0, u, v, x, y, tileWidth, tileHeight);
         }
 
-        addFrame(texture_: PIXI.Texture | String, x: number, y: number) {
+        addFrame(texture_: PIXI.Texture | String, x: number, y: number, animX: number, animY: number) {
             var texture : PIXI.Texture;
             if (typeof texture_ === "string") {
                 texture = PIXI.Texture.fromImage(texture_);
@@ -91,7 +91,7 @@ module PIXI.tilemap {
                     ind = 0;
                 }
             }
-            layer.addRect(ind, texture.frame.x, texture.frame.y, x, y, texture.frame.width, texture.frame.height);
+            layer.addRect(ind, texture.frame.x, texture.frame.y, x, y, texture.frame.width, texture.frame.height, animX, animY);
             return true;
         };
 
