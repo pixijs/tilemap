@@ -57,3 +57,7 @@ loader.load(function(loader, resources) {
     renderer.render(tilemap);
 });
 ```
+
+### More tutorials
+
+[Alan01252 tutorial](https://github.com/Alan01252/pixi-tilemap-tutorial)
