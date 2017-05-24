@@ -96,6 +96,7 @@ function update() {
         tilemap.origin.x = x2;
         tilemap.origin.y = y2;
         _renderer.render(stage);
+        _renderer.gl.flush();
     }
     requestAnimationFrame(update);
 }

@@ -1,5 +1,18 @@
 /// <reference types="pixi.js" />
 
+class Thingy<T extends Function> {
+    emit: T = <any> function(x: number) {
+        return x
+    }
+}
+
+class Test {
+    public x = new Thingy<(y: number, z: number) => number>();
+    testee() {
+        var y = this.x.emit(123, 123);
+    }
+}
+
 module PIXI.tilemap {
     export class CompositeRectTileLayer extends PIXI.Container {
         constructor(zIndex?: number, bitmaps?: Array<Texture>, useSquare?: boolean, texPerChild?: number) {

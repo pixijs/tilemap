@@ -1,6 +1,6 @@
 {
   "name": "pixi-tilemap",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Pixi-tilemap provides tilemap shaders and tilemap renderer for pixi.js (v3 and v4). Used in rpgmaker MV.",
   "author": "Ivan Popelyshev",
   "contributors": [
@@ -33,7 +33,8 @@
     "README.md"
   ],
   "dependencies": {
-    "glslify": "^5.0.2"
+    "glslify": "^5.0.2",
+    "typescript": "^2.2.2"
   },
   "devDependencies": {
     "del": "^2.2.0",

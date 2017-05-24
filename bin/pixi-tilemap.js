@@ -15,11 +15,33 @@ var PIXI;
         PIXI.CanvasRenderer.registerPlugin('tilemap', CanvasTileRenderer);
     })(tilemap = PIXI.tilemap || (PIXI.tilemap = {}));
 })(PIXI || (PIXI = {}));
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var Thingy = (function () {
+    function Thingy() {
+        this.emit = function (x) {
+            return x;
+        };
+    }
+    return Thingy;
+}());
+var Test = (function () {
+    function Test() {
+        this.x = new Thingy();
+    }
+    Test.prototype.testee = function () {
+        var y = this.x.emit(123, 123);
+    };
+    return Test;
+}());
 var PIXI;
 (function (PIXI) {
     var tilemap;
@@ -27,12 +49,13 @@ var PIXI;
         var CompositeRectTileLayer = (function (_super) {
             __extends(CompositeRectTileLayer, _super);
             function CompositeRectTileLayer(zIndex, bitmaps, useSquare, texPerChild) {
-                _super.call(this);
-                this.shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
-                this.modificationMarker = 0;
-                this._globalMat = null;
-                this._tempScale = null;
-                this.initialize.apply(this, arguments);
+                var _this = _super.call(this) || this;
+                _this.shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
+                _this.modificationMarker = 0;
+                _this._globalMat = null;
+                _this._tempScale = null;
+                _this.initialize.apply(_this, arguments);
+                return _this;
             }
             CompositeRectTileLayer.prototype.updateTransform = function () {
                 _super.prototype.displayObjectUpdateTransform.call(this);
@@ -173,8 +196,9 @@ var PIXI;
         var GraphicsLayer = (function (_super) {
             __extends(GraphicsLayer, _super);
             function GraphicsLayer(zIndex) {
-                _super.call(this);
-                this.z = this.zIndex = zIndex;
+                var _this = _super.call(this) || this;
+                _this.z = _this.zIndex = zIndex;
+                return _this;
             }
             GraphicsLayer.prototype.renderCanvas = function (renderer) {
                 var wt = null;
@@ -209,19 +233,20 @@ var PIXI;
         var RectTileLayer = (function (_super) {
             __extends(RectTileLayer, _super);
             function RectTileLayer(zIndex, texture) {
-                _super.call(this);
-                this.z = 0;
-                this.zIndex = 0;
-                this.pointsBuf = [];
-                this._tempSize = new Float32Array([0, 0]);
-                this._tempTexSize = 1;
-                this.modificationMarker = 0;
-                this.hasAnim = false;
-                this.vbId = 0;
-                this.vbBuffer = null;
-                this.vbArray = null;
-                this.vbInts = null;
-                this.initialize(zIndex, texture);
+                var _this = _super.call(this) || this;
+                _this.z = 0;
+                _this.zIndex = 0;
+                _this.pointsBuf = [];
+                _this._tempSize = new Float32Array([0, 0]);
+                _this._tempTexSize = 1;
+                _this.modificationMarker = 0;
+                _this.hasAnim = false;
+                _this.vbId = 0;
+                _this.vbBuffer = null;
+                _this.vbArray = null;
+                _this.vbInts = null;
+                _this.initialize(zIndex, texture);
+                return _this;
             }
             RectTileLayer.prototype.initialize = function (zIndex, textures) {
                 if (!textures) {
@@ -469,10 +494,11 @@ var PIXI;
         var TilemapShader = (function (_super) {
             __extends(TilemapShader, _super);
             function TilemapShader(gl, maxTextures, shaderVert, shaderFrag) {
-                _super.call(this, gl, shaderVert, shaderFrag);
-                this.maxTextures = 0;
-                this.maxTextures = maxTextures;
-                tilemap.shaderGenerator.fillSamplers(this, this.maxTextures);
+                var _this = _super.call(this, gl, shaderVert, shaderFrag) || this;
+                _this.maxTextures = 0;
+                _this.maxTextures = maxTextures;
+                tilemap.shaderGenerator.fillSamplers(_this, _this.maxTextures);
+                return _this;
             }
             return TilemapShader;
         }(PIXI.Shader));
@@ -480,11 +506,12 @@ var PIXI;
         var RectTileShader = (function (_super) {
             __extends(RectTileShader, _super);
             function RectTileShader(gl, maxTextures) {
-                _super.call(this, gl, maxTextures, rectShaderVert, tilemap.shaderGenerator.generateFragmentSrc(maxTextures, rectShaderFrag));
-                this.vertSize = 11;
-                this.vertPerQuad = 4;
-                this.stride = this.vertSize * 4;
-                tilemap.shaderGenerator.fillSamplers(this, this.maxTextures);
+                var _this = _super.call(this, gl, maxTextures, rectShaderVert, tilemap.shaderGenerator.generateFragmentSrc(maxTextures, rectShaderFrag)) || this;
+                _this.vertSize = 11;
+                _this.vertPerQuad = 4;
+                _this.stride = _this.vertSize * 4;
+                tilemap.shaderGenerator.fillSamplers(_this, _this.maxTextures);
+                return _this;
             }
             RectTileShader.prototype.createVao = function (renderer, vb) {
                 var gl = renderer.gl;
@@ -560,12 +587,13 @@ var PIXI;
         var SquareTileShader = (function (_super) {
             __extends(SquareTileShader, _super);
             function SquareTileShader(gl, maxTextures) {
-                _super.call(this, gl, maxTextures, squareShaderVert, tilemap.shaderGenerator.generateFragmentSrc(maxTextures, squareShaderFrag));
-                this.vertSize = 8;
-                this.vertPerQuad = 1;
-                this.stride = this.vertSize * 4;
-                this.maxTextures = maxTextures;
-                tilemap.shaderGenerator.fillSamplers(this, this.maxTextures);
+                var _this = _super.call(this, gl, maxTextures, squareShaderVert, tilemap.shaderGenerator.generateFragmentSrc(maxTextures, squareShaderFrag)) || this;
+                _this.vertSize = 8;
+                _this.vertPerQuad = 1;
+                _this.stride = _this.vertSize * 4;
+                _this.maxTextures = maxTextures;
+                tilemap.shaderGenerator.fillSamplers(_this, _this.maxTextures);
+                return _this;
             }
             SquareTileShader.prototype.createVao = function (renderer, vb) {
                 var gl = renderer.gl;
@@ -588,22 +616,26 @@ var PIXI;
     var tilemap;
     (function (tilemap) {
         var glCore = PIXI.glCore;
-        function _hackSubImage(tex, sprite) {
+        function _hackSubImage(tex, sprite, clearBuffer, clearWidth, clearHeight) {
             var gl = tex.gl;
             var baseTex = sprite.texture.baseTexture;
+            if (clearBuffer && clearWidth > 0 && clearHeight > 0) {
+                gl.texSubImage2D(gl.TEXTURE_2D, 0, sprite.position.x, sprite.position.y, clearWidth, clearHeight, tex.format, tex.type, clearBuffer);
+            }
             gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
             gl.texSubImage2D(gl.TEXTURE_2D, 0, sprite.position.x, sprite.position.y, tex.format, tex.type, baseTex.source);
         }
         var TileRenderer = (function (_super) {
             __extends(TileRenderer, _super);
             function TileRenderer(renderer) {
-                _super.call(this, renderer);
-                this.vbs = {};
-                this.indices = new Uint16Array(0);
-                this.lastTimeCheck = 0;
-                this.tileAnim = [0, 0];
-                this.maxTextures = 4;
-                this.texLoc = [];
+                var _this = _super.call(this, renderer) || this;
+                _this.vbs = {};
+                _this.indices = new Uint16Array(0);
+                _this.lastTimeCheck = 0;
+                _this.tileAnim = [0, 0];
+                _this.maxTextures = 4;
+                _this.texLoc = [];
+                return _this;
             }
             TileRenderer.prototype.onContextChange = function () {
                 var gl = this.renderer.gl;
@@ -648,6 +680,10 @@ var PIXI;
                 if (len >= 4 * maxTextures) {
                     return;
                 }
+                var doClear = TileRenderer.DO_CLEAR;
+                if (doClear && !this._clearBuffer) {
+                    this._clearBuffer = new Uint8Array(1024 * 1024 * 4);
+                }
                 var i;
                 for (i = 0; i < len; i++) {
                     var texture = textures[i];
@@ -659,7 +695,12 @@ var PIXI;
                         bs.texture = texture;
                         var glt = glts[i >> 2];
                         renderer.bindTexture(glt, 0, true);
-                        _hackSubImage(glt.baseTexture._glTextures[renderer.CONTEXT_UID], bs);
+                        if (doClear) {
+                            _hackSubImage(glt.baseTexture._glTextures[renderer.CONTEXT_UID], bs, this._clearBuffer, 1024, 1024);
+                        }
+                        else {
+                            _hackSubImage(glt.baseTexture._glTextures[renderer.CONTEXT_UID], bs);
+                        }
                     }
                 }
                 this.texLoc.length = 0;
@@ -757,10 +798,11 @@ var PIXI;
                 this.squareShader = null;
             };
             ;
-            TileRenderer.vbAutoincrement = 0;
-            TileRenderer.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
             return TileRenderer;
         }(PIXI.ObjectRenderer));
+        TileRenderer.vbAutoincrement = 0;
+        TileRenderer.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
+        TileRenderer.DO_CLEAR = false;
         tilemap.TileRenderer = TileRenderer;
         PIXI.WebGLRenderer.registerPlugin('tilemap', TileRenderer);
     })(tilemap = PIXI.tilemap || (PIXI.tilemap = {}));
@@ -772,10 +814,11 @@ var PIXI;
         var ZLayer = (function (_super) {
             __extends(ZLayer, _super);
             function ZLayer(tilemap, zIndex) {
-                _super.call(this);
-                this._lastAnimationFrame = -1;
-                this.tilemap = tilemap;
-                this.z = zIndex;
+                var _this = _super.call(this) || this;
+                _this._lastAnimationFrame = -1;
+                _this.tilemap = tilemap;
+                _this.z = zIndex;
+                return _this;
             }
             ZLayer.prototype.clear = function () {
                 var layers = this.children;

@@ -7,6 +7,13 @@ declare module PIXI.tilemap {
         constructor(renderer: PIXI.CanvasRenderer);
     }
 }
+declare class Thingy<T extends Function> {
+    emit: T;
+}
+declare class Test {
+    x: Thingy<(y: number, z: number) => number>;
+    testee(): void;
+}
 declare module PIXI.tilemap {
     class CompositeRectTileLayer extends PIXI.Container {
         constructor(zIndex?: number, bitmaps?: Array<Texture>, useSquare?: boolean, texPerChild?: number);
@@ -93,6 +100,7 @@ declare module PIXI.tilemap {
     class TileRenderer extends PIXI.ObjectRenderer {
         static vbAutoincrement: number;
         static SCALE_MODE: number;
+        static DO_CLEAR: boolean;
         renderer: WebGLRenderer;
         gl: WebGLRenderingContext;
         vbs: {
@@ -100,6 +108,7 @@ declare module PIXI.tilemap {
         };
         indices: Uint16Array;
         indexBuffer: glCore.GLBuffer;
+        _clearBuffer: Uint8Array;
         lastTimeCheck: number;
         tileAnim: number[];
         maxTextures: number;
