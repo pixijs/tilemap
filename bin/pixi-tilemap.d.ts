@@ -7,13 +7,6 @@ declare module PIXI.tilemap {
         constructor(renderer: PIXI.CanvasRenderer);
     }
 }
-declare class Thingy<T extends Function> {
-    emit: T;
-}
-declare class Test {
-    x: Thingy<(y: number, z: number) => number>;
-    testee(): void;
-}
 declare module PIXI.tilemap {
     class CompositeRectTileLayer extends PIXI.Container {
         constructor(zIndex?: number, bitmaps?: Array<Texture>, useSquare?: boolean, texPerChild?: number);

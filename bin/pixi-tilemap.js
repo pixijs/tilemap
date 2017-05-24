@@ -25,23 +25,6 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var Thingy = (function () {
-    function Thingy() {
-        this.emit = function (x) {
-            return x;
-        };
-    }
-    return Thingy;
-}());
-var Test = (function () {
-    function Test() {
-        this.x = new Thingy();
-    }
-    Test.prototype.testee = function () {
-        var y = this.x.emit(123, 123);
-    };
-    return Test;
-}());
 var PIXI;
 (function (PIXI) {
     var tilemap;
