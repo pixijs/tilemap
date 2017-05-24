@@ -89,7 +89,7 @@ var PIXI;
                 if (this.children[num] && this.children[num].textures)
                     this.children[num].addRect(0, u, v, x, y, tileWidth, tileHeight);
             };
-            CompositeRectTileLayer.prototype.addFrame = function (texture_, x, y) {
+            CompositeRectTileLayer.prototype.addFrame = function (texture_, x, y, animX, animY) {
                 var texture;
                 if (typeof texture_ === "string") {
                     texture = PIXI.Texture.fromImage(texture_);
@@ -127,7 +127,7 @@ var PIXI;
                         ind = 0;
                     }
                 }
-                layer.addRect(ind, texture.frame.x, texture.frame.y, x, y, texture.frame.width, texture.frame.height);
+                layer.addRect(ind, texture.frame.x, texture.frame.y, x, y, texture.frame.width, texture.frame.height, animX, animY);
                 return true;
             };
             ;
