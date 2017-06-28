@@ -1356,7 +1356,7 @@ function requireRpgMaker() {
             function progress(loader, resource) {
                 if (resource.name == 'tilesets') {
                     //1. load the map
-                    loader.add(name, 'rpgmaker/data/'+name+'.json');
+                    loader.add(name, 'rpgmaker/data/'+name+'.json', {parentResource: resource });
                     self.tilesetResource = resource;
                     tilesets = resource.data;
                 } else
@@ -1367,7 +1367,7 @@ function requireRpgMaker() {
                     tilesetNames = tileset['tilesetNames'];
                     tilesetNames.forEach(function(name) {
                         if (name.length>0 && !PIXI.utils.TextureCache[name])
-                            loader.add(name, 'rpgmaker/img/'+name +".png");
+                            loader.add(name, 'rpgmaker/img/'+name +".png", {parentResource: resource });
                     })
                 }
             }
