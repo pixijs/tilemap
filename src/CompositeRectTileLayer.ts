@@ -53,30 +53,37 @@ module PIXI.tilemap {
                 (this.children[num] as RectTileLayer).addRect(0, u, v, x, y, tileWidth, tileHeight);
         }
 
-        addFrame(texture_: PIXI.Texture | String, x: number, y: number, animX: number, animY: number) {
+        addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX: number, animY: number) {
             var texture : PIXI.Texture;
+            var layer : RectTileLayer = null, ind = 0;
+            var children = this.children;
+
             if (typeof texture_ === "string") {
                 texture = PIXI.Texture.fromImage(texture_);
+            } else if (typeof texture_ === "number") {
+                var childIndex = texture_ / this.texPerChild >> 0;
+                ind = texture_ % this.texPerChild;
+                layer = children[childIndex] as RectTileLayer;
+                texture = layer.textures[ind];
             } else {
-                texture = texture_ as PIXI.Texture
-            }
+                texture = texture_ as PIXI.Texture;
 
-            var children = this.children;
-            var layer : RectTileLayer = null, ind = 0;
-            for (var i = 0; i < children.length; i++) {
-                var child = children[i] as RectTileLayer;
-                var tex = child.textures;
-                for (var j = 0; j < tex.length; j++) {
-                    if (tex[j].baseTexture == texture.baseTexture) {
-                        layer = child;
-                        ind = j;
+                for (var i = 0; i < children.length; i++) {
+                    var child = children[i] as RectTileLayer;
+                    var tex = child.textures;
+                    for (var j = 0; j < tex.length; j++) {
+                        if (tex[j].baseTexture == texture.baseTexture) {
+                            layer = child;
+                            ind = j;
+                            break;
+                        }
+                    }
+                    if (layer) {
                         break;
                     }
                 }
-                if (layer) {
-                    break;
-                }
             }
+
             if (!layer) {
                 for (i = 0; i < children.length; i++) {
                     var child = children[i] as RectTileLayer;

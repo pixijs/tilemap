@@ -23,7 +23,7 @@ declare module PIXI.tilemap {
         setBitmaps(bitmaps: Array<Texture>): void;
         clear(): void;
         addRect(num: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number): void;
-        addFrame(texture_: PIXI.Texture | String, x: number, y: number, animX: number, animY: number): boolean;
+        addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX: number, animY: number): boolean;
         renderCanvas(renderer: CanvasRenderer): void;
         renderWebGL(renderer: WebGLRenderer): void;
         isModified(anim: boolean): boolean;

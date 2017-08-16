@@ -74,26 +74,32 @@ var PIXI;
             };
             CompositeRectTileLayer.prototype.addFrame = function (texture_, x, y, animX, animY) {
                 var texture;
+                var layer = null, ind = 0;
+                var children = this.children;
                 if (typeof texture_ === "string") {
                     texture = PIXI.Texture.fromImage(texture_);
                 }
+                else if (typeof texture_ === "number") {
+                    var childIndex = texture_ / this.texPerChild >> 0;
+                    ind = texture_ % this.texPerChild;
+                    layer = children[childIndex];
+                    texture = layer.textures[ind];
+                }
                 else {
                     texture = texture_;
-                }
-                var children = this.children;
-                var layer = null, ind = 0;
-                for (var i = 0; i < children.length; i++) {
-                    var child = children[i];
-                    var tex = child.textures;
-                    for (var j = 0; j < tex.length; j++) {
-                        if (tex[j].baseTexture == texture.baseTexture) {
-                            layer = child;
-                            ind = j;
+                    for (var i = 0; i < children.length; i++) {
+                        var child = children[i];
+                        var tex = child.textures;
+                        for (var j = 0; j < tex.length; j++) {
+                            if (tex[j].baseTexture == texture.baseTexture) {
+                                layer = child;
+                                ind = j;
+                                break;
+                            }
+                        }
+                        if (layer) {
                             break;
                         }
-                    }
-                    if (layer) {
-                        break;
                     }
                 }
                 if (!layer) {
