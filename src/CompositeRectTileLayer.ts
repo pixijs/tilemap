@@ -60,8 +60,18 @@ module PIXI.tilemap {
 
             if (typeof texture_ === "number") {
                 var childIndex = texture_ / this.texPerChild >> 0;
-                ind = texture_ % this.texPerChild;
                 layer = children[childIndex] as RectTileLayer;
+
+                if (!layer) {
+                    layer = children[0] as RectTileLayer;
+                    if (!layer) {
+                        return false;
+                    }
+                    ind = 0;
+                } else {
+                    ind = texture_ % this.texPerChild;
+                }
+
                 texture = layer.textures[ind];
             } else if (typeof texture_ === "string") {
                 texture = PIXI.Texture.fromImage(texture_);
@@ -82,23 +92,24 @@ module PIXI.tilemap {
                         break;
                     }
                 }
-            }
 
-            if (!layer) {
-                for (i = 0; i < children.length; i++) {
-                    var child = children[i] as RectTileLayer;
-                    if (child.textures.length < 16) {
-                        layer = child;
-                        ind = child.textures.length;
-                        child.textures.push(texture);
-                        break;
+                if (!layer) {
+                    for (i = 0; i < children.length; i++) {
+                        var child = children[i] as RectTileLayer;
+                        if (child.textures.length < 16) {
+                            layer = child;
+                            ind = child.textures.length;
+                            child.textures.push(texture);
+                            break;
+                        }
+                    }
+                    if (!layer) {
+                        children.push(layer = new RectTileLayer(this.zIndex, texture));
+                        ind = 0;
                     }
                 }
-                if (!layer) {
-                    children.push(layer = new RectTileLayer(this.zIndex, texture));
-                    ind = 0;
-                }
             }
+
             layer.addRect(ind, texture.frame.x, texture.frame.y, x, y, texture.frame.width, texture.frame.height, animX, animY);
             return true;
         };
