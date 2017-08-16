@@ -103,6 +103,7 @@ var PIXI;
                             layer = child;
                             ind = child.textures.length;
                             child.textures.push(texture);
+                            break;
                         }
                     }
                     if (!layer) {
@@ -781,11 +782,11 @@ var PIXI;
                 this.squareShader = null;
             };
             ;
+            TileRenderer.vbAutoincrement = 0;
+            TileRenderer.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
+            TileRenderer.DO_CLEAR = false;
             return TileRenderer;
         }(PIXI.ObjectRenderer));
-        TileRenderer.vbAutoincrement = 0;
-        TileRenderer.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
-        TileRenderer.DO_CLEAR = false;
         tilemap.TileRenderer = TileRenderer;
         PIXI.WebGLRenderer.registerPlugin('tilemap', TileRenderer);
     })(tilemap = PIXI.tilemap || (PIXI.tilemap = {}));
