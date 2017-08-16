@@ -58,13 +58,13 @@ module PIXI.tilemap {
             var layer : RectTileLayer = null, ind = 0;
             var children = this.children;
 
-            if (typeof texture_ === "string") {
-                texture = PIXI.Texture.fromImage(texture_);
-            } else if (typeof texture_ === "number") {
+            if (typeof texture_ === "number") {
                 var childIndex = texture_ / this.texPerChild >> 0;
                 ind = texture_ % this.texPerChild;
                 layer = children[childIndex] as RectTileLayer;
                 texture = layer.textures[ind];
+            } else if (typeof texture_ === "string") {
+                texture = PIXI.Texture.fromImage(texture_);
             } else {
                 texture = texture_ as PIXI.Texture;
 
