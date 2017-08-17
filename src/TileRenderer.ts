@@ -92,7 +92,7 @@ module PIXI.tilemap {
             const glts = this.glTextures;
             const len = textures.length;
             const maxTextures = this.maxTextures;
-            if (len >= 4 * maxTextures) {
+            if (len > 4 * maxTextures) {
                 return;
             }
 
