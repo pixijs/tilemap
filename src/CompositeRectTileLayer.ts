@@ -53,45 +53,63 @@ module PIXI.tilemap {
                 (this.children[num] as RectTileLayer).addRect(0, u, v, x, y, tileWidth, tileHeight);
         }
 
-        addFrame(texture_: PIXI.Texture | String, x: number, y: number, animX: number, animY: number) {
+        addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX: number, animY: number) {
             var texture : PIXI.Texture;
-            if (typeof texture_ === "string") {
+            var layer : RectTileLayer = null, ind = 0;
+            var children = this.children;
+
+            if (typeof texture_ === "number") {
+                var childIndex = texture_ / this.texPerChild >> 0;
+                layer = children[childIndex] as RectTileLayer;
+
+                if (!layer) {
+                    layer = children[0] as RectTileLayer;
+                    if (!layer) {
+                        return false;
+                    }
+                    ind = 0;
+                } else {
+                    ind = texture_ % this.texPerChild;
+                }
+
+                texture = layer.textures[ind];
+            } else if (typeof texture_ === "string") {
                 texture = PIXI.Texture.fromImage(texture_);
             } else {
-                texture = texture_ as PIXI.Texture
+                texture = texture_ as PIXI.Texture;
+
+                for (var i = 0; i < children.length; i++) {
+                    var child = children[i] as RectTileLayer;
+                    var tex = child.textures;
+                    for (var j = 0; j < tex.length; j++) {
+                        if (tex[j].baseTexture == texture.baseTexture) {
+                            layer = child;
+                            ind = j;
+                            break;
+                        }
+                    }
+                    if (layer) {
+                        break;
+                    }
+                }
+
+                if (!layer) {
+                    for (i = 0; i < children.length; i++) {
+                        var child = children[i] as RectTileLayer;
+                        if (child.textures.length < this.texPerChild) {
+                            layer = child;
+                            ind = child.textures.length;
+                            child.textures.push(texture);
+                            break;
+                        }
+                    }
+                    if (!layer) {
+                        children.push(layer = new RectTileLayer(this.zIndex, texture));
+                        ind = 0;
+                    }
+                }
             }
 
-            var children = this.children;
-            var layer : RectTileLayer = null, ind = 0;
-            for (var i = 0; i < children.length; i++) {
-                var child = children[i] as RectTileLayer;
-                var tex = child.textures;
-                for (var j = 0; j < tex.length; j++) {
-                    if (tex[j].baseTexture == texture.baseTexture) {
-                        layer = child;
-                        ind = j;
-                        break;
-                    }
-                }
-                if (layer) {
-                    break;
-                }
-            }
-            if (!layer) {
-                for (i = 0; i < children.length; i++) {
-                    var child = children[i] as RectTileLayer;
-                    if (child.textures.length < this.texPerChild) {
-                        layer = child;
-                        ind = child.textures.length;
-                        child.textures.push(texture);
-                        break;
-                    }
-                }
-                if (!layer) {
-                    children.push(layer = new RectTileLayer(this.zIndex, texture));
-                    ind = 0;
-                }
-            }
             layer.addRect(ind, texture.frame.x, texture.frame.y, x, y, texture.frame.width, texture.frame.height, animX, animY);
             return true;
         };
