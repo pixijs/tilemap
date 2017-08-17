@@ -5,7 +5,7 @@
 		"noImplicitAny": true,
 		"removeComments": true,
 		"preserveConstEnums": true,
-        "outFile": "bin/pixi-tilemap.js",
+        "outFile": "dist/pixi-tilemap.js",
         "sourceMap": true,
         "inlineSources": true,
         "declaration": true,
