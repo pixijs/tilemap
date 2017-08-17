@@ -84,6 +84,7 @@ module PIXI.tilemap {
                         layer = child;
                         ind = child.textures.length;
                         child.textures.push(texture);
+                        break;
                     }
                 }
                 if (!layer) {
