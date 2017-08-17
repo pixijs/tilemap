@@ -80,7 +80,7 @@ module PIXI.tilemap {
             if (!layer) {
                 for (i = 0; i < children.length; i++) {
                     var child = children[i] as RectTileLayer;
-                    if (child.textures.length < 16) {
+                    if (child.textures.length < this.texPerChild) {
                         layer = child;
                         ind = child.textures.length;
                         child.textures.push(texture);
