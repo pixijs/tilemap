@@ -82,7 +82,7 @@ module PIXI.tilemap {
                     var child = children[i] as RectTileLayer;
                     var tex = child.textures;
                     for (var j = 0; j < tex.length; j++) {
-                        if (tex[j].baseTexture == texture.baseTexture) {
+                        if (tex[j].baseTexture === texture.baseTexture) {
                             layer = child;
                             ind = j;
                             break;
