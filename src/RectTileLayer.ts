@@ -57,7 +57,7 @@ module PIXI.tilemap {
         addRect(textureId: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX: number = 0, animY: number = 0) {
             var pb = this.pointsBuf;
             this.hasAnim = this.hasAnim || animX > 0 || animY > 0;
-            if (tileWidth == tileHeight) {
+            if (tileWidth === tileHeight) {
                 pb.push(u);
                 pb.push(v);
                 pb.push(x);
