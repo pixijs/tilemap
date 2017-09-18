@@ -36,7 +36,7 @@ module PIXI.tilemap {
         _clearBuffer: Uint8Array;
         lastTimeCheck = 0;
         tileAnim = [0, 0];
-        maxTextures = 4;
+        maxTextures = 8;
         texLoc : Array<number> = [];
 
         rectShader: RectTileShader;
