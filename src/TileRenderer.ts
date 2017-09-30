@@ -64,10 +64,6 @@ module PIXI.tilemap {
 
         initBounds() {
             const gl = this.renderer.gl;
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = 2048;
-            tempCanvas.height = 2048;
-            // tempCanvas.getContext('2d').clearRect(0, 0, 2048, 2048);
             for (let i = 0; i < this.maxTextures; i++) {
                 const rt = PIXI.RenderTexture.create(2048, 2048);
                 rt.baseTexture.premultipliedAlpha = true;
