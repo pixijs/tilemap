@@ -41,7 +41,7 @@ module PIXI.tilemap {
 
         rectShader: RectTileShader;
         squareShader: SquareTileShader;
-        boundSprites: Array<Array<PIXI.Sprite>>;
+        boundSprites: Array<PIXI.Sprite>;
         glTextures: Array<PIXI.RenderTexture>;
 
         constructor(renderer: WebGLRenderer) {
@@ -72,36 +72,34 @@ module PIXI.tilemap {
                 this.renderer.textureManager.updateTexture(rt);
 
                 this.glTextures.push(rt);
-                const bs : Array<PIXI.Sprite> = [];
+                const bounds = this.boundSprites;
                 for (let j = 0; j < 4; j++) {
                     const spr = new PIXI.Sprite();
                     spr.position.x = 1024 * (j & 1);
                     spr.position.y = 1024 * (j >> 1);
-                    bs.push(spr);
+                    bounds.push(spr);
                 }
-                this.boundSprites.push(bs);
             }
         }
 
         bindTextures(renderer: WebGLRenderer, shader: TilemapShader, textures: Array<PIXI.Texture>) {
-            const bounds = this.boundSprites;
-            const glts = this.glTextures;
             const len = textures.length;
             const maxTextures = this.maxTextures;
             if (len > 4 * maxTextures) {
                 return;
             }
-
             const doClear = TileRenderer.DO_CLEAR;
             if (doClear && !this._clearBuffer) {
                 this._clearBuffer = new Uint8Array(1024 * 1024 * 4);
             }
+            const glts = this.glTextures;
+            const bounds = this.boundSprites;
 
             let i: number;
             for (i = 0; i < len; i++) {
                 const texture = textures[i];
                 if (!texture || !textures[i].valid) continue;
-                const bs = bounds[i >> 2][i & 3];
+                const bs = bounds[i];
                 if (!bs.texture ||
                     bs.texture.baseTexture !== texture.baseTexture) {
                     bs.texture = texture;
