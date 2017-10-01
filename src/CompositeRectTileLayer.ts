@@ -46,9 +46,12 @@ module PIXI.tilemap {
             this.modificationMarker = 0;
         }
 
-        addRect(num: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number) {
-            if (this.children[num] && (this.children[num] as RectTileLayer).textures)
-                (this.children[num] as RectTileLayer).addRect(0, u, v, x, y, tileWidth, tileHeight);
+        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number) {
+            const childIndex : number = textureIndex / this.texPerChild >> 0;
+            const textureId : number = textureIndex % this.texPerChild;
+
+            if (this.children[childIndex] && (this.children[childIndex] as RectTileLayer).textures)
+                (this.children[childIndex] as RectTileLayer).addRect(textureId, u, v, x, y, tileWidth, tileHeight);
         }
 
         addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX: number, animY: number) {

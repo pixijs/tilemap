@@ -143,7 +143,7 @@ module PIXI.tilemap {
                     renderer.context.globalAlpha = 1;
                 }
             }
-        }
+        };
 
         vbId = 0;
         vbBuffer : ArrayBuffer = null;
