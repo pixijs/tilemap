@@ -57,7 +57,7 @@ module PIXI.tilemap {
         addRect(textureId: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX: number = 0, animY: number = 0) {
             var pb = this.pointsBuf;
             this.hasAnim = this.hasAnim || animX > 0 || animY > 0;
-            if (tileWidth == tileHeight) {
+            if (tileWidth === tileHeight) {
                 pb.push(u);
                 pb.push(v);
                 pb.push(x);
@@ -96,7 +96,7 @@ module PIXI.tilemap {
                         pb.push(textureId);
                     }
                 } else {
-                    //ok, ok, lets use rectangle. but its not working with square shader yet
+                    //ok, ok, lets use rectangle
                     pb.push(u);
                     pb.push(v);
                     pb.push(x);
@@ -115,17 +115,16 @@ module PIXI.tilemap {
         vbArray : Float32Array = null;
         vbInts : Uint32Array = null;
 
-        renderWebGL(renderer: WebGLRenderer, useSquare: boolean = false) {
+        renderWebGL(renderer: WebGLRenderer) {
             var points = this.pointsBuf;
             if (points.length === 0) return;
             var rectsCount = points.length / 9;
             var tile = renderer.plugins.tilemap;
             var gl = renderer.gl;
-            if (!useSquare) {
-                tile.checkIndexBuffer(rectsCount);
-            }
 
-            var shader = tile.getShader(useSquare);
+            tile.checkIndexBuffer(rectsCount);
+
+            var shader = tile.getShader();
             var textures = this.textures;
             if (textures.length === 0) return;
             var len = textures.length;
@@ -145,7 +144,7 @@ module PIXI.tilemap {
             //lost context! recover!
             var vb = tile.getVb(this.vbId);
             if (!vb) {
-                vb = tile.createVb(useSquare);
+                vb = tile.createVb();
                 this.vbId = vb.id;
                 this.vbBuffer = null;
                 this.modificationMarker = 0;
@@ -177,78 +176,64 @@ module PIXI.tilemap {
                 var sz = 0;
                 //var tint = 0xffffffff;
                 var textureId: number, shiftU: number, shiftV: number;
-                if (useSquare) {
-                    for (i = 0; i < points.length; i += 9) {
-                        textureId = (points[i + 8] >> 2);
-                        shiftU = 1024 * (points[i + 8] & 1);
-                        shiftV = 1024 * ((points[i + 8] >> 1) & 1);
-                        arr[sz++] = points[i + 2];
-                        arr[sz++] = points[i + 3];
-                        arr[sz++] = points[i + 0] + shiftU;
-                        arr[sz++] = points[i + 1] + shiftV;
-                        arr[sz++] = points[i + 4];
-                        arr[sz++] = points[i + 6];
-                        arr[sz++] = points[i + 7];
-                        arr[sz++] = textureId;
-                    }
-                } else {
-                    //var tint = 0xffffffff;
-                    var tint = -1;
-                    for (i = 0; i < points.length; i += 9) {
-                        var eps = 0.5;
-                        textureId = (points[i + 8] >> 2);
-                        shiftU = 1024 * (points[i + 8] & 1);
-                        shiftV = 1024 * ((points[i + 8] >> 1) & 1);
-                        var x = points[i + 2], y = points[i + 3];
-                        var w = points[i + 4], h = points[i + 5];
-                        var u = points[i] + shiftU, v = points[i + 1] + shiftV;
-                        var animX = points[i + 6], animY = points[i + 7];
-                        arr[sz++] = x;
-                        arr[sz++] = y;
-                        arr[sz++] = u;
-                        arr[sz++] = v;
-                        arr[sz++] = u + eps;
-                        arr[sz++] = v + eps;
-                        arr[sz++] = u + w - eps;
-                        arr[sz++] = v + h - eps;
-                        arr[sz++] = animX;
-                        arr[sz++] = animY;
-                        arr[sz++] = textureId;
-                        arr[sz++] = x + w;
-                        arr[sz++] = y;
-                        arr[sz++] = u + w;
-                        arr[sz++] = v;
-                        arr[sz++] = u + eps;
-                        arr[sz++] = v + eps;
-                        arr[sz++] = u + w - eps;
-                        arr[sz++] = v + h - eps;
-                        arr[sz++] = animX;
-                        arr[sz++] = animY;
-                        arr[sz++] = textureId;
-                        arr[sz++] = x + w;
-                        arr[sz++] = y + h;
-                        arr[sz++] = u + w;
-                        arr[sz++] = v + h;
-                        arr[sz++] = u + eps;
-                        arr[sz++] = v + eps;
-                        arr[sz++] = u + w - eps;
-                        arr[sz++] = v + h - eps;
-                        arr[sz++] = animX;
-                        arr[sz++] = animY;
-                        arr[sz++] = textureId;
-                        arr[sz++] = x;
-                        arr[sz++] = y + h;
-                        arr[sz++] = u;
-                        arr[sz++] = v + h;
-                        arr[sz++] = u + eps;
-                        arr[sz++] = v + eps;
-                        arr[sz++] = u + w - eps;
-                        arr[sz++] = v + h - eps;
-                        arr[sz++] = animX;
-                        arr[sz++] = animY;
-                        arr[sz++] = textureId;
-                    }
+
+                //var tint = 0xffffffff;
+                var tint = -1;
+                for (i = 0; i < points.length; i += 9) {
+                    var eps = 0.5;
+                    textureId = (points[i + 8] >> 2);
+                    shiftU = 1024 * (points[i + 8] & 1);
+                    shiftV = 1024 * ((points[i + 8] >> 1) & 1);
+                    var x = points[i + 2], y = points[i + 3];
+                    var w = points[i + 4], h = points[i + 5];
+                    var u = points[i] + shiftU, v = points[i + 1] + shiftV;
+                    var animX = points[i + 6], animY = points[i + 7];
+                    arr[sz++] = x;
+                    arr[sz++] = y;
+                    arr[sz++] = u;
+                    arr[sz++] = v;
+                    arr[sz++] = u + eps;
+                    arr[sz++] = v + eps;
+                    arr[sz++] = u + w - eps;
+                    arr[sz++] = v + h - eps;
+                    arr[sz++] = animX;
+                    arr[sz++] = animY;
+                    arr[sz++] = textureId;
+                    arr[sz++] = x + w;
+                    arr[sz++] = y;
+                    arr[sz++] = u + w;
+                    arr[sz++] = v;
+                    arr[sz++] = u + eps;
+                    arr[sz++] = v + eps;
+                    arr[sz++] = u + w - eps;
+                    arr[sz++] = v + h - eps;
+                    arr[sz++] = animX;
+                    arr[sz++] = animY;
+                    arr[sz++] = textureId;
+                    arr[sz++] = x + w;
+                    arr[sz++] = y + h;
+                    arr[sz++] = u + w;
+                    arr[sz++] = v + h;
+                    arr[sz++] = u + eps;
+                    arr[sz++] = v + eps;
+                    arr[sz++] = u + w - eps;
+                    arr[sz++] = v + h - eps;
+                    arr[sz++] = animX;
+                    arr[sz++] = animY;
+                    arr[sz++] = textureId;
+                    arr[sz++] = x;
+                    arr[sz++] = y + h;
+                    arr[sz++] = u;
+                    arr[sz++] = v + h;
+                    arr[sz++] = u + eps;
+                    arr[sz++] = v + eps;
+                    arr[sz++] = u + w - eps;
+                    arr[sz++] = v + h - eps;
+                    arr[sz++] = animX;
+                    arr[sz++] = animY;
+                    arr[sz++] = textureId;
                 }
+
                 // if (vs > this.vbArray.length/2 ) {
                 vertexBuf.upload(arr, 0, true);
                 // } else {
@@ -256,10 +241,7 @@ module PIXI.tilemap {
                 //     vb.upload(view, 0);
                 // }
             }
-            if (useSquare)
-                gl.drawArrays(gl.POINTS, 0, vertices);
-            else
-                gl.drawElements(gl.TRIANGLES, rectsCount * 6, gl.UNSIGNED_SHORT, 0);
+            gl.drawElements(gl.TRIANGLES, rectsCount * 6, gl.UNSIGNED_SHORT, 0);
         }
     }
 
