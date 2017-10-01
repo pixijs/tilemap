@@ -32,41 +32,6 @@ module PIXI.tilemap {
             this.hasAnim = false;
         }
 
-        addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX: number, animY: number) {
-            let textureId : number = null;
-            let texture : PIXI.Texture;
-            const tex = this.textures;
-
-            if (typeof texture_ === "number") {
-                textureId = texture_;
-                texture = tex[textureId];
-            } else {
-                if (typeof texture_ === "string") {
-                    texture = PIXI.Texture.fromImage(texture_);
-                } else {
-                    texture = texture_ as PIXI.Texture;
-                }
-
-                for (var j = 0; j < tex.length; j++) {
-                    if (tex[j].baseTexture === texture.baseTexture) {
-                        textureId = j;
-                        break;
-                    }
-                }
-
-                if (textureId === null && texture) {
-                    textureId = this.textures.length;
-                    this.textures.push(texture);
-                }
-            }
-
-            if (!texture) {
-                return false;
-            }
-
-            this.addRect(textureId, texture.frame.x, texture.frame.y, x, y, texture.frame.width, texture.frame.height, animX, animY);
-        };
-
         addRect(textureId: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX: number = 0, animY: number = 0) {
             var pb = this.pointsBuf;
             this.hasAnim = this.hasAnim || animX > 0 || animY > 0;
@@ -121,7 +86,7 @@ module PIXI.tilemap {
                     pb.push(textureId);
                 }
             }
-        };
+        }
 
         renderCanvas(renderer: CanvasRenderer) {
             if (this.textures.length === 0) return;
@@ -143,7 +108,7 @@ module PIXI.tilemap {
                     renderer.context.globalAlpha = 1;
                 }
             }
-        };
+        }
 
         vbId = 0;
         vbBuffer : ArrayBuffer = null;
