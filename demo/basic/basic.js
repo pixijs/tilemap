@@ -12,7 +12,7 @@ loader.load(function(loader, resources) {
     //third parameter means that all our tiles are squares or at least 2x1 dominoes
     //   and we can optimize it with gl.POINTS
     stage = new PIXI.Container();
-	tilemap = new PIXI.tilemap.CompositeRectTileLayer(0, [resources['atlas_image'].texture], true);
+	tilemap = new PIXI.tilemap.CompositeRectTileLayer(0, [resources['atlas_image'].texture]);
 	stage.addChild(tilemap);
 
     animate();
