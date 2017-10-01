@@ -32,27 +32,40 @@ module PIXI.tilemap {
             this.hasAnim = false;
         }
 
-        renderCanvas(renderer: CanvasRenderer) {
-            if (this.textures.length === 0) return;
-            var points = this.pointsBuf;
-            renderer.context.fillStyle = '#000000';
-            for (var i = 0, n = points.length; i < n; i += 9) {
-                var x1 = points[i], y1 = points[i + 1];
-                var x2 = points[i + 2], y2 = points[i + 3];
-                var w = points[i + 4];
-                var h = points[i + 5];
-                x1 += points[i + 6] * renderer.plugins.tilemap.tileAnim[0];
-                y1 += points[i + 7] * renderer.plugins.tilemap.tileAnim[1];
-                var textureId = points[i + 8];
-                if (textureId >= 0) {
-                    renderer.context.drawImage(this.textures[textureId].baseTexture.source, x1, y1, w, h, x2, y2, w, h);
+        addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX: number, animY: number) {
+            let textureId : number = null;
+            let texture : PIXI.Texture;
+            const tex = this.textures;
+
+            if (typeof texture_ === "number") {
+                textureId = texture_;
+                texture = tex[textureId];
+            } else {
+                if (typeof texture_ === "string") {
+                    texture = PIXI.Texture.fromImage(texture_);
                 } else {
-                    renderer.context.globalAlpha = 0.5;
-                    renderer.context.fillRect(x2, y2, w, h);
-                    renderer.context.globalAlpha = 1;
+                    texture = texture_ as PIXI.Texture;
+                }
+
+                for (var j = 0; j < tex.length; j++) {
+                    if (tex[j].baseTexture === texture.baseTexture) {
+                        textureId = j;
+                        break;
+                    }
+                }
+
+                if (textureId === null && texture) {
+                    textureId = this.textures.length;
+                    this.textures.push(texture);
                 }
             }
-        }
+
+            if (!texture) {
+                return false;
+            }
+
+            this.addRect(textureId, texture.frame.x, texture.frame.y, x, y, texture.frame.width, texture.frame.height, animX, animY);
+        };
 
         addRect(textureId: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX: number = 0, animY: number = 0) {
             var pb = this.pointsBuf;
@@ -109,6 +122,28 @@ module PIXI.tilemap {
                 }
             }
         };
+
+        renderCanvas(renderer: CanvasRenderer) {
+            if (this.textures.length === 0) return;
+            var points = this.pointsBuf;
+            renderer.context.fillStyle = '#000000';
+            for (var i = 0, n = points.length; i < n; i += 9) {
+                var x1 = points[i], y1 = points[i + 1];
+                var x2 = points[i + 2], y2 = points[i + 3];
+                var w = points[i + 4];
+                var h = points[i + 5];
+                x1 += points[i + 6] * renderer.plugins.tilemap.tileAnim[0];
+                y1 += points[i + 7] * renderer.plugins.tilemap.tileAnim[1];
+                var textureId = points[i + 8];
+                if (textureId >= 0) {
+                    renderer.context.drawImage(this.textures[textureId].baseTexture.source, x1, y1, w, h, x2, y2, w, h);
+                } else {
+                    renderer.context.globalAlpha = 0.5;
+                    renderer.context.fillRect(x2, y2, w, h);
+                    renderer.context.globalAlpha = 1;
+                }
+            }
+        }
 
         vbId = 0;
         vbBuffer : ArrayBuffer = null;
