@@ -12,10 +12,7 @@ module PIXI.tilemap {
     }
 
     /*
-     * Renderer for square and rectangle tiles.
-     * Squares cannot be rotated, skewed.
-     * For container with squares, scale.x must be equals to scale.y, matrix.a to matrix.d
-     * Rectangles do not care about that.
+     * Renderer for rectangle tiles.
      *
      * @class
      * @memberof PIXI.tilemap
@@ -40,7 +37,6 @@ module PIXI.tilemap {
         texLoc : Array<number> = [];
 
         rectShader: RectTileShader;
-        squareShader: SquareTileShader;
         boundSprites: Array<PIXI.Sprite>;
         glTextures: Array<PIXI.RenderTexture>;
 
@@ -52,10 +48,8 @@ module PIXI.tilemap {
             const gl = this.renderer.gl;
             const maxTextures = this.maxTextures;
             this.rectShader = new RectTileShader(gl, maxTextures);
-            this.squareShader = new SquareTileShader(gl, maxTextures);
             this.checkIndexBuffer(2000);
             this.rectShader.indexBuffer = this.indexBuffer;
-            this.squareShader.indexBuffer = this.indexBuffer;
             this.vbs = {};
             this.glTextures = [];
             this.boundSprites = [];
@@ -150,9 +144,9 @@ module PIXI.tilemap {
             return null;
         }
 
-        createVb(useSquare: boolean) {
+        createVb() {
             const id = ++TileRenderer.vbAutoincrement;
-            const shader = this.getShader(useSquare);
+            const shader = this.getShader();
             const gl = this.renderer.gl;
             const vb = PIXI.glCore.GLBuffer.createVertexBuffer(gl, null, gl.STREAM_DRAW);
             const stuff = {
@@ -160,7 +154,6 @@ module PIXI.tilemap {
                 vb: vb,
                 vao: shader.createVao(this.renderer, vb),
                 lastTimeAccess: Date.now(),
-                useSquare: useSquare,
                 shader: shader
             };
             this.vbs[id] = stuff;
@@ -208,16 +201,14 @@ module PIXI.tilemap {
             }
         }
 
-        getShader(useSquare: boolean) : TilemapShader {
-            return useSquare ? this.squareShader : this.rectShader;
+        getShader() : TilemapShader {
+            return this.rectShader;
         }
 
         destroy() {
             super.destroy();
             this.rectShader.destroy();
-            this.squareShader.destroy();
             this.rectShader = null;
-            this.squareShader = null;
         };
     }
 
