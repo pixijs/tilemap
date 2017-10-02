@@ -11,7 +11,7 @@ module PIXI.tilemap {
         zIndex = 0;
         pointsBuf : Array<number> = [];
         _tempSize = new Float32Array([0, 0]);
-        _tempTexSize = 1;
+        // _tempTexSize = 1;
         modificationMarker = 0;
         hasAnim = false;
 
@@ -127,18 +127,18 @@ module PIXI.tilemap {
             var shader = tile.getShader();
             var textures = this.textures;
             if (textures.length === 0) return;
-            var len = textures.length;
-            if (this._tempTexSize < shader.maxTextures) {
-                this._tempTexSize = shader.maxTextures;
-                this._tempSize = new Float32Array(2 * shader.maxTextures);
-            }
-            // var samplerSize = this._tempSize;
-            for (var i = 0; i < len; i++) {
-                if (!textures[i] || !textures[i].valid) return;
-                var texture = textures[i].baseTexture;
-                // samplerSize[i * 2] = 1.0 / texture.width;
-                // samplerSize[i * 2 + 1] = 1.0 / texture.height;
-            }
+            // var len = textures.length;
+            // if (this._tempTexSize < shader.maxTextures) {
+            //     this._tempTexSize = shader.maxTextures;
+            //     this._tempSize = new Float32Array(2 * shader.maxTextures);
+            // }
+            // // var samplerSize = this._tempSize;
+            // for (var i = 0; i < len; i++) {
+            //     if (!textures[i] || !textures[i].valid) return;
+            //     var texture = textures[i].baseTexture;
+            //     // samplerSize[i * 2] = 1.0 / texture.width;
+            //     // samplerSize[i * 2 + 1] = 1.0 / texture.height;
+            // }
             tile.bindTextures(renderer, shader, textures);
             // shader.uniforms.uSamplerSize = samplerSize;
             //lost context! recover!
@@ -179,7 +179,7 @@ module PIXI.tilemap {
 
                 //var tint = 0xffffffff;
                 var tint = -1;
-                for (i = 0; i < points.length; i += 9) {
+                for (var i = 0; i < points.length; i += 9) {
                     var eps = 0.5;
                     textureId = (points[i + 8] >> 2);
                     shiftU = 1024 * (points[i + 8] & 1);
