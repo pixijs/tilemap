@@ -17,7 +17,7 @@ module PIXI.tilemap {
         texPerChild: number;
         modificationMarker = 0;
         _globalMat: PIXI.Matrix = null;
-        _tempScale: Array<number> = null;
+        // _tempScale: Array<number> = null;
 
         initialize(zIndex?: number, bitmaps?: Array<Texture>, texPerChild?: number) {
             this.z = this.zIndex = zIndex;

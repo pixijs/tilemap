@@ -10,7 +10,7 @@ module PIXI.tilemap {
         z = 0;
         zIndex = 0;
         pointsBuf : Array<number> = [];
-        _tempSize = new Float32Array([0, 0]);
+        // _tempSize = new Float32Array([0, 0]);
         // _tempTexSize = 1;
         modificationMarker = 0;
         hasAnim = false;
