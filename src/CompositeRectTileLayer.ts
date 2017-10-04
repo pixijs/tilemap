@@ -3,6 +3,7 @@
 module PIXI.tilemap {
 
     export class CompositeRectTileLayer extends PIXI.Container {
+
         constructor(zIndex?: number, bitmaps?: Array<Texture>, texPerChild?: number) {
             super();
             this.initialize.apply(this, arguments);

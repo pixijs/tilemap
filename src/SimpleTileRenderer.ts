@@ -1,6 +1,7 @@
 /// <reference path="TileRenderer.ts" />
 
 module PIXI.tilemap {
+
     import glCore = PIXI.glCore;
 
     /*

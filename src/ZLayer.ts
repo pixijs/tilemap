@@ -1,6 +1,7 @@
 module PIXI.tilemap {
 
     export class ZLayer extends PIXI.Container {
+
         constructor(tilemap: PIXI.Container, zIndex: number) {
             super();
             this.tilemap = tilemap;

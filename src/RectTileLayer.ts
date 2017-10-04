@@ -1,6 +1,7 @@
 module PIXI.tilemap {
 
     export class RectTileLayer extends PIXI.Container {
+
         constructor(zIndex: number, texture: PIXI.Texture | Array<PIXI.Texture>) {
             super();
             this.initialize(zIndex, texture);

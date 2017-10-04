@@ -1,6 +1,7 @@
 module PIXI.tilemap {
 
     class GraphicsLayer extends PIXI.Graphics {
+
         z: number;
         zIndex: number;
 

@@ -1,5 +1,7 @@
 module PIXI.tilemap {
+
     export class CanvasTileRenderer {
+
         renderer: PIXI.CanvasRenderer;
         tileAnim = [0, 0];
         dontUseTransform = false;

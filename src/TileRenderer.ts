@@ -1,4 +1,5 @@
 module PIXI.tilemap {
+
     import glCore = PIXI.glCore;
 
     function _hackSubImage(tex: glCore.GLTexture, sprite: PIXI.Sprite, clearBuffer?: Uint8Array, clearWidth?: number, clearHeight?: number) {

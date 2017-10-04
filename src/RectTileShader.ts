@@ -2,6 +2,7 @@ module PIXI.tilemap {
 
     import GLBuffer = PIXI.glCore.GLBuffer;
     import VertexArrayObject = PIXI.glCore.VertexArrayObject;
+
     var rectShaderFrag = `
 varying vec2 vTextureCoord;
 varying vec4 vFrame;
@@ -44,8 +45,10 @@ void main(void){
 `;
 
     export abstract class TilemapShader extends PIXI.Shader {
+
         maxTextures = 0;
         indexBuffer: GLBuffer;
+
         constructor(gl: WebGLRenderingContext, maxTextures: number, shaderVert: string, shaderFrag: string) {
             super(gl,
                 shaderVert,
