@@ -1,7 +1,7 @@
 module PIXI.tilemap.shaderGenerator {
 
     export function fillSamplers(shader: TilemapShader, maxTextures: number) {
-        var sampleValues : Array<number> = [];
+        var sampleValues: Array<number> = [];
         for (var i = 0; i < maxTextures; i++)
         {
             sampleValues[i] = i;
@@ -9,7 +9,7 @@ module PIXI.tilemap.shaderGenerator {
         shader.bind();
         shader.uniforms.uSamplers = sampleValues;
 
-        var samplerSize : Array<number> = [];
+        var samplerSize: Array<number> = [];
         for (i = 0; i < maxTextures; i++) {
             samplerSize.push(1.0 / Constant.bufferSize);
             samplerSize.push(1.0 / Constant.bufferSize);
@@ -51,4 +51,5 @@ module PIXI.tilemap.shaderGenerator {
 
         return src;
     }
+
 }

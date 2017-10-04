@@ -46,8 +46,9 @@ module PIXI.tilemap {
         }
 
         clear() {
-            for (var i = 0; i < this.children.length; i++)
+            for (var i = 0; i < this.children.length; i++) {
                 (this.children[i] as RectTileLayer).clear();
+            }
             this.modificationMarker = 0;
         }
 
@@ -55,8 +56,9 @@ module PIXI.tilemap {
             const childIndex: number = textureIndex / this.texPerChild >> 0;
             const textureId: number = textureIndex % this.texPerChild;
 
-            if (this.children[childIndex] && (this.children[childIndex] as RectTileLayer).textures)
+            if (this.children[childIndex] && (this.children[childIndex] as RectTileLayer).textures) {
                 (this.children[childIndex] as RectTileLayer).addRect(textureId, u, v, x, y, tileWidth, tileHeight);
+            }
         }
 
         addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX: number, animY: number) {
@@ -114,6 +116,7 @@ module PIXI.tilemap {
                     }
                     if (!layer) {
                         layer = new RectTileLayer(this.zIndex, texture);
+                        layer.compositeParent = true;
                         layer.offsetX = Constant.boundSize;
                         layer.offsetY = Constant.boundSize;
                         children.push(layer);
@@ -140,9 +143,10 @@ module PIXI.tilemap {
                 );
             }
             var layers = this.children;
-            for (var i = 0; i < layers.length; i++)
+            for (var i = 0; i < layers.length; i++) {
                 layers[i].renderCanvas(renderer);
-        };
+            }
+        }
 
         renderWebGL(renderer: WebGLRenderer) {
             var gl = renderer.gl;
@@ -158,8 +162,9 @@ module PIXI.tilemap {
             var af = shader.uniforms.animationFrame = plugin.tileAnim;
             //shader.syncUniform(shader.uniforms.animationFrame);
             var layers = this.children;
-            for (var i = 0; i < layers.length; i++)
+            for (var i = 0; i < layers.length; i++) {
                 (layers[i] as RectTileLayer).renderWebGLCore(renderer, plugin);
+            }
         }
 
         isModified(anim: boolean) {
@@ -185,6 +190,6 @@ module PIXI.tilemap {
                 layer.modificationMarker = layer.pointsBuf.length;
             }
         }
-
     }
+
 }

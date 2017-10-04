@@ -10,7 +10,7 @@ module PIXI.tilemap {
         }
 
         renderCanvas(renderer: PIXI.CanvasRenderer) {
-            var wt : PIXI.Matrix = null;
+            var wt: PIXI.Matrix = null;
             if (renderer.plugins.tilemap.dontUseTransform) {
                 wt = this.transform.worldTransform;
                 this.transform.worldTransform = PIXI.Matrix.IDENTITY;

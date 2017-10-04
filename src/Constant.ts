@@ -6,4 +6,5 @@ module PIXI.tilemap {
         boundSize: 1024,
         boundCountPerBuffer: 4,
     }
+
 }

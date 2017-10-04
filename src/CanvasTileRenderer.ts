@@ -11,5 +11,6 @@ module PIXI.tilemap {
     }
 
     PIXI.CanvasRenderer.registerPlugin('tilemap', CanvasTileRenderer);
+
 }
 

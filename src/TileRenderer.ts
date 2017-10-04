@@ -28,12 +28,12 @@ module PIXI.tilemap {
         static DO_CLEAR = false;
         renderer: WebGLRenderer;
         gl: WebGLRenderingContext;
-        vbs :  { [key: string]: any; } = {};
+        vbs:  { [key: string]: any; } = {};
         indices = new Uint16Array(0);
-        indexBuffer : glCore.GLBuffer;
+        indexBuffer: glCore.GLBuffer;
         lastTimeCheck = 0;
         tileAnim = [0, 0];
-        texLoc : Array<number> = [];
+        texLoc: Array<number> = [];
 
         rectShader: RectTileShader;
         boundSprites: Array<PIXI.Sprite>;
@@ -205,7 +205,7 @@ module PIXI.tilemap {
             }
         }
 
-        getShader() : TilemapShader {
+        getShader(): TilemapShader {
             return this.rectShader;
         }
 
