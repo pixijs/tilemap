@@ -35,15 +35,20 @@ module PIXI.tilemap {
             let i: number;
             for (i = 0; i < len; i++) {
                 const texture = textures[i];
-                if (!texture || !texture.valid) continue;
 
-                var baseTexture = texture.baseTexture;
-                this.texLoc.length = 0;
-                this.texLoc.push(renderer.bindTexture(baseTexture, 0, true));
+                if (!texture || !texture.valid) {
+                    continue;
+                }
+
+                const baseTexture = texture.baseTexture;
+
+                this.texLoc[0] = renderer.bindTexture(baseTexture, 0, true);
                 shader.uniforms.uSamplers = this.texLoc;
+
                 this.samplerSize[0] = 1.0 / baseTexture.width;
                 this.samplerSize[1] = 1.0 / baseTexture.height;
                 shader.uniforms.uSamplerSize = this.samplerSize;
+
                 break;
             }
         }
