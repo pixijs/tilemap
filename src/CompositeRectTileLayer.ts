@@ -127,7 +127,7 @@ module PIXI.tilemap {
 
             layer.addRect(ind, texture.frame.x, texture.frame.y, x, y, texture.frame.width, texture.frame.height, animX, animY);
             return true;
-        };
+        }
 
         renderCanvas(renderer: CanvasRenderer) {
             var plugin = renderer.plugins.tilemap;

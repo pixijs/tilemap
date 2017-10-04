@@ -67,7 +67,7 @@ module PIXI.tilemap {
                 this.layerTransform = layers[i].worldTransform;
                 break;
             }
-        };
+        }
 
         renderCanvas(renderer: PIXI.CanvasRenderer) {
             this.cacheIfDirty();
@@ -82,6 +82,6 @@ module PIXI.tilemap {
             );
             var tilemap = this.tilemap;
             renderer.context.drawImage(this.canvasBuffer, 0, 0);
-        };
+        }
     }
 }

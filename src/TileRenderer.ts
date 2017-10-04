@@ -131,7 +131,7 @@ module PIXI.tilemap {
                     }
                 }
             }
-        };
+        }
 
         start() {
             this.renderer.state.setBlendMode(PIXI.BLEND_MODES.NORMAL);
