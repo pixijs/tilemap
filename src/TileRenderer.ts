@@ -1,5 +1,6 @@
 module PIXI.tilemap {
     import glCore = PIXI.glCore;
+
     function _hackSubImage(tex: glCore.GLTexture, sprite: PIXI.Sprite, clearBuffer?: Uint8Array, clearWidth?: number, clearHeight?: number) {
         const gl = tex.gl;
         const baseTex = sprite.texture.baseTexture;
@@ -30,15 +31,15 @@ module PIXI.tilemap {
         vbs :  { [key: string]: any; } = {};
         indices = new Uint16Array(0);
         indexBuffer : glCore.GLBuffer;
-        _clearBuffer: Uint8Array;
         lastTimeCheck = 0;
         tileAnim = [0, 0];
-        maxTextures = 8;
         texLoc : Array<number> = [];
 
         rectShader: RectTileShader;
         boundSprites: Array<PIXI.Sprite>;
         glTextures: Array<PIXI.RenderTexture>;
+
+        _clearBuffer: Uint8Array;
 
         constructor(renderer: WebGLRenderer) {
             super(renderer)
@@ -46,7 +47,7 @@ module PIXI.tilemap {
 
         onContextChange() {
             const gl = this.renderer.gl;
-            const maxTextures = this.maxTextures;
+            const maxTextures = Constant.maxTextures;
             this.rectShader = new RectTileShader(gl, maxTextures);
             this.checkIndexBuffer(2000);
             this.rectShader.indexBuffer = this.indexBuffer;
@@ -58,8 +59,9 @@ module PIXI.tilemap {
 
         initBounds() {
             const gl = this.renderer.gl;
-            for (let i = 0; i < this.maxTextures; i++) {
-                const rt = PIXI.RenderTexture.create(2048, 2048);
+            const maxTextures = Constant.maxTextures;
+            for (let i = 0; i < maxTextures; i++) {
+                const rt = PIXI.RenderTexture.create(Constant.bufferSize, Constant.bufferSize);
                 rt.baseTexture.premultipliedAlpha = true;
                 rt.baseTexture.scaleMode = TileRenderer.SCALE_MODE;
                 rt.baseTexture.wrapMode = PIXI.WRAP_MODES.CLAMP;
@@ -67,10 +69,10 @@ module PIXI.tilemap {
 
                 this.glTextures.push(rt);
                 const bounds = this.boundSprites;
-                for (let j = 0; j < 4; j++) {
+                for (let j = 0; j < Constant.boundCountPerBuffer; j++) {
                     const spr = new PIXI.Sprite();
-                    spr.position.x = 1024 * (j & 1);
-                    spr.position.y = 1024 * (j >> 1);
+                    spr.position.x = Constant.boundSize * (j & 1);
+                    spr.position.y = Constant.boundSize * (j >> 1);
                     bounds.push(spr);
                 }
             }
@@ -78,13 +80,13 @@ module PIXI.tilemap {
 
         bindTextures(renderer: WebGLRenderer, shader: TilemapShader, textures: Array<PIXI.Texture>) {
             const len = textures.length;
-            const maxTextures = this.maxTextures;
-            if (len > 4 * maxTextures) {
+            const maxTextures = Constant.maxTextures;
+            if (len > Constant.boundCountPerBuffer * maxTextures) {
                 return;
             }
             const doClear = TileRenderer.DO_CLEAR;
             if (doClear && !this._clearBuffer) {
-                this._clearBuffer = new Uint8Array(1024 * 1024 * 4);
+                this._clearBuffer = new Uint8Array(Constant.boundSize * Constant.boundSize * 4);
             }
             const glts = this.glTextures;
             const bounds = this.boundSprites;
@@ -92,7 +94,7 @@ module PIXI.tilemap {
             let i: number;
             for (i = 0; i < len; i++) {
                 const texture = textures[i];
-                if (!texture || !textures[i].valid) continue;
+                if (!texture || !texture.valid) continue;
                 const bs = bounds[i];
                 if (!bs.texture ||
                     bs.texture.baseTexture !== texture.baseTexture) {
@@ -100,7 +102,7 @@ module PIXI.tilemap {
                     const glt = glts[i >> 2];
                     renderer.bindTexture(glt, 0, true);
                     if (doClear) {
-                        _hackSubImage((glt.baseTexture as any)._glTextures[renderer.CONTEXT_UID], bs, this._clearBuffer, 1024, 1024);
+                        _hackSubImage((glt.baseTexture as any)._glTextures[renderer.CONTEXT_UID], bs, this._clearBuffer, Constant.boundSize, Constant.boundSize);
                     } else {
                         _hackSubImage((glt.baseTexture as any)._glTextures[renderer.CONTEXT_UID], bs);
                     }
@@ -211,7 +213,7 @@ module PIXI.tilemap {
             super.destroy();
             this.rectShader.destroy();
             this.rectShader = null;
-        };
+        }
     }
 
     PIXI.WebGLRenderer.registerPlugin('tilemap', TileRenderer);

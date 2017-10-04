@@ -1,6 +1,7 @@
 /// <reference types="pixi.js" />
 
 module PIXI.tilemap {
+
     export class CompositeRectTileLayer extends PIXI.Container {
         constructor(zIndex?: number, bitmaps?: Array<Texture>, texPerChild?: number) {
             super();
@@ -13,15 +14,15 @@ module PIXI.tilemap {
 
         z: number;
         zIndex: number;
-        shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
-        texPerChild: number;
         modificationMarker = 0;
+        shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
         _globalMat: PIXI.Matrix = null;
-        // _tempScale: Array<number> = null;
+
+        texPerChild: number;
 
         initialize(zIndex?: number, bitmaps?: Array<Texture>, texPerChild?: number) {
             this.z = this.zIndex = zIndex;
-            this.texPerChild = texPerChild || 16;
+            this.texPerChild = texPerChild || Constant.boundCountPerBuffer * Constant.maxTextures;
             if (bitmaps) {
                 this.setBitmaps(bitmaps);
             }
@@ -36,7 +37,11 @@ module PIXI.tilemap {
                 (this.children[i] as RectTileLayer).textures = bitmaps.slice(i * texPerChild, (i + 1) * texPerChild);
             }
             for (i = len1; i < len2; i++) {
-                this.addChild(new RectTileLayer(this.zIndex, bitmaps.slice(i * texPerChild, (i + 1) * texPerChild)));
+                var layer = new RectTileLayer(this.zIndex, bitmaps.slice(i * texPerChild, (i + 1) * texPerChild));
+                layer.compositeParent = true;
+                layer.offsetX = Constant.boundSize;
+                layer.offsetY = Constant.boundSize;
+                this.addChild(layer);
             }
         }
 
@@ -47,16 +52,17 @@ module PIXI.tilemap {
         }
 
         addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number) {
-            const childIndex : number = textureIndex / this.texPerChild >> 0;
-            const textureId : number = textureIndex % this.texPerChild;
+            const childIndex: number = textureIndex / this.texPerChild >> 0;
+            const textureId: number = textureIndex % this.texPerChild;
 
             if (this.children[childIndex] && (this.children[childIndex] as RectTileLayer).textures)
                 (this.children[childIndex] as RectTileLayer).addRect(textureId, u, v, x, y, tileWidth, tileHeight);
         }
 
         addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX: number, animY: number) {
-            var texture : PIXI.Texture;
-            var layer : RectTileLayer = null, ind = 0;
+            var texture: PIXI.Texture;
+            var layer: RectTileLayer = null;
+            var ind: number = 0;
             var children = this.children;
 
             if (typeof texture_ === "number") {
@@ -107,7 +113,10 @@ module PIXI.tilemap {
                         }
                     }
                     if (!layer) {
-                        children.push(layer = new RectTileLayer(this.zIndex, texture));
+                        layer = new RectTileLayer(this.zIndex, texture);
+                        layer.offsetX = Constant.boundSize;
+                        layer.offsetY = Constant.boundSize;
+                        children.push(layer);
                         ind = 0;
                     }
                 }
@@ -118,7 +127,8 @@ module PIXI.tilemap {
         };
 
         renderCanvas(renderer: CanvasRenderer) {
-            if (!renderer.plugins.tilemap.dontUseTransform) {
+            var plugin = renderer.plugins.tilemap;
+            if (!plugin.dontUseTransform) {
                 var wt = this.worldTransform;
                 renderer.context.setTransform(
                     wt.a,
@@ -136,19 +146,20 @@ module PIXI.tilemap {
 
         renderWebGL(renderer: WebGLRenderer) {
             var gl = renderer.gl;
-            var shader = renderer.plugins.tilemap.getShader();
-            renderer.setObjectRenderer(renderer.plugins.tilemap);
+            var plugin = renderer.plugins.tilemap;
+            var shader = plugin.getShader();
+            renderer.setObjectRenderer(plugin);
             renderer.bindShader(shader);
             //TODO: dont create new array, please
             this._globalMat = this._globalMat || new PIXI.Matrix();
             renderer._activeRenderTarget.projectionMatrix.copy(this._globalMat).append(this.worldTransform);
             shader.uniforms.projectionMatrix = this._globalMat.toArray(true);
             shader.uniforms.shadowColor = this.shadowColor;
-            var af = shader.uniforms.animationFrame = renderer.plugins.tilemap.tileAnim;
+            var af = shader.uniforms.animationFrame = plugin.tileAnim;
             //shader.syncUniform(shader.uniforms.animationFrame);
             var layers = this.children;
             for (var i = 0; i < layers.length; i++)
-                (layers[i] as RectTileLayer).renderWebGL(renderer);
+                (layers[i] as RectTileLayer).renderWebGLCore(renderer, plugin);
         }
 
         isModified(anim: boolean) {
