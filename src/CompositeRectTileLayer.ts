@@ -144,7 +144,7 @@ module PIXI.tilemap {
             }
             var layers = this.children;
             for (var i = 0; i < layers.length; i++) {
-                layers[i].renderCanvas(renderer);
+                (layers[i] as RectTileLayer).renderCanvasCore(renderer);
             }
         }
 
@@ -173,9 +173,7 @@ module PIXI.tilemap {
                 return true;
             }
             for (var i = 0; i < layers.length; i++) {
-                const layer = layers[i] as RectTileLayer;
-                if (layer.modificationMarker != layer.pointsBuf.length ||
-                    anim && layer.hasAnim) {
+                if ((layers[i] as RectTileLayer).isModified(anim)) {
                     return true;
                 }
             }
@@ -186,8 +184,7 @@ module PIXI.tilemap {
             var layers = this.children;
             this.modificationMarker = layers.length;
             for (var i = 0; i < layers.length; i++) {
-                const layer = layers[i] as RectTileLayer;
-                layer.modificationMarker = layer.pointsBuf.length;
+                (layers[i] as RectTileLayer).clearModify();
             }
         }
     }

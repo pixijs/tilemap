@@ -133,6 +133,22 @@ module PIXI.tilemap {
         }
 
         renderCanvas(renderer: CanvasRenderer) {
+            var plugin = renderer.plugins.tilemap;
+            if (!plugin.dontUseTransform) {
+                var wt = this.worldTransform;
+                renderer.context.setTransform(
+                    wt.a,
+                    wt.b,
+                    wt.c,
+                    wt.d,
+                    wt.tx * renderer.resolution,
+                    wt.ty * renderer.resolution
+                );
+            }
+            this.renderCanvasCore(renderer);
+        }
+
+        renderCanvasCore(renderer: CanvasRenderer) {
             if (this.textures.length === 0) return;
             var points = this.pointsBuf;
             renderer.context.fillStyle = '#000000';
