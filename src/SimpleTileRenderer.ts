@@ -19,6 +19,8 @@ module PIXI.tilemap {
             super(renderer)
         }
 
+        samplerSize: Array<number> = [];
+
         onContextChange() {
             const gl = this.renderer.gl;
             this.rectShader = new RectTileShader(gl, 1);
@@ -35,14 +37,13 @@ module PIXI.tilemap {
                 const texture = textures[i];
                 if (!texture || !texture.valid) continue;
 
-                this.texLoc.length = 0;
                 var baseTexture = texture.baseTexture;
+                this.texLoc.length = 0;
                 this.texLoc.push(renderer.bindTexture(baseTexture, 0, true));
                 shader.uniforms.uSamplers = this.texLoc;
-                shader.uniforms.uSamplerSize = [
-                    1.0 / baseTexture.width,
-                    1.0 / baseTexture.height
-                ];
+                this.samplerSize[0] = 1.0 / baseTexture.width;
+                this.samplerSize[1] = 1.0 / baseTexture.height;
+                shader.uniforms.uSamplerSize = this.samplerSize;
                 break;
             }
         }
