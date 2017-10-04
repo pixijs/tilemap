@@ -185,6 +185,6 @@ module PIXI.tilemap {
                 layer.modificationMarker = layer.pointsBuf.length;
             }
         }
-
     }
+
 }
