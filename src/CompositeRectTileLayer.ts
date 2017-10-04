@@ -169,7 +169,7 @@ module PIXI.tilemap {
 
         isModified(anim: boolean) {
             var layers = this.children;
-            if (this.modificationMarker != layers.length) {
+            if (this.modificationMarker !== layers.length) {
                 return true;
             }
             for (var i = 0; i < layers.length; i++) {

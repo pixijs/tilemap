@@ -221,7 +221,7 @@ module PIXI.tilemap {
             vertexBuf.bind();
             var vertices = rectsCount * shader.vertPerQuad;
             if (vertices === 0) return;
-            if (this.modificationMarker != vertices) {
+            if (this.modificationMarker !== vertices) {
                 this.modificationMarker = vertices;
                 var vs = shader.stride * vertices;
                 if (!this.vbBuffer || this.vbBuffer.byteLength < vs) {
@@ -314,7 +314,7 @@ module PIXI.tilemap {
         }
 
         isModified(anim: boolean) {
-            if (this.modificationMarker != this.pointsBuf.length ||
+            if (this.modificationMarker !== this.pointsBuf.length ||
                 anim && this.hasAnim) {
                 return true;
             }

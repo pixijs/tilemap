@@ -26,7 +26,7 @@ module PIXI.tilemap {
         cacheIfDirty() {
             var tilemap: any = this.tilemap;
             var layers = this.children as Array<CompositeRectTileLayer>;
-            var modified = this._previousLayers != layers.length;
+            var modified = this._previousLayers !== layers.length;
             this._previousLayers = layers.length;
             var buf = this.canvasBuffer;
             var tempRender = this._tempRender;
@@ -36,8 +36,8 @@ module PIXI.tilemap {
                 tempRender.context = tempRender.rootContext;
                 tempRender.plugins.tilemap.dontUseTransform = true;
             }
-            if (buf.width != tilemap._layerWidth ||
-                buf.height != tilemap._layerHeight) {
+            if (buf.width !== tilemap._layerWidth ||
+                buf.height !== tilemap._layerHeight) {
                 buf.width = tilemap._layerWidth;
                 buf.height = tilemap._layerHeight;
                 modified = true;
@@ -45,7 +45,7 @@ module PIXI.tilemap {
             var i: number;
             if (!modified) {
                 for (i = 0; i < layers.length; i++) {
-                    if (layers[i].isModified(this._lastAnimationFrame != tilemap.animationFrame)) {
+                    if (layers[i].isModified(this._lastAnimationFrame !== tilemap.animationFrame)) {
                         modified = true;
                         break;
                     }
