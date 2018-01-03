@@ -1,6 +1,7 @@
-module PIXI.tilemap {
+namespace pixi_tilemap {
 
     class GraphicsLayer extends PIXI.Graphics {
+
         z: number;
         zIndex: number;
 
@@ -10,7 +11,7 @@ module PIXI.tilemap {
         }
 
         renderCanvas(renderer: PIXI.CanvasRenderer) {
-            var wt : PIXI.Matrix = null;
+            var wt: PIXI.Matrix = null;
             if (renderer.plugins.tilemap.dontUseTransform) {
                 wt = this.transform.worldTransform;
                 this.transform.worldTransform = PIXI.Matrix.IDENTITY;
@@ -22,7 +23,7 @@ module PIXI.tilemap {
             renderer.context.globalAlpha = 1.0;
         }
 
-        renderWebGL(renderer: WebGLRenderer) {
+        renderWebGL(renderer: PIXI.WebGLRenderer) {
             if (!this._webGL[renderer.CONTEXT_UID])
                 this.dirty = true;
             super.renderWebGL(renderer)

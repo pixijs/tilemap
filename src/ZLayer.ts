@@ -1,6 +1,7 @@
-module PIXI.tilemap {
+namespace pixi_tilemap {
 
     export class ZLayer extends PIXI.Container {
+
         constructor(tilemap: PIXI.Container, zIndex: number) {
             super();
             this.tilemap = tilemap;
@@ -26,7 +27,7 @@ module PIXI.tilemap {
         cacheIfDirty() {
             var tilemap: any = this.tilemap;
             var layers = this.children as Array<CompositeRectTileLayer>;
-            var modified = this._previousLayers != layers.length;
+            var modified = this._previousLayers !== layers.length;
             this._previousLayers = layers.length;
             var buf = this.canvasBuffer;
             var tempRender = this._tempRender;
@@ -36,8 +37,8 @@ module PIXI.tilemap {
                 tempRender.context = tempRender.rootContext;
                 tempRender.plugins.tilemap.dontUseTransform = true;
             }
-            if (buf.width != tilemap._layerWidth ||
-                buf.height != tilemap._layerHeight) {
+            if (buf.width !== tilemap._layerWidth ||
+                buf.height !== tilemap._layerHeight) {
                 buf.width = tilemap._layerWidth;
                 buf.height = tilemap._layerHeight;
                 modified = true;
@@ -45,7 +46,7 @@ module PIXI.tilemap {
             var i: number;
             if (!modified) {
                 for (i = 0; i < layers.length; i++) {
-                    if (layers[i].isModified(this._lastAnimationFrame != tilemap.animationFrame)) {
+                    if (layers[i].isModified(this._lastAnimationFrame !== tilemap.animationFrame)) {
                         modified = true;
                         break;
                     }
@@ -67,7 +68,7 @@ module PIXI.tilemap {
                 this.layerTransform = layers[i].worldTransform;
                 break;
             }
-        };
+        }
 
         renderCanvas(renderer: PIXI.CanvasRenderer) {
             this.cacheIfDirty();
@@ -82,6 +83,6 @@ module PIXI.tilemap {
             );
             var tilemap = this.tilemap;
             renderer.context.drawImage(this.canvasBuffer, 0, 0);
-        };
+        }
     }
 }

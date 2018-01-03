@@ -1,8 +1,10 @@
-module PIXI.tilemap {
+namespace pixi_tilemap {
 
     import GLBuffer = PIXI.glCore.GLBuffer;
     import VertexArrayObject = PIXI.glCore.VertexArrayObject;
-    var rectShaderFrag = `varying vec2 vTextureCoord;
+
+    var rectShaderFrag = `
+varying vec2 vTextureCoord;
 varying vec4 vFrame;
 varying float vTextureId;
 uniform vec4 shadowColor;
@@ -16,7 +18,8 @@ void main(void){
    vec4 color;
    %forloop%
    gl_FragColor = color;
-}`;
+}
+`;
 
     var rectShaderVert = `
 attribute vec2 aVertexPosition;
@@ -42,8 +45,10 @@ void main(void){
 `;
 
     export abstract class TilemapShader extends PIXI.Shader {
+
         maxTextures = 0;
         indexBuffer: GLBuffer;
+
         constructor(gl: WebGLRenderingContext, maxTextures: number, shaderVert: string, shaderFrag: string) {
             super(gl,
                 shaderVert,
@@ -53,7 +58,7 @@ void main(void){
             shaderGenerator.fillSamplers(this, this.maxTextures);
         }
 
-        abstract createVao(renderer : WebGLRenderer, vb: GLBuffer) : VertexArrayObject;
+        abstract createVao(renderer: PIXI.WebGLRenderer, vb: GLBuffer): VertexArrayObject;
     }
 
     export class RectTileShader extends TilemapShader {
@@ -70,7 +75,7 @@ void main(void){
             shaderGenerator.fillSamplers(this, this.maxTextures);
         }
 
-        createVao(renderer : WebGLRenderer, vb: GLBuffer) {
+        createVao(renderer: PIXI.WebGLRenderer, vb: GLBuffer) {
             var gl = renderer.gl;
             return renderer.createVao()
                 .addIndex(this.indexBuffer)
@@ -81,4 +86,5 @@ void main(void){
                 .addAttribute(vb, this.attributes.aTextureId, gl.FLOAT, false, this.stride, 10 * 4);
         }
     }
+
 }
