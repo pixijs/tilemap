@@ -1,5 +1,7 @@
-module PIXI.tilemap {
+namespace pixi_tilemap {
+
     export class CanvasTileRenderer {
+
         renderer: PIXI.CanvasRenderer;
         tileAnim = [0, 0];
         dontUseTransform = false;
@@ -11,5 +13,5 @@ module PIXI.tilemap {
     }
 
     PIXI.CanvasRenderer.registerPlugin('tilemap', CanvasTileRenderer);
-}
 
+}
