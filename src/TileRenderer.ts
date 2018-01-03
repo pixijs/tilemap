@@ -110,12 +110,13 @@ namespace pixi_tilemap {
                 }
             }
 
-            var gltsUsed = i >> 2;
             this.texLoc.length = 0;
-            for (i = 0; i <= gltsUsed; i++) {
+            var gltsUsed = (i + 3) >> 2;
+            for (i = 0; i < gltsUsed; i++) {
                 //remove "i, true" after resolving a bug
                 this.texLoc.push(renderer.bindTexture(glts[i], i, true))
             }
+
             shader.uniforms.uSamplers = this.texLoc;
         }
 
