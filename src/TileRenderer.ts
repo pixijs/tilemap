@@ -113,7 +113,7 @@ module PIXI.tilemap {
                 //remove "i, true" after resolving a bug
                 this.texLoc.push(renderer.bindTexture(glts[i], i, true))
             }
-            
+
             shader.uniforms.uSamplers = this.texLoc;
         }
 
