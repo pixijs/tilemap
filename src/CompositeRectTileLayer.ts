@@ -131,7 +131,9 @@ namespace pixi_tilemap {
         }
 
         renderCanvas(renderer: PIXI.CanvasRenderer) {
-            if(!this.visible) return;
+            if (!this.visible || this.worldAlpha <= 0 || !this.renderable) {
+                return;
+            }
             var plugin = renderer.plugins.tilemap;
             if (!plugin.dontUseTransform) {
                 var wt = this.worldTransform;
@@ -151,7 +153,9 @@ namespace pixi_tilemap {
         }
 
         renderWebGL(renderer: PIXI.WebGLRenderer) {
-            if(!this.visible) return;
+            if (!this.visible || this.worldAlpha <= 0 || !this.renderable) {
+                return;
+            }
             var gl = renderer.gl;
             var plugin = renderer.plugins.tilemap;
             var shader = plugin.getShader();
