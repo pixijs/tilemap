@@ -1,4 +1,7 @@
 # pixi-tilemap
+
+[![Build Status](https://travis-ci.org/pixijs/pixi-tilemap.svg?branch=master)](https://travis-ci.org/pixijs/pixi-tilemap)
+
 Library that helps with tilemaps, provide special shaders and canvas fallback. Works only with pixi > 4.2.4
 
 It has some strict limitations connected to its RPGMV legacy: it uses only up to 16 textures of size 1024x1024, and combines them into 4 render textures of 2k size.
