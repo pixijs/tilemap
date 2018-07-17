@@ -9,10 +9,8 @@ loader.add('button', 'basic/button.png');
 loader.load(function(loader, resources) {
     //first parameter means z-layer, which is not used yet
     //second parameter is list of textures for layers
-    //third parameter means that all our tiles are squares or at least 2x1 dominoes
-    //   and we can optimize it with gl.POINTS
     stage = new PIXI.Container();
-	tilemap = new PIXI.tilemap.CompositeRectTileLayer(0, [resources['atlas_image'].texture], true);
+	tilemap = new PIXI.tilemap.CompositeRectTileLayer(0, [resources['atlas_image'].texture]);
 	stage.addChild(tilemap);
 
     animate();

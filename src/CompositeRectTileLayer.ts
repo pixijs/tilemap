@@ -22,6 +22,10 @@ namespace pixi_tilemap {
         texPerChild: number;
 
         initialize(zIndex?: number, bitmaps?: Array<PIXI.Texture>, texPerChild?: number) {
+            if (texPerChild as any === true) {
+                //old format, ignore it!
+                texPerChild = 0;
+            }
             this.z = this.zIndex = zIndex;
             this.texPerChild = texPerChild || Constant.boundCountPerBuffer * Constant.maxTextures;
             if (bitmaps) {
@@ -62,7 +66,7 @@ namespace pixi_tilemap {
             }
         }
 
-        addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX: number, animY: number) {
+        addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX?: number, animY?: number) {
             var texture: PIXI.Texture;
             var layer: RectTileLayer = null;
             var ind: number = 0;

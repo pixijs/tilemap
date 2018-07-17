@@ -25,7 +25,7 @@ namespace pixi_tilemap {
 
         renderWebGL(renderer: PIXI.WebGLRenderer) {
             if (!this._webGL[renderer.CONTEXT_UID])
-                this.dirty = true;
+                this.dirty++;
             super.renderWebGL(renderer)
         }
 

@@ -8,10 +8,7 @@
         "outFile": "dist/pixi-tilemap.js",
         "sourceMap": true,
         "inlineSources": true,
-        "declaration": true,
-        "typeRoots": [
-          "lib/"
-        ]
+        "declaration": true
 	},
     "include": [
         "src/**/*"
