@@ -21,10 +21,8 @@ loader.load(function(loader: PIXI.loaders.Loader, resources: any) {
 	//third parameter means that all our tiles are squares or at least 2x1 dominoes
 	//   and we can optimize it with gl.POINTS
 	stage = new PIXI.Container();
-	tilemap = new PIXI.tilemap.CompositeRectTileLayer(0, [resources['atlas_image'].texture]);
+	tilemap = new PIXI.tilemap.CompositeRectTileLayer(0, []);
 	stage.addChild(tilemap);
-
-	animate();
 
 	var frame = 0;
 	buildTilemap(frame++);
@@ -33,7 +31,7 @@ loader.load(function(loader: PIXI.loaders.Loader, resources: any) {
 	pic.position.set(200, 100);
 	stage.addChild(pic);
 	//lets animate tilemap every second
-	setInterval(function() { buildTilemap(frame++) }, 400);
+	//setInterval(function() { buildTilemap(frame++) }, 400);
 });
 
 function buildTilemap(frame: number) {
@@ -63,7 +61,3 @@ function buildTilemap(frame: number) {
 	tilemap.addFrame(resources.button.texture, 6*size, 2*size);
 }
 
-function animate() {
-	requestAnimationFrame(animate);
-	renderer.render(stage);
-}
