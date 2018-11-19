@@ -219,7 +219,7 @@ namespace pixi_tilemap {
             var vao = vb.vao;
             renderer.bindVao(vao);
 
-	        tile.checkIndexBuffer(rectsCount);
+            tile.checkIndexBuffer(rectsCount);
 
             var vertexBuf = vb.vb as glCore.GLBuffer;
             //if layer was changed, re-upload vertices

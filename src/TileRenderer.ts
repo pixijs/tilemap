@@ -163,7 +163,7 @@ namespace pixi_tilemap {
             const shader = this.getShader();
             const gl = this.renderer.gl;
 
-	        this.renderer.bindVao(null);
+            this.renderer.bindVao(null);
 
             const vb = PIXI.glCore.GLBuffer.createVertexBuffer(gl, null, gl.STREAM_DRAW);
             const stuff = {

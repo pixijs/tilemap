@@ -162,7 +162,7 @@ namespace pixi_tilemap {
             }
             var gl = renderer.gl;
             var plugin = renderer.plugins.tilemap;
-	        renderer.setObjectRenderer(plugin);
+            renderer.setObjectRenderer(plugin);
             var shader = plugin.getShader();
             renderer.bindShader(shader);
             //TODO: dont create new array, please
