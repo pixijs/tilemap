@@ -201,7 +201,6 @@ namespace pixi_tilemap {
             var tile = plugin || renderer.plugins.simpleTilemap;
             var gl = renderer.gl;
 
-            tile.checkIndexBuffer(rectsCount);
 
             var shader = tile.getShader();
             var textures = this.textures;
@@ -219,6 +218,9 @@ namespace pixi_tilemap {
             }
             var vao = vb.vao;
             renderer.bindVao(vao);
+
+	        tile.checkIndexBuffer(rectsCount);
+
             var vertexBuf = vb.vb as glCore.GLBuffer;
             //if layer was changed, re-upload vertices
             vertexBuf.bind();

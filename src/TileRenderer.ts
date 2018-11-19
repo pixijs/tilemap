@@ -49,6 +49,7 @@ namespace pixi_tilemap {
         onContextChange() {
             const gl = this.renderer.gl;
             const maxTextures = Constant.maxTextures;
+
             this.rectShader = new RectTileShader(gl, maxTextures);
             this.checkIndexBuffer(2000);
             this.rectShader.indexBuffer = this.indexBuffer;
@@ -92,6 +93,8 @@ namespace pixi_tilemap {
             const glts = this.glTextures;
             const bounds = this.boundSprites;
 
+            const oldActiveRenderTarget = this.renderer._activeRenderTarget;
+
             let i: number;
             for (i = 0; i < len; i++) {
                 const texture = textures[i];
@@ -108,6 +111,11 @@ namespace pixi_tilemap {
                         _hackSubImage((glt.baseTexture as any)._glTextures[renderer.CONTEXT_UID], bs);
                     }
                 }
+            }
+
+            // fix in case we are inside of filter or renderTexture
+            if (!oldActiveRenderTarget.root) {
+                this.renderer._activeRenderTarget.frameBuffer.bind();
             }
 
             this.texLoc.length = 0;
@@ -154,6 +162,9 @@ namespace pixi_tilemap {
             const id = ++TileRenderer.vbAutoincrement;
             const shader = this.getShader();
             const gl = this.renderer.gl;
+
+	        this.renderer.bindVao(null);
+
             const vb = PIXI.glCore.GLBuffer.createVertexBuffer(gl, null, gl.STREAM_DRAW);
             const stuff = {
                 id: id,
