@@ -160,8 +160,8 @@ var pixi_tilemap;
             }
             var gl = renderer.gl;
             var plugin = renderer.plugins.tilemap;
-            var shader = plugin.getShader();
             renderer.setObjectRenderer(plugin);
+            var shader = plugin.getShader();
             renderer.bindShader(shader);
             this._globalMat = this._globalMat || new PIXI.Matrix();
             renderer._activeRenderTarget.projectionMatrix.copy(this._globalMat).append(this.worldTransform);
@@ -418,7 +418,6 @@ var pixi_tilemap;
             var rectsCount = points.length / 9;
             var tile = plugin || renderer.plugins.simpleTilemap;
             var gl = renderer.gl;
-            tile.checkIndexBuffer(rectsCount);
             var shader = tile.getShader();
             var textures = this.textures;
             if (textures.length === 0)
@@ -433,6 +432,7 @@ var pixi_tilemap;
             }
             var vao = vb.vao;
             renderer.bindVao(vao);
+            tile.checkIndexBuffer(rectsCount);
             var vertexBuf = vb.vb;
             vertexBuf.bind();
             var vertices = rectsCount * shader.vertPerQuad;
@@ -636,6 +636,7 @@ var pixi_tilemap;
             }
             var glts = this.glTextures;
             var bounds = this.boundSprites;
+            var oldActiveRenderTarget = this.renderer._activeRenderTarget;
             var i;
             for (i = 0; i < len; i++) {
                 var texture = textures[i];
@@ -654,6 +655,9 @@ var pixi_tilemap;
                         _hackSubImage(glt.baseTexture._glTextures[renderer.CONTEXT_UID], bs);
                     }
                 }
+            }
+            if (!oldActiveRenderTarget.root) {
+                this.renderer._activeRenderTarget.frameBuffer.bind();
             }
             this.texLoc.length = 0;
             var gltsUsed = (i + 3) >> 2;
@@ -692,6 +696,7 @@ var pixi_tilemap;
             var id = ++TileRenderer.vbAutoincrement;
             var shader = this.getShader();
             var gl = this.renderer.gl;
+            this.renderer.bindVao(null);
             var vb = PIXI.glCore.GLBuffer.createVertexBuffer(gl, null, gl.STREAM_DRAW);
             var stuff = {
                 id: id,
