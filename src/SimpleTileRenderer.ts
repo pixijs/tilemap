@@ -23,10 +23,12 @@ namespace pixi_tilemap {
 
         onContextChange() {
             const gl = this.renderer.gl;
+
+            this.sn = TileRenderer.snAutoincrement++;
+
             this.rectShader = new RectTileShader(gl, 1);
             this.checkIndexBuffer(2000);
             this.rectShader.indexBuffer = this.indexBuffer;
-            this.vbs = {};
         }
 
         bindTextures(renderer: PIXI.WebGLRenderer, shader: TilemapShader, textures: Array<PIXI.Texture>) {
