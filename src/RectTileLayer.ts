@@ -174,9 +174,24 @@ namespace pixi_tilemap {
         }
 
         vbId = 0;
+        vb: any = null;
         vbBuffer: ArrayBuffer = null;
         vbArray: Float32Array = null;
         vbInts: Uint32Array = null;
+
+        getVb(renderer: TileRenderer) {
+            var _vb = this.vb;
+
+            if (_vb) {
+                if (_vb.rendererSN === renderer.sn){
+                    return _vb;
+                }
+                _vb.vb.destroy();
+                _vb.vao.destroy();
+            }
+
+            return null;
+        }
 
         renderWebGL(renderer: PIXI.WebGLRenderer) {
             var gl = renderer.gl;
@@ -209,9 +224,10 @@ namespace pixi_tilemap {
             tile.bindTextures(renderer, shader, textures);
 
             //lost context! recover!
-            var vb = tile.getVb(this.vbId);
+            var vb = this.getVb(tile as TileRenderer);
             if (!vb) {
                 vb = tile.createVb();
+                this.vb = vb;
                 this.vbId = vb.id;
                 this.vbBuffer = null;
                 this.modificationMarker = 0;
@@ -328,6 +344,14 @@ namespace pixi_tilemap {
 
         clearModify() {
             this.modificationMarker = this.pointsBuf.length;
+        }
+
+        destroy(options?: PIXI.DestroyOptions | boolean) {
+            super.destroy(options);
+            if (this.vb) {
+                this.vb.destroy();
+                this.vb = null;
+            }
         }
     }
 
