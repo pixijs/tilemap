@@ -25,11 +25,14 @@ namespace pixi_tilemap {
     export class TileRenderer extends PIXI.ObjectRenderer {
 
         static vbAutoincrement = 0;
+        static snAutoincrement = 0;
+
         static SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
         static DO_CLEAR = false;
+
         renderer: PIXI.WebGLRenderer;
         gl: WebGLRenderingContext;
-        vbs:  { [key: string]: any; } = {};
+        sn: number = -1;
         indices = new Uint16Array(0);
         indexBuffer: glCore.GLBuffer;
         lastTimeCheck = 0;
@@ -50,10 +53,11 @@ namespace pixi_tilemap {
             const gl = this.renderer.gl;
             const maxTextures = Constant.maxTextures;
 
+            this.sn = TileRenderer.snAutoincrement++;
+
             this.rectShader = new RectTileShader(gl, maxTextures);
             this.checkIndexBuffer(2000);
             this.rectShader.indexBuffer = this.indexBuffer;
-            this.vbs = {};
             this.glTextures = [];
             this.boundSprites = [];
             this.initBounds();
@@ -128,34 +132,9 @@ namespace pixi_tilemap {
             shader.uniforms.uSamplers = this.texLoc;
         }
 
-        checkLeaks() {
-            const now = Date.now();
-            const old = now - 10000;
-            if (this.lastTimeCheck < old ||
-                this.lastTimeCheck > now) {
-                this.lastTimeCheck = now;
-                const vbs = this.vbs;
-                for (let key in vbs) {
-                    if (vbs[key].lastTimeAccess < old) {
-                        this.removeVb(key);
-                    }
-                }
-            }
-        }
-
         start() {
             this.renderer.state.setBlendMode(PIXI.BLEND_MODES.NORMAL);
             //sorry, nothing
-        }
-
-        getVb(id: string) {
-            this.checkLeaks();
-            const vb = this.vbs[id];
-            if (vb) {
-                vb.lastAccessTime = Date.now();
-                return vb;
-            }
-            return null;
         }
 
         createVb() {
@@ -171,18 +150,10 @@ namespace pixi_tilemap {
                 vb: vb,
                 vao: shader.createVao(this.renderer, vb),
                 lastTimeAccess: Date.now(),
-                shader: shader
+                shader: shader,
+                rendererSN: this.sn
             };
-            this.vbs[id] = stuff;
             return stuff;
-        }
-
-        removeVb(id: string) {
-            if (this.vbs[id]) {
-                this.vbs[id].vb.destroy();
-                this.vbs[id].vao.destroy();
-                delete this.vbs[id];
-            }
         }
 
         checkIndexBuffer(size: number) {
