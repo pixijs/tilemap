@@ -186,12 +186,18 @@ namespace pixi_tilemap {
                 if (_vb.rendererSN === renderer.sn){
                     return _vb;
                 }
-                _vb.vb.destroy();
-                _vb.vao.destroy();
-                this.vb = null;
+                this.destroyVb();
             }
 
             return null;
+        }
+
+        destroyVb() {
+            if (this.vb) {
+                this.vb.vb.destroy();
+                this.vb.vao.destroy();
+                this.vb = null;
+            }
         }
 
         renderWebGL(renderer: PIXI.WebGLRenderer) {
@@ -349,11 +355,7 @@ namespace pixi_tilemap {
 
         destroy(options?: PIXI.DestroyOptions | boolean) {
             super.destroy(options);
-            if (this.vb) {
-                this.vb.vb.destroy();
-                this.vb.vao.destroy();
-                this.vb = null;
-            }
+            this.destroyVb();
         }
     }
 
