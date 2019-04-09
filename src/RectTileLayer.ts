@@ -349,7 +349,8 @@ namespace pixi_tilemap {
         destroy(options?: PIXI.DestroyOptions | boolean) {
             super.destroy(options);
             if (this.vb) {
-                this.vb.destroy();
+                this.vb.vb.destroy();
+                this.vb.vao.destroy();
                 this.vb = null;
             }
         }
