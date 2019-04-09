@@ -188,6 +188,7 @@ namespace pixi_tilemap {
                 }
                 _vb.vb.destroy();
                 _vb.vao.destroy();
+                this.vb = null;
             }
 
             return null;
