@@ -62,13 +62,17 @@ declare module PIXI.tilemap {
         renderCanvas(renderer: PIXI.CanvasRenderer): void;
         renderCanvasCore(renderer: PIXI.CanvasRenderer): void;
         vbId: number;
+        vb: any;
         vbBuffer: ArrayBuffer;
         vbArray: Float32Array;
         vbInts: Uint32Array;
+        getVb(renderer: TileRenderer): any;
+        destroyVb(): void;
         renderWebGL(renderer: PIXI.WebGLRenderer): void;
         renderWebGLCore(renderer: PIXI.WebGLRenderer, plugin: PIXI.ObjectRenderer): void;
         isModified(anim: boolean): boolean;
         clearModify(): void;
+        destroy(options?: PIXI.DestroyOptions | boolean): void;
     }
 }
 declare module PIXI.tilemap {
@@ -106,13 +110,12 @@ declare module PIXI.tilemap {
     import glCore = PIXI.glCore;
     class TileRenderer extends PIXI.ObjectRenderer {
         static vbAutoincrement: number;
+        static snAutoincrement: number;
         static SCALE_MODE: number;
         static DO_CLEAR: boolean;
         renderer: PIXI.WebGLRenderer;
         gl: WebGLRenderingContext;
-        vbs: {
-            [key: string]: any;
-        };
+        sn: number;
         indices: Uint16Array;
         indexBuffer: glCore.GLBuffer;
         lastTimeCheck: number;
@@ -125,18 +128,17 @@ declare module PIXI.tilemap {
         constructor(renderer: PIXI.WebGLRenderer);
         onContextChange(): void;
         initBounds(): void;
+        bindTexturesWithoutRT(renderer: PIXI.WebGLRenderer, shader: TilemapShader, textures: Array<PIXI.Texture>): void;
         bindTextures(renderer: PIXI.WebGLRenderer, shader: TilemapShader, textures: Array<PIXI.Texture>): void;
-        checkLeaks(): void;
         start(): void;
-        getVb(id: string): any;
         createVb(): {
             id: number;
             vb: glCore.GLBuffer;
             vao: glCore.VertexArrayObject;
             lastTimeAccess: number;
             shader: TilemapShader;
+            rendererSN: number;
         };
-        removeVb(id: string): void;
         checkIndexBuffer(size: number): void;
         getShader(): TilemapShader;
         destroy(): void;

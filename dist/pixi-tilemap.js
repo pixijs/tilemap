@@ -256,6 +256,7 @@ var pixi_tilemap;
             _this.offsetY = 0;
             _this.compositeParent = false;
             _this.vbId = 0;
+            _this.vb = null;
             _this.vbBuffer = null;
             _this.vbArray = null;
             _this.vbInts = null;
@@ -398,6 +399,23 @@ var pixi_tilemap;
                 }
             }
         };
+        RectTileLayer.prototype.getVb = function (renderer) {
+            var _vb = this.vb;
+            if (_vb) {
+                if (_vb.rendererSN === renderer.sn) {
+                    return _vb;
+                }
+                this.destroyVb();
+            }
+            return null;
+        };
+        RectTileLayer.prototype.destroyVb = function () {
+            if (this.vb) {
+                this.vb.vb.destroy();
+                this.vb.vao.destroy();
+                this.vb = null;
+            }
+        };
         RectTileLayer.prototype.renderWebGL = function (renderer) {
             var gl = renderer.gl;
             var plugin = renderer.plugins.simpleTilemap;
@@ -423,9 +441,10 @@ var pixi_tilemap;
             if (textures.length === 0)
                 return;
             tile.bindTextures(renderer, shader, textures);
-            var vb = tile.getVb(this.vbId);
+            var vb = this.getVb(tile);
             if (!vb) {
                 vb = tile.createVb();
+                this.vb = vb;
                 this.vbId = vb.id;
                 this.vbBuffer = null;
                 this.modificationMarker = 0;
@@ -433,6 +452,7 @@ var pixi_tilemap;
             var vao = vb.vao;
             renderer.bindVao(vao);
             tile.checkIndexBuffer(rectsCount);
+            var boundCountPerBuffer = pixi_tilemap.Constant.boundCountPerBuffer;
             var vertexBuf = vb.vb;
             vertexBuf.bind();
             var vertices = rectsCount * shader.vertPerQuad;
@@ -460,9 +480,16 @@ var pixi_tilemap;
                 for (var i = 0; i < points.length; i += 9) {
                     var eps = 0.5;
                     if (this.compositeParent) {
-                        textureId = (points[i + 8] >> 2);
-                        shiftU = this.offsetX * (points[i + 8] & 1);
-                        shiftV = this.offsetY * ((points[i + 8] >> 1) & 1);
+                        if (boundCountPerBuffer > 1) {
+                            textureId = (points[i + 8] >> 2);
+                            shiftU = this.offsetX * (points[i + 8] & 1);
+                            shiftV = this.offsetY * ((points[i + 8] >> 1) & 1);
+                        }
+                        else {
+                            textureId = points[i + 8];
+                            shiftU = 0;
+                            shiftV = 0;
+                        }
                     }
                     var x = points[i + 2], y = points[i + 3];
                     var w = points[i + 4], h = points[i + 5];
@@ -527,6 +554,10 @@ var pixi_tilemap;
         RectTileLayer.prototype.clearModify = function () {
             this.modificationMarker = this.pointsBuf.length;
         };
+        RectTileLayer.prototype.destroy = function (options) {
+            _super.prototype.destroy.call(this, options);
+            this.destroyVb();
+        };
         return RectTileLayer;
     }(PIXI.Container));
     pixi_tilemap.RectTileLayer = RectTileLayer;
@@ -587,7 +618,7 @@ var pixi_tilemap;
         __extends(TileRenderer, _super);
         function TileRenderer(renderer) {
             var _this = _super.call(this, renderer) || this;
-            _this.vbs = {};
+            _this.sn = -1;
             _this.indices = new Uint16Array(0);
             _this.lastTimeCheck = 0;
             _this.tileAnim = [0, 0];
@@ -597,15 +628,18 @@ var pixi_tilemap;
         TileRenderer.prototype.onContextChange = function () {
             var gl = this.renderer.gl;
             var maxTextures = pixi_tilemap.Constant.maxTextures;
+            this.sn = TileRenderer.snAutoincrement++;
             this.rectShader = new pixi_tilemap.RectTileShader(gl, maxTextures);
             this.checkIndexBuffer(2000);
             this.rectShader.indexBuffer = this.indexBuffer;
-            this.vbs = {};
             this.glTextures = [];
             this.boundSprites = [];
             this.initBounds();
         };
         TileRenderer.prototype.initBounds = function () {
+            if (pixi_tilemap.Constant.boundCountPerBuffer <= 1) {
+                return;
+            }
             var gl = this.renderer.gl;
             var maxTextures = pixi_tilemap.Constant.maxTextures;
             for (var i = 0; i < maxTextures; i++) {
@@ -624,10 +658,31 @@ var pixi_tilemap;
                 }
             }
         };
+        TileRenderer.prototype.bindTexturesWithoutRT = function (renderer, shader, textures) {
+            var len = textures.length;
+            var maxTextures = pixi_tilemap.Constant.maxTextures;
+            var samplerSize = shader.uniforms.uSamplerSize;
+            this.texLoc.length = 0;
+            for (var i = 0; i < textures.length; i++) {
+                var texture = textures[i];
+                if (!texture || !texture.valid) {
+                    return;
+                }
+                this.texLoc.push(renderer.bindTexture(textures[i], i, true));
+                samplerSize[i * 2] = 1.0 / textures[i].baseTexture.width;
+                samplerSize[i * 2 + 1] = 1.0 / textures[i].baseTexture.height;
+            }
+            shader.uniforms.uSamplerSize = samplerSize;
+            shader.uniforms.uSamplers = this.texLoc;
+        };
         TileRenderer.prototype.bindTextures = function (renderer, shader, textures) {
             var len = textures.length;
             var maxTextures = pixi_tilemap.Constant.maxTextures;
             if (len > pixi_tilemap.Constant.boundCountPerBuffer * maxTextures) {
+                return;
+            }
+            if (pixi_tilemap.Constant.boundCountPerBuffer <= 1) {
+                this.bindTexturesWithoutRT(renderer, shader, textures);
                 return;
             }
             var doClear = TileRenderer.DO_CLEAR;
@@ -666,31 +721,8 @@ var pixi_tilemap;
             }
             shader.uniforms.uSamplers = this.texLoc;
         };
-        TileRenderer.prototype.checkLeaks = function () {
-            var now = Date.now();
-            var old = now - 10000;
-            if (this.lastTimeCheck < old ||
-                this.lastTimeCheck > now) {
-                this.lastTimeCheck = now;
-                var vbs = this.vbs;
-                for (var key in vbs) {
-                    if (vbs[key].lastTimeAccess < old) {
-                        this.removeVb(key);
-                    }
-                }
-            }
-        };
         TileRenderer.prototype.start = function () {
             this.renderer.state.setBlendMode(PIXI.BLEND_MODES.NORMAL);
-        };
-        TileRenderer.prototype.getVb = function (id) {
-            this.checkLeaks();
-            var vb = this.vbs[id];
-            if (vb) {
-                vb.lastAccessTime = Date.now();
-                return vb;
-            }
-            return null;
         };
         TileRenderer.prototype.createVb = function () {
             var id = ++TileRenderer.vbAutoincrement;
@@ -703,17 +735,10 @@ var pixi_tilemap;
                 vb: vb,
                 vao: shader.createVao(this.renderer, vb),
                 lastTimeAccess: Date.now(),
-                shader: shader
+                shader: shader,
+                rendererSN: this.sn
             };
-            this.vbs[id] = stuff;
             return stuff;
-        };
-        TileRenderer.prototype.removeVb = function (id) {
-            if (this.vbs[id]) {
-                this.vbs[id].vb.destroy();
-                this.vbs[id].vao.destroy();
-                delete this.vbs[id];
-            }
         };
         TileRenderer.prototype.checkIndexBuffer = function (size) {
             var totalIndices = size * 6;
@@ -752,6 +777,7 @@ var pixi_tilemap;
             this.rectShader = null;
         };
         TileRenderer.vbAutoincrement = 0;
+        TileRenderer.snAutoincrement = 0;
         TileRenderer.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
         TileRenderer.DO_CLEAR = false;
         return TileRenderer;
@@ -770,10 +796,10 @@ var pixi_tilemap;
         }
         SimpleTileRenderer.prototype.onContextChange = function () {
             var gl = this.renderer.gl;
+            this.sn = pixi_tilemap.TileRenderer.snAutoincrement++;
             this.rectShader = new pixi_tilemap.RectTileShader(gl, 1);
             this.checkIndexBuffer(2000);
             this.rectShader.indexBuffer = this.indexBuffer;
-            this.vbs = {};
         };
         SimpleTileRenderer.prototype.bindTextures = function (renderer, shader, textures) {
             var len = textures.length;
