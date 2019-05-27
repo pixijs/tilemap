@@ -64,6 +64,10 @@ namespace pixi_tilemap {
         }
 
         initBounds() {
+            if (Constant.boundCountPerBuffer <= 1) {
+                return;
+            }
+
             const gl = this.renderer.gl;
             const maxTextures = Constant.maxTextures;
             for (let i = 0; i < maxTextures; i++) {
@@ -84,10 +88,34 @@ namespace pixi_tilemap {
             }
         }
 
+        bindTexturesWithoutRT(renderer: PIXI.WebGLRenderer, shader: TilemapShader, textures: Array<PIXI.Texture>) {
+            const len = textures.length;
+            const maxTextures = Constant.maxTextures;
+
+            let samplerSize: Array<number> = shader.uniforms.uSamplerSize;
+            this.texLoc.length = 0;
+            for (let i = 0; i < textures.length; i++) {
+                const texture = textures[i];
+                if (!texture || !texture.valid) {
+                    return;
+                }
+                this.texLoc.push(renderer.bindTexture(textures[i], i, true))
+                //TODO: add resolution here
+                samplerSize[i*2] = 1.0 / textures[i].baseTexture.width;
+                samplerSize[i*2 + 1] = 1.0 / textures[i].baseTexture.height;
+            }
+            shader.uniforms.uSamplerSize = samplerSize;
+            shader.uniforms.uSamplers = this.texLoc;
+        }
+
         bindTextures(renderer: PIXI.WebGLRenderer, shader: TilemapShader, textures: Array<PIXI.Texture>) {
             const len = textures.length;
             const maxTextures = Constant.maxTextures;
             if (len > Constant.boundCountPerBuffer * maxTextures) {
+                return;
+            }
+            if (Constant.boundCountPerBuffer <= 1) {
+                this.bindTexturesWithoutRT(renderer, shader, textures);
                 return;
             }
             const doClear = TileRenderer.DO_CLEAR;

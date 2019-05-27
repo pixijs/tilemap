@@ -8,7 +8,13 @@ It has some strict limitations connected to its RPGMV legacy: it uses only up to
 
 When you render the tilemap with other textures, textures will be re-uploaded.
 
-If that limitation is affecting you somehow, either hack it, either help the project by submitting more general solution.
+If that limitation is affecting you somehow, for example if you change texture set too often, please do the following before the creation of renderer, it works only since 1.2.6:
+
+```js
+PIXI.tilemap.Constant.boundCountPerBuffer = 1;
+PIXI.tilemap.Constant.maxTextures = 16;
+```
+
 
 Please use [v3 branch](https://github.com/pixijs/pixi-tilemap/tree/pixiv3) for pixi V3.
 

@@ -244,6 +244,8 @@ namespace pixi_tilemap {
 
             tile.checkIndexBuffer(rectsCount);
 
+            const boundCountPerBuffer = Constant.boundCountPerBuffer;
+
             var vertexBuf = vb.vb as glCore.GLBuffer;
             //if layer was changed, re-upload vertices
             vertexBuf.bind();
@@ -277,9 +279,16 @@ namespace pixi_tilemap {
                 for (var i = 0; i < points.length; i += 9) {
                     var eps = 0.5;
                     if (this.compositeParent){
-                        textureId = (points[i + 8] >> 2);
-                        shiftU = this.offsetX * (points[i + 8] & 1);
-                        shiftV = this.offsetY * ((points[i + 8] >> 1) & 1);
+                        if (boundCountPerBuffer > 1) {
+                            //TODO: what if its more than 4?
+                            textureId = (points[i + 8] >> 2);
+                            shiftU = this.offsetX * (points[i + 8] & 1);
+                            shiftV = this.offsetY * ((points[i + 8] >> 1) & 1);
+                        } else {
+                            textureId = points[i + 8];
+                            shiftU = 0;
+                            shiftV = 0;
+                        }
                     }
                     var x = points[i + 2], y = points[i + 3];
                     var w = points[i + 4], h = points[i + 5];
