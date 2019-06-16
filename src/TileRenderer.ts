@@ -22,6 +22,7 @@ namespace pixi_tilemap {
 
 		constructor(renderer: PIXI.Renderer) {
 			super(renderer);
+			this.rectShader = new RectTileShader(Constant.maxTextures);
 			this.indexBuffer = new PIXI.Buffer(undefined, true, true);
 			this.checkIndexBuffer(2000);
 			this.initBounds();
@@ -74,7 +75,7 @@ namespace pixi_tilemap {
 				const texture = textures[i];
 				if (!texture || !texture.valid) continue;
 				const multi = this.texResources[i >> 2];
-				multi.setTexture(i, texture);
+				multi.setTexture(i & 3, texture);
 			}
 
 			let gltsUsed = (i + 3) >> 2;
@@ -85,8 +86,6 @@ namespace pixi_tilemap {
 		}
 
 		start() {
-			this.renderer.state.setBlendMode(PIXI.BLEND_MODES.NORMAL);
-			this.renderer.shader.bind(this.getShader(), false);
 			//sorry, nothing
 		}
 
@@ -109,27 +108,27 @@ namespace pixi_tilemap {
 				len <<= 1;
 			}
 
-			this.ibLen = size;
-			this.indexBuffer.update((PIXI as any).createIndicesForQuads(size / 6, Constant.use32bitIndex));
+			this.ibLen = totalIndices;
+			this.indexBuffer.update((PIXI as any).utils.createIndicesForQuads(size, Constant.use32bitIndex));
 
-			if (vb) {
-				const curIndex = vb.getIndex();
-				if (curIndex !== this.indexBuffer && (curIndex.data as any).length < totalIndices) {
-					this.swapIndex(vb, this.indexBuffer);
-				}
-			}
+			// 	TODO: create new index buffer instead?
+			// if (vb) {
+			// 	const curIndex = vb.getIndex();
+			// 	if (curIndex !== this.indexBuffer && (curIndex.data as any).length < totalIndices) {
+			// 		this.swapIndex(vb, this.indexBuffer);
+			// 	}
+			// }
 		}
 
-		swapIndex(geom: PIXI.Geometry, indexBuf: PIXI.Buffer) {
-			//TODO: dispose old index buffers?
-			let buffers = (geom as any).buffers;
-			const oldIndex = geom.getIndex();
-			let ind = buffers.indexOf(oldIndex);
-			if (ind >= 0) {
-				buffers.splice(ind, 1);
-			}
-			geom.addIndex(indexBuf);
-		}
+		// swapIndex(geom: PIXI.Geometry, indexBuf: PIXI.Buffer) {
+			// let buffers = (geom as any).buffers;
+			// const oldIndex = geom.getIndex();
+			// let ind = buffers.indexOf(oldIndex);
+			// if (ind >= 0) {
+			// 	buffers.splice(ind, 1);
+			// }
+			// geom.addIndex(indexBuf);
+		// }
 
 		getShader(): TilemapShader {
 			return this.rectShader;

@@ -3,6 +3,7 @@ namespace pixi_tilemap {
 		boundCountPerBuffer: number;
 		boundSize: number;
 		bufferSize: number;
+		DO_CLEAR?: boolean;
 	}
 
 	export class MultiTextureResource extends PIXI.resources.Resource {
@@ -11,6 +12,7 @@ namespace pixi_tilemap {
 
 			const bounds = this.boundSprites;
 			const dirties = this.dirties;
+			this.boundSize = options.boundSize;
 			for (let j = 0; j < options.boundCountPerBuffer; j++) {
 				const spr = new PIXI.Sprite();
 				spr.position.x = options.boundSize * (j & 1);
@@ -18,13 +20,19 @@ namespace pixi_tilemap {
 				bounds.push(spr);
 				dirties.push(0);
 			}
+			this.DO_CLEAR = !!options.DO_CLEAR;
 		}
+
+		DO_CLEAR = false;
+		boundSize: number = 0;
+		_clearBuffer: Uint8Array = null;
 
 		bind(baseTexture: PIXI.BaseTexture) {
 			if (this.baseTex) {
 				throw new Error('Only one baseTexture is allowed for this resource!')
 			}
 			this.baseTex = baseTexture;
+			super.bind(baseTexture);
 		}
 
 		baseTex: PIXI.BaseTexture = null;
@@ -45,6 +53,7 @@ namespace pixi_tilemap {
 			const { gl } = renderer as any;
 
 			const {width, height} = this;
+			gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha);
 
 			if (glTexture.dirtyId < 0) {
 				(glTexture as any).width = width;
@@ -60,6 +69,11 @@ namespace pixi_tilemap {
 					null);
 			}
 
+			const doClear = this.DO_CLEAR;
+			if (doClear && !this._clearBuffer) {
+				this._clearBuffer = new Uint8Array(Constant.boundSize * Constant.boundSize * 4);
+			}
+
 			const bounds = this.boundSprites;
 			for (let i = 0; i < bounds.length; i++) {
 				const spr = bounds[i];
@@ -70,6 +84,17 @@ namespace pixi_tilemap {
 				const res = tex.resource as any;
 				if (!tex.valid || !res || !res.source) {
 					continue;
+				}
+				if (doClear && (tex.width < this.boundSize || tex.height < this.boundSize))
+				{
+					gl.texSubImage2D(texture.target, 0,
+						spr.position.x,
+						spr.position.y,
+						this.boundSize,
+						this.boundSize,
+						texture.format,
+						texture.type,
+						this._clearBuffer);
 				}
 				gl.texSubImage2D(texture.target, 0,
 					spr.position.x,

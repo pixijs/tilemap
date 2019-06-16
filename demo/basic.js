@@ -3,7 +3,7 @@ document.body.appendChild(renderer.view);
 
 var stage, tilemap;
 
-var loader = new PIXI.loaders.Loader();
+var loader = new PIXI.Loader();
 loader.add('atlas', 'basic/atlas.json');
 loader.add('button', 'basic/button.png');
 loader.load(function(loader, resources) {

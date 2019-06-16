@@ -968,12 +968,12 @@ function requireRpgMaker() {
     /**
      * PIXI render method
      *
-     * @method renderWebGL
+     * @method render
      * @param {Object} pixi renderer
      */
-    ShaderTilemap.prototype.renderWebGL = function(renderer) {
+    ShaderTilemap.prototype.render = function(renderer) {
         this._hackRenderer(renderer);
-        PIXI.Container.prototype.renderWebGL.call(this, renderer);
+        PIXI.Container.prototype.render.call(this, renderer);
     };
 
     /**
@@ -1351,7 +1351,7 @@ function requireRpgMaker() {
             var tileset = null;
             var tilesetNames = null;
             var map = null;
-            var loader = new PIXI.loaders.Loader();
+            var loader = new PIXI.Loader();
             var self = this;
             function progress(loader, resource) {
                 if (resource.name == 'tilesets') {

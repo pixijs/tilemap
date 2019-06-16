@@ -182,9 +182,10 @@ namespace pixi_tilemap {
             let shader = plugin.getShader();
             renderer.batch.setObjectRenderer(plugin);
             this._globalMat = shader.uniforms.projTransMatrix;
-            renderer.globalUniforms.uniforms.projectionMatrix.copy(this._globalMat).append(this.worldTransform);
+            renderer.globalUniforms.uniforms.projectionMatrix.copyTo(this._globalMat).append(this.worldTransform);
             shader.uniforms.shadowColor = this.shadowColor;
             shader.uniforms.animationFrame = plugin.tileAnim;
+            renderer.shader.bind(shader, false);
             this.renderWebGLCore(renderer, plugin);
         }
 
@@ -309,7 +310,7 @@ namespace pixi_tilemap {
             }
 
             (renderer.geometry as any).bind(vb, shader);
-            renderer.geometry.draw(PIXI.DRAW_MODES.TRIANGLES, rectsCount * 6, PIXI.TYPES.UNSIGNED_SHORT, 0);
+            renderer.geometry.draw(PIXI.DRAW_MODES.TRIANGLES, rectsCount * 6, 0);
         }
 
         isModified(anim: boolean) {

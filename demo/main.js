@@ -44,9 +44,9 @@ function isOptionValid(name) {
 function setupView() {
     var backCanvas = document.querySelector('#backCanvas');
     if (isOptionValid('canvas'))
-        _renderer = new PIXI.CanvasRenderer(backCanvas.width, backCanvas.height, {view: backCanvas, resolution: resolution, antialias: 1, autoresize: true});
+        _renderer = new PIXI.CanvasRenderer({width: backCanvas.width, height: backCanvas.height, view: backCanvas, resolution: resolution, antialias: 1, autoresize: true});
     else
-        _renderer = PIXI.autoDetectRenderer(backCanvas.width, backCanvas.height, {view: backCanvas, resolution: resolution, antialias: 1, autoresize: true});
+        _renderer = PIXI.autoDetectRenderer({width: backCanvas.width, height: backCanvas.height, view: backCanvas, resolution: resolution, antialias: 1, autoresize: true});
     resize();
     window.addEventListener('resize', resize)
 }

@@ -162,12 +162,13 @@ namespace pixi_tilemap {
             }
             let plugin = (renderer.plugins as any)['tilemap'];
             let shader = plugin.getShader();
+            renderer.batch.setObjectRenderer(plugin);
             //TODO: dont create new array, please
             this._globalMat = shader.uniforms.projTransMatrix;
-            renderer.globalUniforms.uniforms.projectionMatrix.copy(this._globalMat).append(this.worldTransform);
+            renderer.globalUniforms.uniforms.projectionMatrix.copyTo(this._globalMat).append(this.worldTransform);
             shader.uniforms.shadowColor = this.shadowColor;
-            let af = shader.uniforms.animationFrame = plugin.tileAnim;
-            //shader.syncUniform(shader.uniforms.animationFrame);
+            shader.uniforms.animationFrame = plugin.tileAnim;
+            renderer.shader.bind(shader, false);
             let layers = this.children;
             for (let i = 0; i < layers.length; i++) {
                 (layers[i] as RectTileLayer).renderWebGLCore(renderer, plugin);
