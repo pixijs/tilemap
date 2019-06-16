@@ -1,6 +1,6 @@
 {
   "name": "pixi-tilemap",
-  "version": "1.2.6",
+  "version": "2.0.0",
   "description": "Pixi-tilemap provides tilemap shaders and tilemap renderer for pixi.js (v3 and v4). Used in rpgmaker MV.",
   "author": "Ivan Popelyshev",
   "contributors": [

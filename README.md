@@ -28,13 +28,9 @@ There's limitation on 16k tiles per one tilemap. If you want to lift it, please 
 PIXI.tilemap.Constant.use32bitIndex = true;
 ```
 
-Please use [v4 branch](https://github.com/pixijs/pixi-tilemap/tree/v4.x) for pixi V4, npm version is `1.2.6`
+For RPGMaker MV please use [v4 branch](https://github.com/pixijs/pixi-tilemap/tree/v4.x) for pixi V4, npm version is `1.2.6`
 
 Please use [v3 branch](https://github.com/pixijs/pixi-tilemap/tree/pixiv3) for pixi V3.
-
-Rpgmaker MV - check.
-
-TODO: Tiled, gameofbombs - in progress.
 
 Canvas fallback is 5x slower than vanilla rpgmaker. Webgl version is faster and doesnt use extra textures.
 
