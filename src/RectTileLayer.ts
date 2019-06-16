@@ -1,6 +1,5 @@
 namespace pixi_tilemap {
     export class RectTileLayer extends PIXI.Container {
-
         constructor(zIndex: number, texture: PIXI.Texture | Array<PIXI.Texture>) {
             super();
             this.initialize(zIndex, texture);
@@ -45,7 +44,7 @@ namespace pixi_tilemap {
                 texture = this.textures[textureIndex];
             } else {
                 if (typeof texture_ === "string") {
-                    texture = PIXI.Texture.fromImage(texture_);
+                    texture = PIXI.Texture.from(texture_);
                 } else {
                     texture = texture_ as PIXI.Texture;
                 }
@@ -127,7 +126,7 @@ namespace pixi_tilemap {
             }
         }
 
-        renderCanvas(renderer: PIXI.CanvasRenderer) {
+        renderCanvas(renderer: any) {
             let plugin = renderer.plugins.tilemap;
             if (!plugin.dontUseTransform) {
                 let wt = this.worldTransform;
@@ -143,7 +142,7 @@ namespace pixi_tilemap {
             this.renderCanvasCore(renderer);
         }
 
-        renderCanvasCore(renderer: PIXI.CanvasRenderer) {
+        renderCanvasCore(renderer: any) {
             if (this.textures.length === 0) return;
             let points = this.pointsBuf;
             renderer.context.fillStyle = '#000000';
@@ -166,7 +165,7 @@ namespace pixi_tilemap {
         }
 
         vbId = 0;
-        vb: PIXI.Geometry = null;
+        vb: RectTileGeom = null;
         vbBuffer: ArrayBuffer = null;
         vbArray: Float32Array = null;
         vbInts: Uint32Array = null;
@@ -178,69 +177,58 @@ namespace pixi_tilemap {
             }
         }
 
-        render(renderer: PIXIRenderer) {
-            let plugin = renderer.plugins.simpleTilemap;
+        render(renderer: PIXI.Renderer) {
+            let plugin = (renderer.plugins as any)['tilemap'];
             let shader = plugin.getShader();
-            renderer.setObjectRenderer(plugin);
-            renderer.bindShader(shader);
-            //TODO: dont create new array, please
-            this._globalMat = this._globalMat || new PIXI.Matrix();
-            renderer._activeRenderTarget.projectionMatrix.copy(this._globalMat).append(this.worldTransform);
-            shader.uniforms.projectionMatrix = this._globalMat.toArray(true);
+            renderer.batch.setObjectRenderer(plugin);
+            this._globalMat = shader.uniforms.projTransMatrix;
+            renderer.globalUniforms.uniforms.projectionMatrix.copy(this._globalMat).append(this.worldTransform);
             shader.uniforms.shadowColor = this.shadowColor;
-            let af = shader.uniforms.animationFrame = plugin.tileAnim;
-            //shader.syncUniform(shader.uniforms.animationFrame);
+            shader.uniforms.animationFrame = plugin.tileAnim;
             this.renderWebGLCore(renderer, plugin);
         }
 
-        renderWebGLCore(renderer: PIXI.WebGLRenderer, plugin: PIXI.ObjectRenderer) {
+        renderWebGLCore(renderer: PIXI.Renderer, plugin: TileRenderer) {
             let points = this.pointsBuf;
             if (points.length === 0) return;
             let rectsCount = points.length / 9;
-            let tile = plugin || renderer.plugins.simpleTilemap;
-            let gl = renderer.gl;
 
-
-            let shader = tile.getShader();
+            let shader = plugin.getShader();
             let textures = this.textures;
             if (textures.length === 0) return;
 
-            tile.bindTextures(renderer, shader, textures);
+            plugin.bindTextures(renderer, shader, textures);
 
             //lost context! recover!
-            let vb = this.getVb(tile as TileRenderer);
+            let vb = this.vb;
             if (!vb) {
-                vb = tile.createVb();
+                vb = plugin.createVb();
                 this.vb = vb;
-                this.vbId = vb.id;
+                this.vbId = (vb as any).id;
                 this.vbBuffer = null;
                 this.modificationMarker = 0;
             }
-            let vao = vb.vao;
-            renderer.bindVao(vao);
 
-            tile.checkIndexBuffer(rectsCount);
-
+            plugin.checkIndexBuffer(rectsCount, vb);
             const boundCountPerBuffer = Constant.boundCountPerBuffer;
 
-            let vertexBuf = vb.vb as glCore.GLBuffer;
+            let vertexBuf = vb.getBuffer('aVertexPosition');
             //if layer was changed, re-upload vertices
-            vertexBuf.bind();
-            let vertices = rectsCount * shader.vertPerQuad;
+            let vertices = rectsCount * vb.vertPerQuad;
             if (vertices === 0) return;
             if (this.modificationMarker !== vertices) {
                 this.modificationMarker = vertices;
-                let vs = shader.stride * vertices;
+                let vs = vb.stride * vertices;
                 if (!this.vbBuffer || this.vbBuffer.byteLength < vs) {
                     //!@#$ happens, need resize
-                    let bk = shader.stride;
+                    let bk = vb.stride;
                     while (bk < vs) {
                         bk *= 2;
                     }
                     this.vbBuffer = new ArrayBuffer(bk);
                     this.vbArray = new Float32Array(this.vbBuffer);
                     this.vbInts = new Uint32Array(this.vbBuffer);
-                    vertexBuf.upload(this.vbBuffer, 0, true);
+                    vertexBuf.update(this.vbBuffer);
                 }
 
                 let arr = this.vbArray, ints = this.vbInts;
@@ -317,14 +305,11 @@ namespace pixi_tilemap {
                     arr[sz++] = textureId;
                 }
 
-                // if (vs > this.vbArray.length/2 ) {
-                vertexBuf.upload(arr, 0, true);
-                // } else {
-                //     let view = arr.subarray(0, vs);
-                //     vb.upload(view, 0);
-                // }
+                vertexBuf.update(arr);
             }
-            gl.drawElements(gl.TRIANGLES, rectsCount * 6, gl.UNSIGNED_SHORT, 0);
+
+            (renderer.geometry as any).bind(vb, shader);
+            renderer.geometry.draw(PIXI.DRAW_MODES.TRIANGLES, rectsCount * 6, PIXI.TYPES.UNSIGNED_SHORT, 0);
         }
 
         isModified(anim: boolean) {
@@ -339,7 +324,7 @@ namespace pixi_tilemap {
             this.modificationMarker = this.pointsBuf.length;
         }
 
-        destroy(options?: PIXI.DestroyOptions | boolean) {
+        destroy(options?: any) {
             super.destroy(options);
             this.destroyVb();
         }

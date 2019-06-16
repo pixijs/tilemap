@@ -13,27 +13,27 @@ namespace pixi_tilemap {
         zIndex: number;
         _previousLayers: number;
         canvasBuffer: HTMLCanvasElement;
-        _tempRender: PIXI.CanvasRenderer;
+        _tempRender: any;
         _lastAnimationFrame: number = -1;
         layerTransform: PIXI.Matrix;
 
         clear() {
-            var layers = this.children as Array<CompositeRectTileLayer>;
-            for (var i = 0; i < layers.length; i++)
+            let layers = this.children as Array<CompositeRectTileLayer>;
+            for (let i = 0; i < layers.length; i++)
                 layers[i].clear();
             this._previousLayers = 0;
         }
 
         cacheIfDirty() {
-            var tilemap: any = this.tilemap;
-            var layers = this.children as Array<CompositeRectTileLayer>;
-            var modified = this._previousLayers !== layers.length;
+            let tilemap: any = this.tilemap;
+            let layers = this.children as Array<CompositeRectTileLayer>;
+            let modified = this._previousLayers !== layers.length;
             this._previousLayers = layers.length;
-            var buf = this.canvasBuffer;
-            var tempRender = this._tempRender;
+            let buf = this.canvasBuffer;
+            let tempRender = this._tempRender;
             if (!buf) {
                 buf = this.canvasBuffer = document.createElement('canvas');
-                tempRender = this._tempRender = new PIXI.CanvasRenderer(100, 100, {view: buf});
+                tempRender = this._tempRender = new (PIXI as any).CanvasRenderer(100, 100, {view: buf});
                 tempRender.context = tempRender.rootContext;
                 tempRender.plugins.tilemap.dontUseTransform = true;
             }
@@ -43,7 +43,7 @@ namespace pixi_tilemap {
                 buf.height = tilemap._layerHeight;
                 modified = true;
             }
-            var i: number;
+            let i: number;
             if (!modified) {
                 for (i = 0; i < layers.length; i++) {
                     if (layers[i].isModified(this._lastAnimationFrame !== tilemap.animationFrame)) {
@@ -70,9 +70,9 @@ namespace pixi_tilemap {
             }
         }
 
-        renderCanvas(renderer: PIXI.CanvasRenderer) {
+        renderCanvas(renderer: any) {
             this.cacheIfDirty();
-            var wt = this.layerTransform;
+            let wt = this.layerTransform;
             renderer.context.setTransform(
                 wt.a,
                 wt.b,
@@ -81,7 +81,7 @@ namespace pixi_tilemap {
                 wt.tx * renderer.resolution,
                 wt.ty * renderer.resolution
             );
-            var tilemap = this.tilemap;
+            let tilemap = this.tilemap;
             renderer.context.drawImage(this.canvasBuffer, 0, 0);
         }
     }

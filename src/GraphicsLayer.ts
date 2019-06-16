@@ -1,17 +1,12 @@
 namespace pixi_tilemap {
-
     class GraphicsLayer extends PIXI.Graphics {
-
-        z: number;
-        zIndex: number;
-
         constructor(zIndex: number) {
             super();
-            this.z = this.zIndex = zIndex;
+            this.zIndex = zIndex;
         }
 
-        renderCanvas(renderer: PIXI.CanvasRenderer) {
-            var wt: PIXI.Matrix = null;
+        renderCanvas(renderer: any) {
+            let wt: PIXI.Matrix = null;
             if (renderer.plugins.tilemap.dontUseTransform) {
                 wt = this.transform.worldTransform;
                 this.transform.worldTransform = PIXI.Matrix.IDENTITY;
@@ -23,11 +18,11 @@ namespace pixi_tilemap {
             renderer.context.globalAlpha = 1.0;
         }
 
-        renderWebGL(renderer: PIXI.WebGLRenderer) {
-            if (!this._webGL[renderer.CONTEXT_UID])
-                this.dirty++;
-            super.renderWebGL(renderer)
-        }
+        // renderWebGL(renderer: PIXI.Renderer) {
+        //     if (!this._webGL[renderer.CONTEXT_UID])
+        //         this.dirty++;
+        //     super.renderWebGL(renderer)
+        // }
 
         isModified(anim: boolean): boolean {
             return false;

@@ -10,7 +10,7 @@ namespace pixi_tilemap {
         }
 
         updateTransform() {
-            super.displayObjectUpdateTransform()
+            (this as any).displayObjectUpdateTransform();
         }
 
         z: number;
@@ -89,7 +89,7 @@ namespace pixi_tilemap {
                 texture = layer.textures[ind];
             } else {
                 if (typeof texture_ === "string") {
-                    texture = PIXI.Texture.fromImage(texture_);
+                    texture = PIXI.Texture.from(texture_);
                 } else {
                     texture = texture_ as PIXI.Texture;
                 }
@@ -110,7 +110,7 @@ namespace pixi_tilemap {
                 }
 
                 if (!layer) {
-                    for (i = 0; i < children.length; i++) {
+                    for (let i = 0; i < children.length; i++) {
                         let child = children[i] as RectTileLayer;
                         if (child.textures.length < this.texPerChild) {
                             layer = child;
@@ -134,7 +134,7 @@ namespace pixi_tilemap {
             return true;
         }
 
-        renderCanvas(renderer: PIXI.CanvasRenderer) {
+        renderCanvas(renderer: any) {
             if (!this.visible || this.worldAlpha <= 0 || !this.renderable) {
                 return;
             }
@@ -156,19 +156,15 @@ namespace pixi_tilemap {
             }
         }
 
-        renderWebGL(renderer: PIXI.WebGLRenderer) {
+        render(renderer: PIXI.Renderer) {
             if (!this.visible || this.worldAlpha <= 0 || !this.renderable) {
                 return;
             }
-            let gl = renderer.gl;
-            let plugin = renderer.plugins.tilemap;
-            renderer.setObjectRenderer(plugin);
+            let plugin = (renderer.plugins as any)['tilemap'];
             let shader = plugin.getShader();
-            renderer.bindShader(shader);
             //TODO: dont create new array, please
-            this._globalMat = this._globalMat || new PIXI.Matrix();
-            renderer._activeRenderTarget.projectionMatrix.copy(this._globalMat).append(this.worldTransform);
-            shader.uniforms.projectionMatrix = this._globalMat.toArray(true);
+            this._globalMat = shader.uniforms.projTransMatrix;
+            renderer.globalUniforms.uniforms.projectionMatrix.copy(this._globalMat).append(this.worldTransform);
             shader.uniforms.shadowColor = this.shadowColor;
             let af = shader.uniforms.animationFrame = plugin.tileAnim;
             //shader.syncUniform(shader.uniforms.animationFrame);

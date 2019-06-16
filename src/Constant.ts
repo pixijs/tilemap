@@ -5,6 +5,8 @@ namespace pixi_tilemap {
         bufferSize: 2048,
         boundSize: 1024,
         boundCountPerBuffer: 4,
+        use32bitIndex: false,
+        SCALE_MODE: PIXI.SCALE_MODES.LINEAR
     }
 
 }

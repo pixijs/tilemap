@@ -1,16 +1,15 @@
 namespace pixi_tilemap.shaderGenerator {
 
     export function fillSamplers(shader: TilemapShader, maxTextures: number) {
-        var sampleValues: Array<number> = [];
-        for (var i = 0; i < maxTextures; i++)
+        let sampleValues: Array<number> = [];
+        for (let i = 0; i < maxTextures; i++)
         {
             sampleValues[i] = i;
         }
-        shader.bind();
         shader.uniforms.uSamplers = sampleValues;
 
-        var samplerSize: Array<number> = [];
-        for (i = 0; i < maxTextures; i++) {
+        let samplerSize: Array<number> = [];
+        for (let i = 0; i < maxTextures; i++) {
             samplerSize.push(1.0 / Constant.bufferSize);
             samplerSize.push(1.0 / Constant.bufferSize);
         }
@@ -23,7 +22,7 @@ namespace pixi_tilemap.shaderGenerator {
     }
 
     export function generateSampleSrc(maxTextures: number) {
-        var src = '';
+        let src = '';
 
         src += '\n';
         src += '\n';
@@ -32,7 +31,7 @@ namespace pixi_tilemap.shaderGenerator {
         src += '\n\tcolor = shadowColor;';
         src += '\n}';
 
-        for (var i = 0; i < maxTextures; i++)
+        for (let i = 0; i < maxTextures; i++)
         {
             src += '\nelse ';
 

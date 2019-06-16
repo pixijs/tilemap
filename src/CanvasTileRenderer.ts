@@ -1,17 +1,18 @@
 namespace pixi_tilemap {
 
     export class CanvasTileRenderer {
-
-        renderer: PIXI.CanvasRenderer;
+        renderer: any;
         tileAnim = [0, 0];
         dontUseTransform = false;
 
-        constructor(renderer: PIXI.CanvasRenderer) {
+        constructor(renderer: any) {
             this.renderer = renderer;
             this.tileAnim = [0, 0];
         }
     }
 
-    PIXI.CanvasRenderer.registerPlugin('tilemap', CanvasTileRenderer);
-
+    const cr = (PIXI as any).CanvasRenderer;
+    if (cr) {
+        cr.registerPlugin('tilemap', CanvasTileRenderer);
+    }
 }

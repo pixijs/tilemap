@@ -1,9 +1,5 @@
 namespace pixi_tilemap {
-
-    import GLBuffer = PIXI.glCore.GLBuffer;
-    import VertexArrayObject = PIXI.glCore.VertexArrayObject;
-
-    var rectShaderFrag = `
+	let rectShaderFrag = `
 varying vec2 vTextureCoord;
 varying vec4 vFrame;
 varying float vTextureId;
@@ -21,14 +17,14 @@ void main(void){
 }
 `;
 
-    var rectShaderVert = `
+	let rectShaderVert = `
 attribute vec2 aVertexPosition;
 attribute vec2 aTextureCoord;
 attribute vec4 aFrame;
 attribute vec2 aAnim;
 attribute float aTextureId;
 
-uniform mat3 projectionMatrix;
+uniform mat3 projTransMatrix;
 uniform vec2 animationFrame;
 
 varying vec2 vTextureCoord;
@@ -36,7 +32,7 @@ varying float vTextureId;
 varying vec4 vFrame;
 
 void main(void){
-   gl_Position = vec4((projectionMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);
+   gl_Position = vec4((projTransMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);
    vec2 anim = aAnim * animationFrame;
    vTextureCoord = aTextureCoord + anim;
    vFrame = aFrame + vec4(anim, anim);
@@ -44,47 +40,52 @@ void main(void){
 }
 `;
 
-    export abstract class TilemapShader extends PIXI.Shader {
+	export abstract class TilemapShader extends PIXI.Shader {
+		maxTextures = 0;
 
-        maxTextures = 0;
-        indexBuffer: GLBuffer;
+		constructor(maxTextures: number, shaderVert: string, shaderFrag: string) {
+			super(
+				new PIXI.Program(
+					shaderVert,
+					shaderFrag),
+				{
+					animationFrame: new Float32Array(2),
+					uSamplers: [],
+					uSamplerSize: [],
+					projTransMatrix: new PIXI.Matrix()
+				}
+			);
+			this.maxTextures = maxTextures;
+			shaderGenerator.fillSamplers(this, this.maxTextures);
+		}
+	}
 
-        constructor(gl: WebGLRenderingContext, maxTextures: number, shaderVert: string, shaderFrag: string) {
-            super(gl,
-                shaderVert,
-                shaderFrag
-            );
-            this.maxTextures = maxTextures;
-            shaderGenerator.fillSamplers(this, this.maxTextures);
-        }
+	export class RectTileShader extends TilemapShader {
+		constructor(maxTextures: number) {
+			super(
+				maxTextures,
+				rectShaderVert,
+				shaderGenerator.generateFragmentSrc(maxTextures, rectShaderFrag)
+			);
+			shaderGenerator.fillSamplers(this, this.maxTextures);
+		}
+	}
 
-        abstract createVao(renderer: PIXI.WebGLRenderer, vb: GLBuffer): VertexArrayObject;
-    }
+	export class RectTileGeom extends PIXI.Geometry {
+		vertSize = 11;
+		vertPerQuad = 4;
+		stride = this.vertSize * 4;
+		lastTimeAccess = 0;
+		constructor() {
+			super();
+			const buf = this.buf = new PIXI.Buffer(new Float32Array(2), true, false);
+			this.addAttribute('aVertexPosition', buf, 0, false, 0, this.stride, 0)
+				.addAttribute('aTextureCoord', buf, 0, false, 0, this.stride, 2 * 4)
+				.addAttribute('aFrame', buf, 0, false, 0, this.stride, 4 * 4)
+				.addAttribute('aAnim', buf, 0, false, 0, this.stride, 8 * 4)
+				.addAttribute('aTextureId', buf, 0, false, 0, this.stride, 10 * 4);
+		}
 
-    export class RectTileShader extends TilemapShader {
-        vertSize = 11;
-        vertPerQuad = 4;
-        stride = this.vertSize * 4;
-
-        constructor(gl: WebGLRenderingContext, maxTextures: number) {
-            super(gl,
-                maxTextures,
-                rectShaderVert,
-                shaderGenerator.generateFragmentSrc(maxTextures, rectShaderFrag)
-            );
-            shaderGenerator.fillSamplers(this, this.maxTextures);
-        }
-
-        createVao(renderer: PIXI.WebGLRenderer, vb: GLBuffer) {
-            var gl = renderer.gl;
-            return renderer.createVao()
-                .addIndex(this.indexBuffer)
-                .addAttribute(vb, this.attributes.aVertexPosition, gl.FLOAT, false, this.stride, 0)
-                .addAttribute(vb, this.attributes.aTextureCoord, gl.FLOAT, false, this.stride, 2 * 4)
-                .addAttribute(vb, this.attributes.aFrame, gl.FLOAT, false, this.stride, 4 * 4)
-                .addAttribute(vb, this.attributes.aAnim, gl.FLOAT, false, this.stride, 8 * 4)
-                .addAttribute(vb, this.attributes.aTextureId, gl.FLOAT, false, this.stride, 10 * 4);
-        }
-    }
-
+		buf: PIXI.Buffer;
+	}
 }

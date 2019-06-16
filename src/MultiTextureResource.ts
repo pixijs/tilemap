@@ -31,24 +31,24 @@ namespace pixi_tilemap {
 		boundSprites: Array<PIXI.Sprite> = [];
 		dirties: Array<number> = [];
 
-		setTexture(ind: number, baseTexture: PIXI.BaseTexture) {
+		setTexture(ind: number, texture: PIXI.Texture) {
 			const spr = this.boundSprites[ind];
-			if (spr.texture.baseTexture === baseTexture) {
+			if (spr.texture.baseTexture === texture.baseTexture) {
 				return;
 			}
-			spr.texture = baseTexture;
-			this.dirties[ind] = this.baseTex;
+			spr.texture = texture;
 			this.baseTex.update();
+			this.dirties[ind] = (this.baseTex as any).dirtyId;
 		}
 
 		upload(renderer: PIXI.Renderer, texture: PIXI.BaseTexture, glTexture: PIXI.GLTexture) {
-			const {gl} = renderer;
+			const { gl } = renderer as any;
 
 			const {width, height} = this;
 
 			if (glTexture.dirtyId < 0) {
-				glTexture.width = width;
-				glTexture.height = height;
+				(glTexture as any).width = width;
+				(glTexture as any).height = height;
 
 				gl.texImage2D(texture.target, 0,
 					texture.format,
@@ -67,7 +67,8 @@ namespace pixi_tilemap {
 				if (glTexture.dirtyId >= this.dirties[i]) {
 					continue;
 				}
-				if (!tex.valid || !tex.resource.source) {
+				const res = tex.resource as any;
+				if (!tex.valid || !res || !res.source) {
 					continue;
 				}
 				gl.texSubImage2D(texture.target, 0,
@@ -75,8 +76,10 @@ namespace pixi_tilemap {
 					spr.position.y,
 					texture.format,
 					texture.type,
-					tex.resource.source);
+					res.source);
 			}
+
+			return true;
 		}
 	}
 }
