@@ -166,34 +166,19 @@ namespace pixi_tilemap {
         }
 
         vbId = 0;
-        vb: any = null;
+        vb: PIXI.Geometry = null;
         vbBuffer: ArrayBuffer = null;
         vbArray: Float32Array = null;
         vbInts: Uint32Array = null;
 
-        getVb(renderer: TileRenderer) {
-            let _vb = this.vb;
-
-            if (_vb) {
-                if (_vb.rendererSN === renderer.sn){
-                    return _vb;
-                }
-                this.destroyVb();
-            }
-
-            return null;
-        }
-
         destroyVb() {
             if (this.vb) {
-                this.vb.vb.destroy();
-                this.vb.vao.destroy();
+                this.vb.destroy();
                 this.vb = null;
             }
         }
 
-        renderWebGL(renderer: PIXI.WebGLRenderer) {
-            let gl = renderer.gl;
+        render(renderer: PIXIRenderer) {
             let plugin = renderer.plugins.simpleTilemap;
             let shader = plugin.getShader();
             renderer.setObjectRenderer(plugin);

@@ -1,14 +1,20 @@
 namespace pixi_tilemap {
+	export interface IMultiTextureOptions {
+		boundCountPerBuffer: number;
+		boundSize: number;
+		bufferSize: number;
+	}
+
 	export class MultiTextureResource extends PIXI.resources.Resource {
-		constructor() {
-			super(Constant.bufferSize, Constant.bufferSize);
+		constructor(options: IMultiTextureOptions) {
+			super(options.bufferSize, options.bufferSize);
 
 			const bounds = this.boundSprites;
 			const dirties = this.dirties;
-			for (let j = 0; j < Constant.boundCountPerBuffer; j++) {
+			for (let j = 0; j < options.boundCountPerBuffer; j++) {
 				const spr = new PIXI.Sprite();
-				spr.position.x = Constant.boundSize * (j & 1);
-				spr.position.y = Constant.boundSize * (j >> 1);
+				spr.position.x = options.boundSize * (j & 1);
+				spr.position.y = options.boundSize * (j >> 1);
 				bounds.push(spr);
 				dirties.push(0);
 			}
