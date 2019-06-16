@@ -1,10 +1,9 @@
-/// <reference types="pixi.js" />
 declare module PIXI.tilemap {
     class CanvasTileRenderer {
-        renderer: PIXI.CanvasRenderer;
+        renderer: any;
         tileAnim: number[];
         dontUseTransform: boolean;
-        constructor(renderer: PIXI.CanvasRenderer);
+        constructor(renderer: any);
     }
 }
 declare module PIXI.tilemap {
@@ -22,8 +21,8 @@ declare module PIXI.tilemap {
         clear(): void;
         addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number): void;
         addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX?: number, animY?: number): boolean;
-        renderCanvas(renderer: PIXI.CanvasRenderer): void;
-        renderWebGL(renderer: PIXI.WebGLRenderer): void;
+        renderCanvas(renderer: any): void;
+        render(renderer: PIXI.Renderer): void;
         isModified(anim: boolean): boolean;
         clearModify(): void;
     }
@@ -34,6 +33,9 @@ declare module PIXI.tilemap {
         bufferSize: number;
         boundSize: number;
         boundCountPerBuffer: number;
+        use32bitIndex: boolean;
+        SCALE_MODE: PIXI.SCALE_MODES;
+        DO_CLEAR: boolean;
     };
 }
 declare module PIXI.tilemap {
@@ -41,10 +43,28 @@ declare module PIXI.tilemap {
 declare module PIXI.tilemap {
 }
 declare module PIXI.tilemap {
+    interface IMultiTextureOptions {
+        boundCountPerBuffer: number;
+        boundSize: number;
+        bufferSize: number;
+        DO_CLEAR?: boolean;
+    }
+    class MultiTextureResource extends PIXI.resources.Resource {
+        constructor(options: IMultiTextureOptions);
+        DO_CLEAR: boolean;
+        boundSize: number;
+        _clearBuffer: Uint8Array;
+        bind(baseTexture: PIXI.BaseTexture): void;
+        baseTex: PIXI.BaseTexture;
+        boundSprites: Array<PIXI.Sprite>;
+        dirties: Array<number>;
+        setTexture(ind: number, texture: PIXI.Texture): void;
+        upload(renderer: PIXI.Renderer, texture: PIXI.BaseTexture, glTexture: PIXI.GLTexture): boolean;
+    }
+}
+declare module PIXI.tilemap {
     class RectTileLayer extends PIXI.Container {
         constructor(zIndex: number, texture: PIXI.Texture | Array<PIXI.Texture>);
-        updateTransform(): void;
-        z: number;
         zIndex: number;
         modificationMarker: number;
         shadowColor: Float32Array;
@@ -59,37 +79,36 @@ declare module PIXI.tilemap {
         clear(): void;
         addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX: number, animY: number): boolean;
         addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number): void;
-        renderCanvas(renderer: PIXI.CanvasRenderer): void;
-        renderCanvasCore(renderer: PIXI.CanvasRenderer): void;
+        renderCanvas(renderer: any): void;
+        renderCanvasCore(renderer: any): void;
         vbId: number;
-        vb: any;
+        vb: RectTileGeom;
         vbBuffer: ArrayBuffer;
         vbArray: Float32Array;
         vbInts: Uint32Array;
-        getVb(renderer: TileRenderer): any;
         destroyVb(): void;
-        renderWebGL(renderer: PIXI.WebGLRenderer): void;
-        renderWebGLCore(renderer: PIXI.WebGLRenderer, plugin: PIXI.ObjectRenderer): void;
+        render(renderer: PIXI.Renderer): void;
+        renderWebGLCore(renderer: PIXI.Renderer, plugin: TileRenderer): void;
         isModified(anim: boolean): boolean;
         clearModify(): void;
-        destroy(options?: PIXI.DestroyOptions | boolean): void;
+        destroy(options?: any): void;
     }
 }
 declare module PIXI.tilemap {
-    import GLBuffer = PIXI.glCore.GLBuffer;
-    import VertexArrayObject = PIXI.glCore.VertexArrayObject;
     abstract class TilemapShader extends PIXI.Shader {
         maxTextures: number;
-        indexBuffer: GLBuffer;
-        constructor(gl: WebGLRenderingContext, maxTextures: number, shaderVert: string, shaderFrag: string);
-        abstract createVao(renderer: PIXI.WebGLRenderer, vb: GLBuffer): VertexArrayObject;
+        constructor(maxTextures: number, shaderVert: string, shaderFrag: string);
     }
     class RectTileShader extends TilemapShader {
+        constructor(maxTextures: number);
+    }
+    class RectTileGeom extends PIXI.Geometry {
         vertSize: number;
         vertPerQuad: number;
         stride: number;
-        constructor(gl: WebGLRenderingContext, maxTextures: number);
-        createVao(renderer: PIXI.WebGLRenderer, vb: GLBuffer): VertexArrayObject;
+        lastTimeAccess: number;
+        constructor();
+        buf: PIXI.Buffer;
     }
 }
 declare module PIXI.tilemap.shaderGenerator {
@@ -98,48 +117,23 @@ declare module PIXI.tilemap.shaderGenerator {
     function generateSampleSrc(maxTextures: number): string;
 }
 declare module PIXI.tilemap {
-    class SimpleTileRenderer extends TileRenderer {
-        constructor(renderer: PIXI.WebGLRenderer);
-        samplerSize: Array<number>;
-        onContextChange(): void;
-        bindTextures(renderer: PIXI.WebGLRenderer, shader: TilemapShader, textures: Array<PIXI.Texture>): void;
-        destroy(): void;
-    }
-}
-declare module PIXI.tilemap {
-    import glCore = PIXI.glCore;
     class TileRenderer extends PIXI.ObjectRenderer {
-        static vbAutoincrement: number;
-        static snAutoincrement: number;
-        static SCALE_MODE: number;
-        static DO_CLEAR: boolean;
-        renderer: PIXI.WebGLRenderer;
+        renderer: PIXI.Renderer;
         gl: WebGLRenderingContext;
         sn: number;
-        indices: Uint16Array;
-        indexBuffer: glCore.GLBuffer;
-        lastTimeCheck: number;
+        indexBuffer: PIXI.Buffer;
+        ibLen: number;
         tileAnim: number[];
         texLoc: Array<number>;
         rectShader: RectTileShader;
-        boundSprites: Array<PIXI.Sprite>;
-        glTextures: Array<PIXI.RenderTexture>;
-        _clearBuffer: Uint8Array;
-        constructor(renderer: PIXI.WebGLRenderer);
-        onContextChange(): void;
+        texResources: Array<MultiTextureResource>;
+        constructor(renderer: PIXI.Renderer);
         initBounds(): void;
-        bindTexturesWithoutRT(renderer: PIXI.WebGLRenderer, shader: TilemapShader, textures: Array<PIXI.Texture>): void;
-        bindTextures(renderer: PIXI.WebGLRenderer, shader: TilemapShader, textures: Array<PIXI.Texture>): void;
+        bindTexturesWithoutRT(renderer: PIXI.Renderer, shader: TilemapShader, textures: Array<PIXI.Texture>): void;
+        bindTextures(renderer: PIXI.Renderer, shader: TilemapShader, textures: Array<PIXI.Texture>): void;
         start(): void;
-        createVb(): {
-            id: number;
-            vb: glCore.GLBuffer;
-            vao: glCore.VertexArrayObject;
-            lastTimeAccess: number;
-            shader: TilemapShader;
-            rendererSN: number;
-        };
-        checkIndexBuffer(size: number): void;
+        createVb(): RectTileGeom;
+        checkIndexBuffer(size: number, vb?: RectTileGeom): void;
         getShader(): TilemapShader;
         destroy(): void;
     }
@@ -152,11 +146,11 @@ declare module PIXI.tilemap {
         zIndex: number;
         _previousLayers: number;
         canvasBuffer: HTMLCanvasElement;
-        _tempRender: PIXI.CanvasRenderer;
+        _tempRender: any;
         _lastAnimationFrame: number;
         layerTransform: PIXI.Matrix;
         clear(): void;
         cacheIfDirty(): void;
-        renderCanvas(renderer: PIXI.CanvasRenderer): void;
+        renderCanvas(renderer: any): void;
     }
 }
