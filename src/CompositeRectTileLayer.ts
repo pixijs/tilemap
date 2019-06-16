@@ -34,15 +34,15 @@ namespace pixi_tilemap {
         }
 
         setBitmaps(bitmaps: Array<PIXI.Texture>) {
-            var texPerChild = this.texPerChild;
-            var len1 = this.children.length;
-            var len2 = Math.ceil(bitmaps.length / texPerChild);
-            var i: number;
+            let texPerChild = this.texPerChild;
+            let len1 = this.children.length;
+            let len2 = Math.ceil(bitmaps.length / texPerChild);
+            let i: number;
             for (i = 0; i < len1; i++) {
                 (this.children[i] as RectTileLayer).textures = bitmaps.slice(i * texPerChild, (i + 1) * texPerChild);
             }
             for (i = len1; i < len2; i++) {
-                var layer = new RectTileLayer(this.zIndex, bitmaps.slice(i * texPerChild, (i + 1) * texPerChild));
+                let layer = new RectTileLayer(this.zIndex, bitmaps.slice(i * texPerChild, (i + 1) * texPerChild));
                 layer.compositeParent = true;
                 layer.offsetX = Constant.boundSize;
                 layer.offsetY = Constant.boundSize;
@@ -51,7 +51,7 @@ namespace pixi_tilemap {
         }
 
         clear() {
-            for (var i = 0; i < this.children.length; i++) {
+            for (let i = 0; i < this.children.length; i++) {
                 (this.children[i] as RectTileLayer).clear();
             }
             this.modificationMarker = 0;
@@ -67,13 +67,13 @@ namespace pixi_tilemap {
         }
 
         addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX?: number, animY?: number) {
-            var texture: PIXI.Texture;
-            var layer: RectTileLayer = null;
-            var ind: number = 0;
-            var children = this.children;
+            let texture: PIXI.Texture;
+            let layer: RectTileLayer = null;
+            let ind: number = 0;
+            let children = this.children;
 
             if (typeof texture_ === "number") {
-                var childIndex = texture_ / this.texPerChild >> 0;
+                let childIndex = texture_ / this.texPerChild >> 0;
                 layer = children[childIndex] as RectTileLayer;
 
                 if (!layer) {
@@ -94,10 +94,10 @@ namespace pixi_tilemap {
                     texture = texture_ as PIXI.Texture;
                 }
 
-                for (var i = 0; i < children.length; i++) {
-                    var child = children[i] as RectTileLayer;
-                    var tex = child.textures;
-                    for (var j = 0; j < tex.length; j++) {
+                for (let i = 0; i < children.length; i++) {
+                    let child = children[i] as RectTileLayer;
+                    let tex = child.textures;
+                    for (let j = 0; j < tex.length; j++) {
                         if (tex[j].baseTexture === texture.baseTexture) {
                             layer = child;
                             ind = j;
@@ -111,7 +111,7 @@ namespace pixi_tilemap {
 
                 if (!layer) {
                     for (i = 0; i < children.length; i++) {
-                        var child = children[i] as RectTileLayer;
+                        let child = children[i] as RectTileLayer;
                         if (child.textures.length < this.texPerChild) {
                             layer = child;
                             ind = child.textures.length;
@@ -138,9 +138,9 @@ namespace pixi_tilemap {
             if (!this.visible || this.worldAlpha <= 0 || !this.renderable) {
                 return;
             }
-            var plugin = renderer.plugins.tilemap;
+            let plugin = renderer.plugins.tilemap;
             if (!plugin.dontUseTransform) {
-                var wt = this.worldTransform;
+                let wt = this.worldTransform;
                 renderer.context.setTransform(
                     wt.a,
                     wt.b,
@@ -150,8 +150,8 @@ namespace pixi_tilemap {
                     wt.ty * renderer.resolution
                 );
             }
-            var layers = this.children;
-            for (var i = 0; i < layers.length; i++) {
+            let layers = this.children;
+            for (let i = 0; i < layers.length; i++) {
                 (layers[i] as RectTileLayer).renderCanvasCore(renderer);
             }
         }
@@ -160,30 +160,30 @@ namespace pixi_tilemap {
             if (!this.visible || this.worldAlpha <= 0 || !this.renderable) {
                 return;
             }
-            var gl = renderer.gl;
-            var plugin = renderer.plugins.tilemap;
+            let gl = renderer.gl;
+            let plugin = renderer.plugins.tilemap;
             renderer.setObjectRenderer(plugin);
-            var shader = plugin.getShader();
+            let shader = plugin.getShader();
             renderer.bindShader(shader);
             //TODO: dont create new array, please
             this._globalMat = this._globalMat || new PIXI.Matrix();
             renderer._activeRenderTarget.projectionMatrix.copy(this._globalMat).append(this.worldTransform);
             shader.uniforms.projectionMatrix = this._globalMat.toArray(true);
             shader.uniforms.shadowColor = this.shadowColor;
-            var af = shader.uniforms.animationFrame = plugin.tileAnim;
+            let af = shader.uniforms.animationFrame = plugin.tileAnim;
             //shader.syncUniform(shader.uniforms.animationFrame);
-            var layers = this.children;
-            for (var i = 0; i < layers.length; i++) {
+            let layers = this.children;
+            for (let i = 0; i < layers.length; i++) {
                 (layers[i] as RectTileLayer).renderWebGLCore(renderer, plugin);
             }
         }
 
         isModified(anim: boolean) {
-            var layers = this.children;
+            let layers = this.children;
             if (this.modificationMarker !== layers.length) {
                 return true;
             }
-            for (var i = 0; i < layers.length; i++) {
+            for (let i = 0; i < layers.length; i++) {
                 if ((layers[i] as RectTileLayer).isModified(anim)) {
                     return true;
                 }
@@ -192,9 +192,9 @@ namespace pixi_tilemap {
         }
 
         clearModify() {
-            var layers = this.children;
+            let layers = this.children;
             this.modificationMarker = layers.length;
-            for (var i = 0; i < layers.length; i++) {
+            for (let i = 0; i < layers.length; i++) {
                 (layers[i] as RectTileLayer).clearModify();
             }
         }

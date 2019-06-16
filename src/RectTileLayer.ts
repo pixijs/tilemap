@@ -1,7 +1,4 @@
 namespace pixi_tilemap {
-
-    import glCore = PIXI.glCore;
-
     export class RectTileLayer extends PIXI.Container {
 
         constructor(zIndex: number, texture: PIXI.Texture | Array<PIXI.Texture>) {
@@ -9,11 +6,6 @@ namespace pixi_tilemap {
             this.initialize(zIndex, texture);
         }
 
-        updateTransform() {
-            super.displayObjectUpdateTransform()
-        }
-
-        z = 0;
         zIndex = 0;
         modificationMarker = 0;
         shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
@@ -34,7 +26,7 @@ namespace pixi_tilemap {
                 textures = [textures as PIXI.Texture];
             }
             this.textures = textures as Array<PIXI.Texture>;
-            this.z = this.zIndex = zIndex;
+            this.zIndex = zIndex;
             // this.visible = false;
         }
 
@@ -45,8 +37,8 @@ namespace pixi_tilemap {
         }
 
         addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX: number, animY: number) {
-            var texture: PIXI.Texture;
-            var textureIndex = 0;
+            let texture: PIXI.Texture;
+            let textureIndex = 0;
 
             if (typeof texture_ === "number") {
                 textureIndex = texture_;
@@ -58,9 +50,9 @@ namespace pixi_tilemap {
                     texture = texture_ as PIXI.Texture;
                 }
 
-                var found = false;
-                var textureList = this.textures;
-                for (var i = 0; i < textureList.length; i++) {
+                let found = false;
+                let textureList = this.textures;
+                for (let i = 0; i < textureList.length; i++) {
                     if (textureList[i].baseTexture === texture.baseTexture) {
                         textureIndex = i;
                         found = true;
@@ -80,7 +72,7 @@ namespace pixi_tilemap {
         }
 
         addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX: number = 0, animY: number = 0) {
-            var pb = this.pointsBuf;
+            let pb = this.pointsBuf;
             this.hasAnim = this.hasAnim || animX > 0 || animY > 0;
             if (tileWidth === tileHeight) {
                 pb.push(u);
@@ -93,7 +85,7 @@ namespace pixi_tilemap {
                 pb.push(animY | 0);
                 pb.push(textureIndex);
             } else {
-                var i: number;
+                let i: number;
                 if (tileWidth % tileHeight === 0) {
                     //horizontal line on squares
                     for (i = 0; i < tileWidth / tileHeight; i++) {
@@ -136,9 +128,9 @@ namespace pixi_tilemap {
         }
 
         renderCanvas(renderer: PIXI.CanvasRenderer) {
-            var plugin = renderer.plugins.tilemap;
+            let plugin = renderer.plugins.tilemap;
             if (!plugin.dontUseTransform) {
-                var wt = this.worldTransform;
+                let wt = this.worldTransform;
                 renderer.context.setTransform(
                     wt.a,
                     wt.b,
@@ -153,16 +145,16 @@ namespace pixi_tilemap {
 
         renderCanvasCore(renderer: PIXI.CanvasRenderer) {
             if (this.textures.length === 0) return;
-            var points = this.pointsBuf;
+            let points = this.pointsBuf;
             renderer.context.fillStyle = '#000000';
-            for (var i = 0, n = points.length; i < n; i += 9) {
-                var x1 = points[i], y1 = points[i + 1];
-                var x2 = points[i + 2], y2 = points[i + 3];
-                var w = points[i + 4];
-                var h = points[i + 5];
+            for (let i = 0, n = points.length; i < n; i += 9) {
+                let x1 = points[i], y1 = points[i + 1];
+                let x2 = points[i + 2], y2 = points[i + 3];
+                let w = points[i + 4];
+                let h = points[i + 5];
                 x1 += points[i + 6] * renderer.plugins.tilemap.tileAnim[0];
                 y1 += points[i + 7] * renderer.plugins.tilemap.tileAnim[1];
-                var textureIndex = points[i + 8];
+                let textureIndex = points[i + 8];
                 if (textureIndex >= 0) {
                     renderer.context.drawImage(this.textures[textureIndex].baseTexture.source, x1, y1, w, h, x2, y2, w, h);
                 } else {
@@ -180,7 +172,7 @@ namespace pixi_tilemap {
         vbInts: Uint32Array = null;
 
         getVb(renderer: TileRenderer) {
-            var _vb = this.vb;
+            let _vb = this.vb;
 
             if (_vb) {
                 if (_vb.rendererSN === renderer.sn){
@@ -201,9 +193,9 @@ namespace pixi_tilemap {
         }
 
         renderWebGL(renderer: PIXI.WebGLRenderer) {
-            var gl = renderer.gl;
-            var plugin = renderer.plugins.simpleTilemap;
-            var shader = plugin.getShader();
+            let gl = renderer.gl;
+            let plugin = renderer.plugins.simpleTilemap;
+            let shader = plugin.getShader();
             renderer.setObjectRenderer(plugin);
             renderer.bindShader(shader);
             //TODO: dont create new array, please
@@ -211,27 +203,27 @@ namespace pixi_tilemap {
             renderer._activeRenderTarget.projectionMatrix.copy(this._globalMat).append(this.worldTransform);
             shader.uniforms.projectionMatrix = this._globalMat.toArray(true);
             shader.uniforms.shadowColor = this.shadowColor;
-            var af = shader.uniforms.animationFrame = plugin.tileAnim;
+            let af = shader.uniforms.animationFrame = plugin.tileAnim;
             //shader.syncUniform(shader.uniforms.animationFrame);
             this.renderWebGLCore(renderer, plugin);
         }
 
         renderWebGLCore(renderer: PIXI.WebGLRenderer, plugin: PIXI.ObjectRenderer) {
-            var points = this.pointsBuf;
+            let points = this.pointsBuf;
             if (points.length === 0) return;
-            var rectsCount = points.length / 9;
-            var tile = plugin || renderer.plugins.simpleTilemap;
-            var gl = renderer.gl;
+            let rectsCount = points.length / 9;
+            let tile = plugin || renderer.plugins.simpleTilemap;
+            let gl = renderer.gl;
 
 
-            var shader = tile.getShader();
-            var textures = this.textures;
+            let shader = tile.getShader();
+            let textures = this.textures;
             if (textures.length === 0) return;
 
             tile.bindTextures(renderer, shader, textures);
 
             //lost context! recover!
-            var vb = this.getVb(tile as TileRenderer);
+            let vb = this.getVb(tile as TileRenderer);
             if (!vb) {
                 vb = tile.createVb();
                 this.vb = vb;
@@ -239,24 +231,24 @@ namespace pixi_tilemap {
                 this.vbBuffer = null;
                 this.modificationMarker = 0;
             }
-            var vao = vb.vao;
+            let vao = vb.vao;
             renderer.bindVao(vao);
 
             tile.checkIndexBuffer(rectsCount);
 
             const boundCountPerBuffer = Constant.boundCountPerBuffer;
 
-            var vertexBuf = vb.vb as glCore.GLBuffer;
+            let vertexBuf = vb.vb as glCore.GLBuffer;
             //if layer was changed, re-upload vertices
             vertexBuf.bind();
-            var vertices = rectsCount * shader.vertPerQuad;
+            let vertices = rectsCount * shader.vertPerQuad;
             if (vertices === 0) return;
             if (this.modificationMarker !== vertices) {
                 this.modificationMarker = vertices;
-                var vs = shader.stride * vertices;
+                let vs = shader.stride * vertices;
                 if (!this.vbBuffer || this.vbBuffer.byteLength < vs) {
                     //!@#$ happens, need resize
-                    var bk = shader.stride;
+                    let bk = shader.stride;
                     while (bk < vs) {
                         bk *= 2;
                     }
@@ -266,18 +258,18 @@ namespace pixi_tilemap {
                     vertexBuf.upload(this.vbBuffer, 0, true);
                 }
 
-                var arr = this.vbArray, ints = this.vbInts;
+                let arr = this.vbArray, ints = this.vbInts;
                 //upload vertices!
-                var sz = 0;
-                //var tint = 0xffffffff;
-                var textureId: number = 0;
-                var shiftU: number = this.offsetX;
-                var shiftV: number = this.offsetY;
+                let sz = 0;
+                //let tint = 0xffffffff;
+                let textureId: number = 0;
+                let shiftU: number = this.offsetX;
+                let shiftV: number = this.offsetY;
 
-                //var tint = 0xffffffff;
-                var tint = -1;
-                for (var i = 0; i < points.length; i += 9) {
-                    var eps = 0.5;
+                //let tint = 0xffffffff;
+                let tint = -1;
+                for (let i = 0; i < points.length; i += 9) {
+                    let eps = 0.5;
                     if (this.compositeParent){
                         if (boundCountPerBuffer > 1) {
                             //TODO: what if its more than 4?
@@ -290,10 +282,10 @@ namespace pixi_tilemap {
                             shiftV = 0;
                         }
                     }
-                    var x = points[i + 2], y = points[i + 3];
-                    var w = points[i + 4], h = points[i + 5];
-                    var u = points[i] + shiftU, v = points[i + 1] + shiftV;
-                    var animX = points[i + 6], animY = points[i + 7];
+                    let x = points[i + 2], y = points[i + 3];
+                    let w = points[i + 4], h = points[i + 5];
+                    let u = points[i] + shiftU, v = points[i + 1] + shiftV;
+                    let animX = points[i + 6], animY = points[i + 7];
                     arr[sz++] = x;
                     arr[sz++] = y;
                     arr[sz++] = u;
@@ -343,7 +335,7 @@ namespace pixi_tilemap {
                 // if (vs > this.vbArray.length/2 ) {
                 vertexBuf.upload(arr, 0, true);
                 // } else {
-                //     var view = arr.subarray(0, vs);
+                //     let view = arr.subarray(0, vs);
                 //     vb.upload(view, 0);
                 // }
             }
