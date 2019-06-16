@@ -2,19 +2,33 @@
 
 [![Build Status](https://travis-ci.org/pixijs/pixi-tilemap.svg?branch=master)](https://travis-ci.org/pixijs/pixi-tilemap)
 
-Library that helps with tilemaps, provide special shaders and canvas fallback. Works only with pixi > 4.2.4
+Library that helps with tilemaps, provide special shaders and canvas fallback. Works with pixi >= 5.0.4
 
 It has some strict limitations connected to its RPGMV legacy: it uses only up to 16 textures of size 1024x1024, and combines them into 4 render textures of 2k size.
 
 When you render the tilemap with other textures, textures will be re-uploaded.
 
-If that limitation is affecting you somehow, for example if you change texture set too often, please do the following before the creation of renderer, it works only since 1.2.6:
+Please specify how many base textures do you want to use. That's the default:
 
 ```js
-PIXI.tilemap.Constant.boundCountPerBuffer = 1;
-PIXI.tilemap.Constant.maxTextures = 16;
+PIXI.tilemap.Constant.maxTextures = 4;
 ```
 
+For compatibility with very old devices, if you want to use multi texture, use this settings, the same as in pixi-tilemap v4:
+
+```js
+PIXI.tilemap.Constant.boundCountPerBuffer = 4;
+PIXI.tilemap.Constant.maxTextures = 4;
+```
+
+There's limitation on 16k tiles per one tilemap. If you want to lift it, please use pixi v5.1.0 and following setting:
+
+
+```js
+PIXI.tilemap.Constant.use32bitIndex = true;
+```
+
+Please use [v4 branch](https://github.com/pixijs/pixi-tilemap/tree/v4.x) for pixi V4, npm version is `1.2.6`
 
 Please use [v3 branch](https://github.com/pixijs/pixi-tilemap/tree/pixiv3) for pixi V3.
 
