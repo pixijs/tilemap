@@ -35,7 +35,7 @@ namespace pixi_tilemap {
             this.hasAnim = false;
         }
 
-        addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX: number, animY: number) {
+        addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, flags: number, animX: number, animY: number) {
             let texture: PIXI.Texture;
             let textureIndex = 0;
 
@@ -66,11 +66,11 @@ namespace pixi_tilemap {
                 }
             }
 
-            this.addRect(textureIndex, texture.frame.x, texture.frame.y, x, y, texture.frame.width, texture.frame.height, animX, animY);
+            this.addRect(textureIndex, texture.frame.x, texture.frame.y, x, y, texture.frame.width, texture.frame.height, flags, animX, animY);
             return true;
         }
 
-        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX: number = 0, animY: number = 0) {
+        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, flags: number, animX: number = 0, animY: number = 0) {
             let pb = this.pointsBuf;
             this.hasAnim = this.hasAnim || animX > 0 || animY > 0;
             if (tileWidth === tileHeight) {
@@ -83,7 +83,11 @@ namespace pixi_tilemap {
                 pb.push(animX | 0);
                 pb.push(animY | 0);
                 pb.push(textureIndex);
+                pb.push(flags);
             } else {
+                if (flags !== 0) {
+                    console.warn('Flip only implemented in rectangular tiles');
+                }
                 let i: number;
                 if (tileWidth % tileHeight === 0) {
                     //horizontal line on squares
@@ -97,6 +101,7 @@ namespace pixi_tilemap {
                         pb.push(animX | 0);
                         pb.push(animY | 0);
                         pb.push(textureIndex);
+                        pb.push(flags);
                     }
                 } else if (tileHeight % tileWidth === 0) {
                     //vertical line on squares
@@ -110,6 +115,7 @@ namespace pixi_tilemap {
                         pb.push(animX | 0);
                         pb.push(animY | 0);
                         pb.push(textureIndex);
+                        pb.push(flags);
                     }
                 } else {
                     //ok, ok, lets use rectangle
@@ -122,6 +128,7 @@ namespace pixi_tilemap {
                     pb.push(animX | 0);
                     pb.push(animY | 0);
                     pb.push(textureIndex);
+                    pb.push(flags);
                 }
             }
         }
@@ -242,7 +249,7 @@ namespace pixi_tilemap {
 
                 //let tint = 0xffffffff;
                 let tint = -1;
-                for (let i = 0; i < points.length; i += 9) {
+                for (let i = 0; i < points.length; i += 10) {
                     let eps = 0.5;
                     if (this.compositeParent){
                         if (boundCountPerBuffer > 1) {
@@ -260,10 +267,17 @@ namespace pixi_tilemap {
                     let w = points[i + 4], h = points[i + 5];
                     let u = points[i] + shiftU, v = points[i + 1] + shiftV;
                     let animX = points[i + 6], animY = points[i + 7];
+                    const flags = points[i + 9];
+                    const mirrorH = flags & 2;
+                    const mirrorV = flags & 4;
+                    const mirrorDiag = flags & 8;
+                    if (mirrorDiag) {
+                        console.warn('Diagonal flip not implemented');
+                    }
                     arr[sz++] = x;
                     arr[sz++] = y;
-                    arr[sz++] = u;
-                    arr[sz++] = v;
+                    arr[sz++] = mirrorH ? u + w : u;
+                    arr[sz++] = mirrorV ? v + h : v;
                     arr[sz++] = u + eps;
                     arr[sz++] = v + eps;
                     arr[sz++] = u + w - eps;
@@ -273,8 +287,8 @@ namespace pixi_tilemap {
                     arr[sz++] = textureId;
                     arr[sz++] = x + w;
                     arr[sz++] = y;
-                    arr[sz++] = u + w;
-                    arr[sz++] = v;
+                    arr[sz++] = mirrorH ? u : u + w;
+                    arr[sz++] = mirrorV ? v + h : v;
                     arr[sz++] = u + eps;
                     arr[sz++] = v + eps;
                     arr[sz++] = u + w - eps;
@@ -284,8 +298,8 @@ namespace pixi_tilemap {
                     arr[sz++] = textureId;
                     arr[sz++] = x + w;
                     arr[sz++] = y + h;
-                    arr[sz++] = u + w;
-                    arr[sz++] = v + h;
+                    arr[sz++] = mirrorH ? u : u + w;
+                    arr[sz++] = mirrorV ? v : v + h;
                     arr[sz++] = u + eps;
                     arr[sz++] = v + eps;
                     arr[sz++] = u + w - eps;
@@ -295,8 +309,8 @@ namespace pixi_tilemap {
                     arr[sz++] = textureId;
                     arr[sz++] = x;
                     arr[sz++] = y + h;
-                    arr[sz++] = u;
-                    arr[sz++] = v + h;
+                    arr[sz++] = mirrorH ? u + w : u;
+                    arr[sz++] = mirrorV ? v : v + h;
                     arr[sz++] = u + eps;
                     arr[sz++] = v + eps;
                     arr[sz++] = u + w - eps;
