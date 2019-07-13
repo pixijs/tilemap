@@ -66,7 +66,7 @@ namespace pixi_tilemap {
             }
         }
 
-        addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, flags: number, animX?: number, animY?: number) {
+        addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, flags: number = 0, animX?: number, animY?: number) {
             let texture: PIXI.Texture;
             let layer: RectTileLayer = null;
             let ind: number = 0;
