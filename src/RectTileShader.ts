@@ -6,6 +6,7 @@ varying float vTextureId;
 uniform vec4 shadowColor;
 uniform sampler2D uSamplers[%count%];
 uniform vec2 uSamplerSize[%count%];
+uniform float alpha;
 
 void main(void){
    vec2 textureCoord = clamp(vTextureCoord, vFrame.xy, vFrame.zw);
@@ -13,7 +14,7 @@ void main(void){
 
    vec4 color;
    %forloop%
-   gl_FragColor = color;
+   gl_FragColor = alpha * color + (1.0 - alpha) * gl_FragColor;
 }
 `;
 
