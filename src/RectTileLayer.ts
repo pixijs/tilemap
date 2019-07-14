@@ -267,17 +267,13 @@ namespace pixi_tilemap {
                     let w = points[i + 4], h = points[i + 5];
                     let u = points[i] + shiftU, v = points[i + 1] + shiftV;
                     let animX = points[i + 6], animY = points[i + 7];
-                    const flags = points[i + 9];
-                    const mirrorH = flags & 2;
-                    const mirrorV = flags & 4;
-                    const mirrorDiag = flags & 8;
-                    if (mirrorDiag) {
-                        console.warn('Diagonal flip not implemented');
-                    }
+                    
+                    const uvs = this.calculateUvTrafos(points[i + 9]);
+
                     arr[sz++] = x;
                     arr[sz++] = y;
-                    arr[sz++] = mirrorH ? u + w : u;
-                    arr[sz++] = mirrorV ? v + h : v;
+                    arr[sz++] = u + uvs._00[0] * w;
+                    arr[sz++] = v + uvs._00[1] * h;
                     arr[sz++] = u + eps;
                     arr[sz++] = v + eps;
                     arr[sz++] = u + w - eps;
@@ -287,8 +283,8 @@ namespace pixi_tilemap {
                     arr[sz++] = textureId;
                     arr[sz++] = x + w;
                     arr[sz++] = y;
-                    arr[sz++] = mirrorH ? u : u + w;
-                    arr[sz++] = mirrorV ? v + h : v;
+                    arr[sz++] = u + uvs._10[0] * w;
+                    arr[sz++] = v + uvs._10[1] * h;
                     arr[sz++] = u + eps;
                     arr[sz++] = v + eps;
                     arr[sz++] = u + w - eps;
@@ -298,8 +294,8 @@ namespace pixi_tilemap {
                     arr[sz++] = textureId;
                     arr[sz++] = x + w;
                     arr[sz++] = y + h;
-                    arr[sz++] = mirrorH ? u : u + w;
-                    arr[sz++] = mirrorV ? v : v + h;
+                    arr[sz++] = u + uvs._11[0] * w;
+                    arr[sz++] = v + uvs._11[1] * h;
                     arr[sz++] = u + eps;
                     arr[sz++] = v + eps;
                     arr[sz++] = u + w - eps;
@@ -309,8 +305,8 @@ namespace pixi_tilemap {
                     arr[sz++] = textureId;
                     arr[sz++] = x;
                     arr[sz++] = y + h;
-                    arr[sz++] = mirrorH ? u + w : u;
-                    arr[sz++] = mirrorV ? v : v + h;
+                    arr[sz++] = u + uvs._01[0] * w;
+                    arr[sz++] = v + uvs._01[1] * h;
                     arr[sz++] = u + eps;
                     arr[sz++] = v + eps;
                     arr[sz++] = u + w - eps;
@@ -325,6 +321,35 @@ namespace pixi_tilemap {
 
             (renderer.geometry as any).bind(vb, shader);
             renderer.geometry.draw(PIXI.DRAW_MODES.TRIANGLES, rectsCount * 6, 0);
+        }
+
+        calculateUvTrafos(flags: number) {
+			const diagonalFlip = flags & 0x20000000;
+			const verticalFlip = flags & 0x40000000;
+			const horizontalFlip = flags & 0x80000000;
+
+            const uvs = {
+                _00: [0, 0],
+                _10: [1, 0],
+                _11: [1, 1],
+                _01: [0, 1],
+            } as any;
+            
+            for (let key in uvs) {
+                const uv = uvs[key];
+                if (horizontalFlip) {
+                    uv[0] = Math.abs(uv[0] - 1);
+                }
+                if (verticalFlip) {
+                    uv[1] = Math.abs(uv[1] - 1);
+                }
+                if (diagonalFlip) {
+                    const temp = uv[1];
+                    uv[1] = uv[0];
+                    uv[0] = temp;
+                }
+            }
+            return uvs;
         }
 
         isModified(anim: boolean) {
