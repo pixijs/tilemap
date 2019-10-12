@@ -109,7 +109,8 @@ namespace pixi_tilemap {
 			}
 
 			this.ibLen = totalIndices;
-			this.indexBuffer.update((PIXI as any).utils.createIndicesForQuads(size, Constant.use32bitIndex));
+			this.indexBuffer.update((PIXI as any).utils.createIndicesForQuads(size,
+                Constant.use32bitIndex ? new Uint32Array(size * 6) : undefined));
 
 			// 	TODO: create new index buffer instead?
 			// if (vb) {

@@ -754,7 +754,7 @@ var pixi_tilemap;
                 len <<= 1;
             }
             this.ibLen = totalIndices;
-            this.indexBuffer.update(PIXI.utils.createIndicesForQuads(size, pixi_tilemap.Constant.use32bitIndex));
+            this.indexBuffer.update(PIXI.utils.createIndicesForQuads(size, pixi_tilemap.Constant.use32bitIndex ? new Uint32Array(size * 6) : undefined));
         };
         TileRenderer.prototype.getShader = function () {
             return this.rectShader;
