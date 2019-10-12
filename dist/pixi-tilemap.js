@@ -203,7 +203,7 @@ var pixi_tilemap;
         maxTextures: 4,
         bufferSize: 2048,
         boundSize: 1024,
-        boundCountPerBuffer: 4,
+        boundCountPerBuffer: 1,
         use32bitIndex: false,
         SCALE_MODE: PIXI.SCALE_MODES.LINEAR,
         DO_CLEAR: true
