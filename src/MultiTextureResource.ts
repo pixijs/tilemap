@@ -53,7 +53,8 @@ namespace pixi_tilemap {
 			const { gl } = renderer as any;
 
 			const {width, height} = this;
-			gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha);
+			gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.alphaMode === undefined ||
+                texture.alphaMode === PIXI.ALPHA_MODES.UNPACK);
 
 			if (glTexture.dirtyId < 0) {
 				(glTexture as any).width = width;

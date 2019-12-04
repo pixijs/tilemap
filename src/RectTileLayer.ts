@@ -1,4 +1,7 @@
 namespace pixi_tilemap {
+    import groupD8 = PIXI.groupD8;
+    export const POINT_STRUCT_SIZE = 10;
+
     export class RectTileLayer extends PIXI.Container {
         constructor(zIndex: number, texture: PIXI.Texture | Array<PIXI.Texture>) {
             super();
@@ -66,64 +69,23 @@ namespace pixi_tilemap {
                 }
             }
 
-            this.addRect(textureIndex, texture.frame.x, texture.frame.y, x, y, texture.frame.width, texture.frame.height, animX, animY);
+            this.addRect(textureIndex, texture.frame.x, texture.frame.y, x, y, texture.orig.width, texture.orig.height, animX, animY, texture.rotate);
             return true;
         }
 
-        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX: number = 0, animY: number = 0) {
+        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX: number = 0, animY: number = 0, rotate: number = 0) {
             let pb = this.pointsBuf;
             this.hasAnim = this.hasAnim || animX > 0 || animY > 0;
-            if (tileWidth === tileHeight) {
-                pb.push(u);
-                pb.push(v);
-                pb.push(x);
-                pb.push(y);
-                pb.push(tileWidth);
-                pb.push(tileHeight);
-                pb.push(animX | 0);
-                pb.push(animY | 0);
-                pb.push(textureIndex);
-            } else {
-                let i: number;
-                if (tileWidth % tileHeight === 0) {
-                    //horizontal line on squares
-                    for (i = 0; i < tileWidth / tileHeight; i++) {
-                        pb.push(u + i * tileHeight);
-                        pb.push(v);
-                        pb.push(x + i * tileHeight);
-                        pb.push(y);
-                        pb.push(tileHeight);
-                        pb.push(tileHeight);
-                        pb.push(animX | 0);
-                        pb.push(animY | 0);
-                        pb.push(textureIndex);
-                    }
-                } else if (tileHeight % tileWidth === 0) {
-                    //vertical line on squares
-                    for (i = 0; i < tileHeight / tileWidth; i++) {
-                        pb.push(u);
-                        pb.push(v + i * tileWidth);
-                        pb.push(x);
-                        pb.push(y + i * tileWidth);
-                        pb.push(tileWidth);
-                        pb.push(tileWidth);
-                        pb.push(animX | 0);
-                        pb.push(animY | 0);
-                        pb.push(textureIndex);
-                    }
-                } else {
-                    //ok, ok, lets use rectangle
-                    pb.push(u);
-                    pb.push(v);
-                    pb.push(x);
-                    pb.push(y);
-                    pb.push(tileWidth);
-                    pb.push(tileHeight);
-                    pb.push(animX | 0);
-                    pb.push(animY | 0);
-                    pb.push(textureIndex);
-                }
-            }
+            pb.push(u);
+            pb.push(v);
+            pb.push(x);
+            pb.push(y);
+            pb.push(tileWidth);
+            pb.push(tileHeight);
+            pb.push(rotate);
+            pb.push(animX | 0);
+            pb.push(animY | 0);
+            pb.push(textureIndex);
         }
 
         renderCanvas(renderer: any) {
@@ -146,16 +108,18 @@ namespace pixi_tilemap {
             if (this.textures.length === 0) return;
             let points = this.pointsBuf;
             renderer.context.fillStyle = '#000000';
-            for (let i = 0, n = points.length; i < n; i += 9) {
+            for (let i = 0, n = points.length; i < n; i += POINT_STRUCT_SIZE) {
                 let x1 = points[i], y1 = points[i + 1];
                 let x2 = points[i + 2], y2 = points[i + 3];
                 let w = points[i + 4];
                 let h = points[i + 5];
-                x1 += points[i + 6] * renderer.plugins.tilemap.tileAnim[0];
-                y1 += points[i + 7] * renderer.plugins.tilemap.tileAnim[1];
-                let textureIndex = points[i + 8];
+                var rotate = points[i + 6];
+                x1 += points[i + 7] * renderer.plugins.tilemap.tileAnim[0];
+                y1 += points[i + 8] * renderer.plugins.tilemap.tileAnim[1];
+                let textureIndex = points[i + 9];
+                // canvas does not work with rotate yet
                 if (textureIndex >= 0) {
-                    renderer.context.drawImage(this.textures[textureIndex].baseTexture.source, x1, y1, w, h, x2, y2, w, h);
+                    renderer.context.drawImage((this.textures[textureIndex].baseTexture as any).getDrawableSource(), x1, y1, w, h, x2, y2, w, h);
                 } else {
                     renderer.context.globalAlpha = 0.5;
                     renderer.context.fillRect(x2, y2, w, h);
@@ -192,7 +156,7 @@ namespace pixi_tilemap {
         renderWebGLCore(renderer: PIXI.Renderer, plugin: TileRenderer) {
             let points = this.pointsBuf;
             if (points.length === 0) return;
-            let rectsCount = points.length / 9;
+            let rectsCount = points.length / POINT_STRUCT_SIZE;
 
             let shader = plugin.getShader();
             let textures = this.textures;
@@ -242,16 +206,16 @@ namespace pixi_tilemap {
 
                 //let tint = 0xffffffff;
                 let tint = -1;
-                for (let i = 0; i < points.length; i += 9) {
+                for (let i = 0; i < points.length; i += POINT_STRUCT_SIZE) {
                     let eps = 0.5;
-                    if (this.compositeParent){
+                    if (this.compositeParent) {
                         if (boundCountPerBuffer > 1) {
                             //TODO: what if its more than 4?
-                            textureId = (points[i + 8] >> 2);
-                            shiftU = this.offsetX * (points[i + 8] & 1);
-                            shiftV = this.offsetY * ((points[i + 8] >> 1) & 1);
+                            textureId = (points[i + 9] >> 2);
+                            shiftU = this.offsetX * (points[i + 9] & 1);
+                            shiftV = this.offsetY * ((points[i + 9] >> 1) & 1);
                         } else {
-                            textureId = points[i + 8];
+                            textureId = points[i + 9];
                             shiftU = 0;
                             shiftV = 0;
                         }
@@ -259,11 +223,50 @@ namespace pixi_tilemap {
                     let x = points[i + 2], y = points[i + 3];
                     let w = points[i + 4], h = points[i + 5];
                     let u = points[i] + shiftU, v = points[i + 1] + shiftV;
-                    let animX = points[i + 6], animY = points[i + 7];
+                    let rotate = points[i + 6];
+                    let animX = points[i + 7], animY = points[i + 8];
+
+                    let u0: number, v0: number, u1: number, v1: number, u2: number, v2: number, u3: number, v3: number;
+                    if (rotate === 0) {
+                        u0 = u;
+                        v0 = v;
+                        u1 = u + w;
+                        v1 = v;
+                        u2 = u + w;
+                        v2 = v + h;
+                        u3 = u;
+                        v3 = v + h;
+                    } else {
+                        let w2 = w / 2;
+                        let h2 = h / 2;
+                        if (rotate % 4 !== 0) {
+                            w2 = h / 2;
+                            h2 = w / 2;
+                        }
+                        const cX = u + w2;
+                        const cY = v + h2;
+
+                        rotate = groupD8.add(rotate, groupD8.NW);
+                        u0 = cX + (w2 * groupD8.uX(rotate));
+                        v0 = cY + (h2 * groupD8.uY(rotate));
+
+                        rotate = groupD8.add(rotate, 2); // rotate 90 degrees clockwise
+                        u1 = cX + (w2 * groupD8.uX(rotate));
+                        v1 = cY + (h2 * groupD8.uY(rotate));
+
+                        rotate = groupD8.add(rotate, 2);
+                        u2 = cX + (w2 * groupD8.uX(rotate));
+                        v2 = cY + (h2 * groupD8.uY(rotate));
+
+                        rotate = groupD8.add(rotate, 2);
+                        u3 = cX + (w2 * groupD8.uX(rotate));
+                        v3 = cY + (h2 * groupD8.uY(rotate));
+                    }
+
                     arr[sz++] = x;
                     arr[sz++] = y;
-                    arr[sz++] = u;
-                    arr[sz++] = v;
+                    arr[sz++] = u0;
+                    arr[sz++] = v0;
                     arr[sz++] = u + eps;
                     arr[sz++] = v + eps;
                     arr[sz++] = u + w - eps;
@@ -273,8 +276,8 @@ namespace pixi_tilemap {
                     arr[sz++] = textureId;
                     arr[sz++] = x + w;
                     arr[sz++] = y;
-                    arr[sz++] = u + w;
-                    arr[sz++] = v;
+                    arr[sz++] = u1;
+                    arr[sz++] = v1;
                     arr[sz++] = u + eps;
                     arr[sz++] = v + eps;
                     arr[sz++] = u + w - eps;
@@ -284,8 +287,8 @@ namespace pixi_tilemap {
                     arr[sz++] = textureId;
                     arr[sz++] = x + w;
                     arr[sz++] = y + h;
-                    arr[sz++] = u + w;
-                    arr[sz++] = v + h;
+                    arr[sz++] = u2;
+                    arr[sz++] = v2;
                     arr[sz++] = u + eps;
                     arr[sz++] = v + eps;
                     arr[sz++] = u + w - eps;
@@ -295,8 +298,8 @@ namespace pixi_tilemap {
                     arr[sz++] = textureId;
                     arr[sz++] = x;
                     arr[sz++] = y + h;
-                    arr[sz++] = u;
-                    arr[sz++] = v + h;
+                    arr[sz++] = u3;
+                    arr[sz++] = v3;
                     arr[sz++] = u + eps;
                     arr[sz++] = v + eps;
                     arr[sz++] = u + w - eps;
