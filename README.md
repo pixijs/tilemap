@@ -4,9 +4,7 @@
 
 Library that helps with tilemaps, provide special shaders and canvas fallback. Works with pixi >= 5.0.4
 
-It has some strict limitations connected to its RPGMV legacy: it uses only up to 16 textures of size 1024x1024, and combines them into 4 render textures of 2k size.
-
-When you render the tilemap with other textures, textures will be re-uploaded.
+## Multi-texture Configuration (**Important!**)
 
 Please specify how many base textures do you want to use. That's the default:
 
@@ -14,15 +12,27 @@ Please specify how many base textures do you want to use. That's the default:
 PIXI.tilemap.Constant.maxTextures = 4;
 ```
 
-For compatibility with very old devices, if you want to use multi texture, use this settings, the same as in pixi-tilemap v4:
+That means, if you use 5th baseTexture, compositeRectTileLayer will move it to second RectTileLayer and all tiles of that texture will go on different Z level!
+
+Specify bigger `maxTextures` if you want everything to be on the same Z.
+
+```js
+PIXI.tilemap.Constant.maxTextures = 16;
+```
+
+Not every device does have 16 texture locations, so, its possible to fit 4 textures of 1024 into 1 of 2048, that's why `boundCountPerBuffer` exists.
+In that case, if you render the tilemap with other textures, textures will be re-uploaded - that can slow down things due to extra `subTexImage2D` in frame.
+
+This is old RpgMakerMV-compatible setting:
 
 ```js
 PIXI.tilemap.Constant.boundCountPerBuffer = 4;
 PIXI.tilemap.Constant.maxTextures = 4;
 ```
 
-There's limitation on 16k tiles per one tilemap. If you want to lift it, please use pixi v5.1.0 and following setting:
+Or you can just set `maxTextures` to 16 and forget about old devices and `texImage2D` slowdown.
 
+There's also a limitation on 16k tiles per one tilemap. If you want to lift it, please use pixi v5.1.0 and following setting:
 
 ```js
 PIXI.tilemap.Constant.use32bitIndex = true;

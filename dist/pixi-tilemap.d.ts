@@ -19,7 +19,7 @@ declare module PIXI.tilemap {
         initialize(zIndex?: number, bitmaps?: Array<PIXI.Texture>, texPerChild?: number): void;
         setBitmaps(bitmaps: Array<PIXI.Texture>): void;
         clear(): void;
-        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number): void;
+        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number, rotate?: number): void;
         addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX?: number, animY?: number): boolean;
         renderCanvas(renderer: any): void;
         render(renderer: PIXI.Renderer): void;
@@ -63,6 +63,7 @@ declare module PIXI.tilemap {
     }
 }
 declare module PIXI.tilemap {
+    const POINT_STRUCT_SIZE = 10;
     class RectTileLayer extends PIXI.Container {
         constructor(zIndex: number, texture: PIXI.Texture | Array<PIXI.Texture>);
         zIndex: number;
@@ -78,7 +79,7 @@ declare module PIXI.tilemap {
         initialize(zIndex: number, textures: PIXI.Texture | Array<PIXI.Texture>): void;
         clear(): void;
         addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX: number, animY: number): boolean;
-        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number): void;
+        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number, rotate?: number): void;
         renderCanvas(renderer: any): void;
         renderCanvasCore(renderer: any): void;
         vbId: number;

@@ -12,6 +12,11 @@ var scale = +(getOptionValue('scale') || 1);
 var resolution = +(getOptionValue('resolution') || window.devicePixelRatio);
 var ratio = window.devicePixelRatio / resolution;
 
+PIXI.tilemap.Constant.boundCountPerBuffer = 4;
+// or
+// PIXI.tilemap.Constant.maxTextures = 16;
+// both are fine for RMMV
+
 function resizeTilemap() {
     if (!tilemap) return;
     tilemap.width = (_renderer.width + 2*tilemap._margin) * scale;
