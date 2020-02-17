@@ -1,10 +1,5 @@
 language: node_js
 
-node_js:
-  - "6"
-  - "7.10"
-  - "8.4"
-
 cache:
   yarn: true
   directories:
