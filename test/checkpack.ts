@@ -1,26 +1,30 @@
-import 'pixi.js';
-import '../dist/pixi-tilemap.js';
-import ResourceDictionary = PIXI.loaders.ResourceDictionary;
-import Loader = PIXI.loaders.Loader;
+import * as  PIXI from 'pixi.js';
+
+window.PIXI = PIXI;
+//@ts-ignore
+require('../dist/pixi-tilemap.js');
 
 //@../node_modules/pixi.js/dist/pixi.min.js
 //@../dist/pixi-tilemap.js
 
-var app = new PIXI.Application(800, 600);
+var app = new PIXI.Application({width: 800, height: 600});
 var renderer = app.renderer;
 document.body.appendChild(renderer.view);
 
+//@ts-ignore
 var stage: PIXI.Container, tilemap: PIXI.tilemap.CompositeRectTileLayer;
 
-var loader = new PIXI.loaders.Loader();
+var loader = new PIXI.Loader();
 loader.add('atlas', 'basic/atlas.json');
 loader.add('button', 'basic/button.png');
-loader.load(function(loader: PIXI.loaders.Loader, resources: any) {
+loader.load(function(loader: PIXI.Loader, resources: any) {
 	//first parameter means z-layer, which is not used yet
 	//second parameter is list of textures for layers
 	//third parameter means that all our tiles are squares or at least 2x1 dominoes
 	//   and we can optimize it with gl.POINTS
 	stage = new PIXI.Container();
+
+    //@ts-ignore
 	tilemap = new PIXI.tilemap.CompositeRectTileLayer(0, []);
 	stage.addChild(tilemap);
 

@@ -203,7 +203,7 @@ var pixi_tilemap;
 var pixi_tilemap;
 (function (pixi_tilemap) {
     pixi_tilemap.Constant = {
-        maxTextures: 16,
+        maxTextures: 4,
         bufferSize: 2048,
         boundSize: 1024,
         boundCountPerBuffer: 1,

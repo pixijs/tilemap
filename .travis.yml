@@ -5,15 +5,9 @@ node_js:
 
 cache:
   yarn: true
-  directories:
-    - node_modules
 
-install:
-  - npm install -g yarn
+before_script:
   - yarn
 
 script:
   - yarn build
-  - yarn checkpack -- vanillajs -e test/checkpack.ts --validate
-  - yarn checkpack -- browserify -e test/checkpack.ts --validate
-  - yarn checkpack -- webpack -e test/checkpack.ts --validate
