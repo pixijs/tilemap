@@ -57,16 +57,16 @@ namespace pixi_tilemap {
             this.modificationMarker = 0;
         }
 
-        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number, rotate?: number) {
+        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number, rotate?: number, animWidth?: number, animHeight?: number) {
             const childIndex: number = textureIndex / this.texPerChild >> 0;
             const textureId: number = textureIndex % this.texPerChild;
 
             if (this.children[childIndex] && (this.children[childIndex] as RectTileLayer).textures) {
-                (this.children[childIndex] as RectTileLayer).addRect(textureId, u, v, x, y, tileWidth, tileHeight, animX, animY, rotate);
+                (this.children[childIndex] as RectTileLayer).addRect(textureId, u, v, x, y, tileWidth, tileHeight, animX, animY, rotate, animWidth, animHeight);
             }
         }
 
-        addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX?: number, animY?: number) {
+        addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX?: number, animY?: number, animWidth?: number, animHeight?: number) {
             var texture: PIXI.Texture;
             var layer: RectTileLayer = null;
             var ind: number = 0;
@@ -130,7 +130,7 @@ namespace pixi_tilemap {
                 }
             }
 
-            layer.addRect(ind, texture.frame.x, texture.frame.y, x, y, texture.orig.width, texture.orig.height, animX, animY, texture.rotate);
+            layer.addRect(ind, texture.frame.x, texture.frame.y, x, y, texture.orig.width, texture.orig.height, animX, animY, texture.rotate, animWidth, animHeight);
             return true;
         }
 

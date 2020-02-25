@@ -3,7 +3,7 @@ namespace pixi_tilemap {
     import glCore = PIXI.glCore;
     import GroupD8 = PIXI.GroupD8;
 
-    export const POINT_STRUCT_SIZE = 10;
+    export const POINT_STRUCT_SIZE = 12;
 
     export class RectTileLayer extends PIXI.Container {
 
@@ -82,7 +82,7 @@ namespace pixi_tilemap {
             return true;
         }
 
-        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX: number = 0, animY: number = 0, rotate: number = 0) {
+        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX: number = 0, animY: number = 0, rotate: number = 0, animWidth: number = 1, animHeight: number = 1) {
             const pb = this.pointsBuf;
             this.hasAnim = this.hasAnim || animX > 0 || animY > 0;
 
@@ -96,6 +96,8 @@ namespace pixi_tilemap {
             pb.push(animX);
             pb.push(animY);
             pb.push(textureIndex);
+            pb.push(animWidth);
+            pb.push(animHeight);
         }
 
         renderCanvas(renderer: PIXI.CanvasRenderer) {
@@ -262,6 +264,7 @@ namespace pixi_tilemap {
                     let rotate = points[i + 6];
                     let u = points[i] + shiftU, v = points[i + 1] + shiftV;
                     let animX = points[i + 7], animY = points[i + 8];
+                    var animWidth = points[i + 10], animHeight = points[i + 11];
 
                     let u0: number, v0: number, u1: number, v1: number, u2: number, v2: number, u3: number, v3: number;
                     if (rotate === 0) {
@@ -311,6 +314,8 @@ namespace pixi_tilemap {
                     arr[sz++] = animX;
                     arr[sz++] = animY;
                     arr[sz++] = textureId;
+                    arr[sz++] = animWidth;
+                    arr[sz++] = animHeight;
                     arr[sz++] = x + w;
                     arr[sz++] = y;
                     arr[sz++] = u1;
@@ -322,6 +327,8 @@ namespace pixi_tilemap {
                     arr[sz++] = animX;
                     arr[sz++] = animY;
                     arr[sz++] = textureId;
+                    arr[sz++] = animWidth;
+                    arr[sz++] = animHeight;
                     arr[sz++] = x + w;
                     arr[sz++] = y + h;
                     arr[sz++] = u2;
@@ -333,6 +340,8 @@ namespace pixi_tilemap {
                     arr[sz++] = animX;
                     arr[sz++] = animY;
                     arr[sz++] = textureId;
+                    arr[sz++] = animWidth;
+                    arr[sz++] = animHeight;
                     arr[sz++] = x;
                     arr[sz++] = y + h;
                     arr[sz++] = u3;
@@ -344,6 +353,8 @@ namespace pixi_tilemap {
                     arr[sz++] = animX;
                     arr[sz++] = animY;
                     arr[sz++] = textureId;
+                    arr[sz++] = animWidth;
+                    arr[sz++] = animHeight;
                 }
 
                 // if (vs > this.vbArray.length/2 ) {
