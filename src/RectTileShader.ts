@@ -39,7 +39,7 @@ varying vec4 vFrame;
 
 void main(void){
    gl_Position = vec4((projectionMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);
-   vec2 anim = aAnim * mod(animationFrame, vec2(aAnimWidth, aAnimHeight));
+   vec2 anim = aAnim * mod(animationFrame + 1.0, vec2(aAnimWidth, aAnimHeight));
    vTextureCoord = aTextureCoord + anim;
    vFrame = aFrame + vec4(anim, anim);
    vTextureId = aTextureId;
