@@ -21,10 +21,21 @@ loader.load(function (loader, resources) {
     var pic = new PIXI.Sprite(resources['button'].texture);
     pic.position.set(200, 100);
     stage.addChild(pic);
-    //lets animate tilemap every second
-    setInterval(function () {
+    // ==== Old way to build animations: Rebuild tilemap every frame
+    function animRebuild() {
         buildTilemap(frame++)
-    }, 400);
+    }
+
+    // ==== New way: animate shader
+    function animShader() {
+        // animate X frames
+        renderer.plugins.tilemap.tileAnim[0] = frame;
+        // animate Y frames
+        renderer.plugins.tilemap.tileAnim[1] = frame;
+        frame++;
+    }
+
+    setInterval(animShader, 400);
 });
 
 function buildTilemap(frame) {
@@ -47,7 +58,11 @@ function buildTilemap(frame) {
     tilemap.addFrame(textures["brick_wall.png"], 2 * size, 3 * size);
 
     //chest will be animated!
-    tilemap.addFrame(textures[frame % 2 == 0 ? "chest.png" : "red_chest.png"], 4 * size, 4 * size);
+    //old way: animate on rebuild
+    // tilemap.addFrame(textures[frame % 2 == 0 ? "chest.png" : "red_chest.png"], 4 * size, 4 * size);
+
+    // new way: animate on shader: 2 frames , X offset is 32 , "red_chest" is exactly 34 pixels right in the atlas
+    tilemap.addFrame(textures["chest.png"], 4 * size, 4 * size).tileAnimX(34, 2);
 
     // button does not appear in the atlas, but tilemap wont surrender, it will create second layer for special for buttons
     // buttons will appear above everything

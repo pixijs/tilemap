@@ -1,6 +1,6 @@
 namespace pixi_tilemap {
     import groupD8 = PIXI.groupD8;
-    export const POINT_STRUCT_SIZE = 10;
+    export const POINT_STRUCT_SIZE = 12;
 
     export class RectTileLayer extends PIXI.Container {
         constructor(zIndex: number, texture: PIXI.Texture | Array<PIXI.Texture>) {
@@ -73,7 +73,8 @@ namespace pixi_tilemap {
             return true;
         }
 
-        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX: number = 0, animY: number = 0, rotate: number = 0) {
+        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number,
+                animX: number = 0, animY: number = 0, rotate: number = 0, animCountX: number = 1024, animCountY: number = 1024): this {
             let pb = this.pointsBuf;
             this.hasAnim = this.hasAnim || animX > 0 || animY > 0;
             pb.push(u);
@@ -86,6 +87,29 @@ namespace pixi_tilemap {
             pb.push(animX | 0);
             pb.push(animY | 0);
             pb.push(textureIndex);
+            pb.push(animCountX);
+            pb.push(animCountY);
+
+            return this;
+        }
+
+        tileRotate(rotate: number) {
+            const pb = this.pointsBuf;
+            pb[pb.length - 3] = rotate;
+        }
+
+        tileAnimX(offset: number, count: number) {
+            const pb = this.pointsBuf;
+
+            pb[pb.length - 5] = offset;
+            pb[pb.length - 2] = count;
+        }
+
+        tileAnimY(offset: number, count: number) {
+            const pb = this.pointsBuf;
+
+            pb[pb.length - 4] = offset;
+            pb[pb.length - 1] = count;
         }
 
         renderCanvas(renderer: any) {
@@ -224,7 +248,11 @@ namespace pixi_tilemap {
                     let w = points[i + 4], h = points[i + 5];
                     let u = points[i] + shiftU, v = points[i + 1] + shiftV;
                     let rotate = points[i + 6];
-                    let animX = points[i + 7], animY = points[i + 8];
+
+                    const animX = points[i + 7], animY = points[i + 8];
+                    const animWidth = points[i + 10] || 1024, animHeight = points[i + 11] || 1024;
+                    const animXEncoded = animX + (animWidth * 2048);
+                    const animYEncoded = animY + (animHeight * 2048);
 
                     let u0: number, v0: number, u1: number, v1: number, u2: number, v2: number, u3: number, v3: number;
                     if (rotate === 0) {
@@ -271,8 +299,8 @@ namespace pixi_tilemap {
                     arr[sz++] = v + eps;
                     arr[sz++] = u + w - eps;
                     arr[sz++] = v + h - eps;
-                    arr[sz++] = animX;
-                    arr[sz++] = animY;
+                    arr[sz++] = animXEncoded;
+                    arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
                     arr[sz++] = x + w;
                     arr[sz++] = y;
@@ -282,8 +310,8 @@ namespace pixi_tilemap {
                     arr[sz++] = v + eps;
                     arr[sz++] = u + w - eps;
                     arr[sz++] = v + h - eps;
-                    arr[sz++] = animX;
-                    arr[sz++] = animY;
+                    arr[sz++] = animXEncoded;
+                    arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
                     arr[sz++] = x + w;
                     arr[sz++] = y + h;
@@ -293,8 +321,8 @@ namespace pixi_tilemap {
                     arr[sz++] = v + eps;
                     arr[sz++] = u + w - eps;
                     arr[sz++] = v + h - eps;
-                    arr[sz++] = animX;
-                    arr[sz++] = animY;
+                    arr[sz++] = animXEncoded;
+                    arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
                     arr[sz++] = x;
                     arr[sz++] = y + h;
@@ -304,8 +332,8 @@ namespace pixi_tilemap {
                     arr[sz++] = v + eps;
                     arr[sz++] = u + w - eps;
                     arr[sz++] = v + h - eps;
-                    arr[sz++] = animX;
-                    arr[sz++] = animY;
+                    arr[sz++] = animXEncoded;
+                    arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
                 }
 

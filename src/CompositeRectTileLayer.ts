@@ -18,6 +18,7 @@ namespace pixi_tilemap {
         modificationMarker = 0;
         shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
         _globalMat: PIXI.Matrix = null;
+        _lastLayer: RectTileLayer = null;
 
         texPerChild: number;
 
@@ -57,21 +58,51 @@ namespace pixi_tilemap {
             this.modificationMarker = 0;
         }
 
-        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number, rotate?: number) {
+        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number, rotate?: number, animWidth?: number, animHeight?: number): this {
             const childIndex: number = textureIndex / this.texPerChild >> 0;
             const textureId: number = textureIndex % this.texPerChild;
 
             if (this.children[childIndex] && (this.children[childIndex] as RectTileLayer).textures) {
-                (this.children[childIndex] as RectTileLayer).addRect(textureId, u, v, x, y, tileWidth, tileHeight, animX, animY, rotate);
+                this._lastLayer = (this.children[childIndex] as RectTileLayer);
+                this._lastLayer.addRect(textureId, u, v, x, y, tileWidth, tileHeight, animX, animY, rotate, animWidth, animHeight);
+            } else {
+                this._lastLayer = null;
             }
+
+            return this;
         }
 
-        addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX?: number, animY?: number) {
+        tileRotate(rotate: number): this {
+            if (this._lastLayer)
+            {
+                this._lastLayer.tileRotate(rotate);
+            }
+            return this;
+        }
+
+        tileAnimX(offset: number, count: number): this {
+            if (this._lastLayer)
+            {
+                this._lastLayer.tileAnimX(offset, count);
+            }
+            return this;
+        }
+
+        tileAnimY(offset: number, count: number): this {
+            if (this._lastLayer)
+            {
+                this._lastLayer.tileAnimY(offset, count);
+            }
+            return this;
+        }
+
+        addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX?: number, animY?: number, animWidth?: number, animHeight?: number): this {
             let texture: PIXI.Texture;
             let layer: RectTileLayer = null;
             let ind: number = 0;
             let children = this.children;
 
+            this._lastLayer = null;
             if (typeof texture_ === "number") {
                 let childIndex = texture_ / this.texPerChild >> 0;
                 layer = children[childIndex] as RectTileLayer;
@@ -79,7 +110,7 @@ namespace pixi_tilemap {
                 if (!layer) {
                     layer = children[0] as RectTileLayer;
                     if (!layer) {
-                        return false;
+                        return this;
                     }
                     ind = 0;
                 } else {
@@ -130,8 +161,9 @@ namespace pixi_tilemap {
                 }
             }
 
-            layer.addRect(ind, texture.frame.x, texture.frame.y, x, y, texture.orig.width, texture.orig.height, animX, animY, texture.rotate);
-            return true;
+            this._lastLayer = layer;
+            layer.addRect(ind, texture.frame.x, texture.frame.y, x, y, texture.orig.width, texture.orig.height, animX, animY, texture.rotate, animWidth, animHeight);
+            return this;
         }
 
         renderCanvas(renderer: any) {
