@@ -1,7 +1,7 @@
 namespace pixi_tilemap {
 
     export const Constant = {
-        maxTextures: 4,
+        maxTextures: 16,
         bufferSize: 2048,
         boundSize: 1024,
         boundCountPerBuffer: 1,
