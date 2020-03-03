@@ -37,6 +37,7 @@ var pixi_tilemap;
             _this.modificationMarker = 0;
             _this.shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
             _this._globalMat = null;
+            _this._lastLayer = null;
             _this.initialize.apply(_this, arguments);
             return _this;
         }
@@ -75,25 +76,49 @@ var pixi_tilemap;
             }
             this.modificationMarker = 0;
         };
-        CompositeRectTileLayer.prototype.addRect = function (textureIndex, u, v, x, y, tileWidth, tileHeight, animX, animY, rotate) {
+        CompositeRectTileLayer.prototype.addRect = function (textureIndex, u, v, x, y, tileWidth, tileHeight, animX, animY, rotate, animWidth, animHeight) {
             var childIndex = textureIndex / this.texPerChild >> 0;
             var textureId = textureIndex % this.texPerChild;
             if (this.children[childIndex] && this.children[childIndex].textures) {
-                this.children[childIndex].addRect(textureId, u, v, x, y, tileWidth, tileHeight, animX, animY, rotate);
+                this._lastLayer = this.children[childIndex];
+                this._lastLayer.addRect(textureId, u, v, x, y, tileWidth, tileHeight, animX, animY, rotate, animWidth, animHeight);
             }
+            else {
+                this._lastLayer = null;
+            }
+            return this;
         };
-        CompositeRectTileLayer.prototype.addFrame = function (texture_, x, y, animX, animY) {
+        CompositeRectTileLayer.prototype.tileRotate = function (rotate) {
+            if (this._lastLayer) {
+                this._lastLayer.tileRotate(rotate);
+            }
+            return this;
+        };
+        CompositeRectTileLayer.prototype.tileAnimX = function (offset, count) {
+            if (this._lastLayer) {
+                this._lastLayer.tileAnimX(offset, count);
+            }
+            return this;
+        };
+        CompositeRectTileLayer.prototype.tileAnimY = function (offset, count) {
+            if (this._lastLayer) {
+                this._lastLayer.tileAnimY(offset, count);
+            }
+            return this;
+        };
+        CompositeRectTileLayer.prototype.addFrame = function (texture_, x, y, animX, animY, animWidth, animHeight) {
             var texture;
             var layer = null;
             var ind = 0;
             var children = this.children;
+            this._lastLayer = null;
             if (typeof texture_ === "number") {
                 var childIndex = texture_ / this.texPerChild >> 0;
                 layer = children[childIndex];
                 if (!layer) {
                     layer = children[0];
                     if (!layer) {
-                        return false;
+                        return this;
                     }
                     ind = 0;
                 }
@@ -143,8 +168,9 @@ var pixi_tilemap;
                     }
                 }
             }
-            layer.addRect(ind, texture.frame.x, texture.frame.y, x, y, texture.orig.width, texture.orig.height, animX, animY, texture.rotate);
-            return true;
+            this._lastLayer = layer;
+            layer.addRect(ind, texture.frame.x, texture.frame.y, x, y, texture.orig.width, texture.orig.height, animX, animY, texture.rotate, animWidth, animHeight);
+            return this;
         };
         CompositeRectTileLayer.prototype.renderCanvas = function (renderer) {
             if (!this.visible || this.worldAlpha <= 0 || !this.renderable) {
@@ -321,7 +347,7 @@ var pixi_tilemap;
 var pixi_tilemap;
 (function (pixi_tilemap) {
     var groupD8 = PIXI.groupD8;
-    pixi_tilemap.POINT_STRUCT_SIZE = 10;
+    pixi_tilemap.POINT_STRUCT_SIZE = 12;
     var RectTileLayer = (function (_super) {
         __extends(RectTileLayer, _super);
         function RectTileLayer(zIndex, texture) {
@@ -388,10 +414,12 @@ var pixi_tilemap;
             this.addRect(textureIndex, texture.frame.x, texture.frame.y, x, y, texture.orig.width, texture.orig.height, animX, animY, texture.rotate);
             return true;
         };
-        RectTileLayer.prototype.addRect = function (textureIndex, u, v, x, y, tileWidth, tileHeight, animX, animY, rotate) {
+        RectTileLayer.prototype.addRect = function (textureIndex, u, v, x, y, tileWidth, tileHeight, animX, animY, rotate, animCountX, animCountY) {
             if (animX === void 0) { animX = 0; }
             if (animY === void 0) { animY = 0; }
             if (rotate === void 0) { rotate = 0; }
+            if (animCountX === void 0) { animCountX = 1024; }
+            if (animCountY === void 0) { animCountY = 1024; }
             var pb = this.pointsBuf;
             this.hasAnim = this.hasAnim || animX > 0 || animY > 0;
             pb.push(u);
@@ -404,6 +432,23 @@ var pixi_tilemap;
             pb.push(animX | 0);
             pb.push(animY | 0);
             pb.push(textureIndex);
+            pb.push(animCountX);
+            pb.push(animCountY);
+            return this;
+        };
+        RectTileLayer.prototype.tileRotate = function (rotate) {
+            var pb = this.pointsBuf;
+            pb[pb.length - 3] = rotate;
+        };
+        RectTileLayer.prototype.tileAnimX = function (offset, count) {
+            var pb = this.pointsBuf;
+            pb[pb.length - 5] = offset;
+            pb[pb.length - 2] = count;
+        };
+        RectTileLayer.prototype.tileAnimY = function (offset, count) {
+            var pb = this.pointsBuf;
+            pb[pb.length - 4] = offset;
+            pb[pb.length - 1] = count;
         };
         RectTileLayer.prototype.renderCanvas = function (renderer) {
             var plugin = renderer.plugins.tilemap;
@@ -516,6 +561,9 @@ var pixi_tilemap;
                     var u = points[i] + shiftU, v = points[i + 1] + shiftV;
                     var rotate = points[i + 6];
                     var animX = points[i + 7], animY = points[i + 8];
+                    var animWidth = points[i + 10] || 1024, animHeight = points[i + 11] || 1024;
+                    var animXEncoded = animX + (animWidth * 2048);
+                    var animYEncoded = animY + (animHeight * 2048);
                     var u0 = void 0, v0 = void 0, u1 = void 0, v1 = void 0, u2 = void 0, v2 = void 0, u3 = void 0, v3 = void 0;
                     if (rotate === 0) {
                         u0 = u;
@@ -557,8 +605,8 @@ var pixi_tilemap;
                     arr[sz++] = v + eps;
                     arr[sz++] = u + w - eps;
                     arr[sz++] = v + h - eps;
-                    arr[sz++] = animX;
-                    arr[sz++] = animY;
+                    arr[sz++] = animXEncoded;
+                    arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
                     arr[sz++] = x + w;
                     arr[sz++] = y;
@@ -568,8 +616,8 @@ var pixi_tilemap;
                     arr[sz++] = v + eps;
                     arr[sz++] = u + w - eps;
                     arr[sz++] = v + h - eps;
-                    arr[sz++] = animX;
-                    arr[sz++] = animY;
+                    arr[sz++] = animXEncoded;
+                    arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
                     arr[sz++] = x + w;
                     arr[sz++] = y + h;
@@ -579,8 +627,8 @@ var pixi_tilemap;
                     arr[sz++] = v + eps;
                     arr[sz++] = u + w - eps;
                     arr[sz++] = v + h - eps;
-                    arr[sz++] = animX;
-                    arr[sz++] = animY;
+                    arr[sz++] = animXEncoded;
+                    arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
                     arr[sz++] = x;
                     arr[sz++] = y + h;
@@ -590,8 +638,8 @@ var pixi_tilemap;
                     arr[sz++] = v + eps;
                     arr[sz++] = u + w - eps;
                     arr[sz++] = v + h - eps;
-                    arr[sz++] = animX;
-                    arr[sz++] = animY;
+                    arr[sz++] = animXEncoded;
+                    arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
                 }
                 vertexBuf.update(arr);
@@ -620,7 +668,7 @@ var pixi_tilemap;
 var pixi_tilemap;
 (function (pixi_tilemap) {
     var rectShaderFrag = "\nvarying vec2 vTextureCoord;\nvarying vec4 vFrame;\nvarying float vTextureId;\nuniform vec4 shadowColor;\nuniform sampler2D uSamplers[%count%];\nuniform vec2 uSamplerSize[%count%];\n\nvoid main(void){\n   vec2 textureCoord = clamp(vTextureCoord, vFrame.xy, vFrame.zw);\n   float textureId = floor(vTextureId + 0.5);\n\n   vec4 color;\n   %forloop%\n   gl_FragColor = color;\n}\n";
-    var rectShaderVert = "\nattribute vec2 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec4 aFrame;\nattribute vec2 aAnim;\nattribute float aTextureId;\n\nuniform mat3 projTransMatrix;\nuniform vec2 animationFrame;\n\nvarying vec2 vTextureCoord;\nvarying float vTextureId;\nvarying vec4 vFrame;\n\nvoid main(void){\n   gl_Position = vec4((projTransMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);\n   vec2 anim = aAnim * animationFrame;\n   vTextureCoord = aTextureCoord + anim;\n   vFrame = aFrame + vec4(anim, anim);\n   vTextureId = aTextureId;\n}\n";
+    var rectShaderVert = "\nattribute vec2 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec4 aFrame;\nattribute vec2 aAnim;\nattribute float aTextureId;\n\nuniform mat3 projTransMatrix;\nuniform vec2 animationFrame;\n\nvarying vec2 vTextureCoord;\nvarying float vTextureId;\nvarying vec4 vFrame;\n\nvoid main(void){\n   gl_Position = vec4((projTransMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);\n   vec2 animCount = floor((aAnim + 0.5) / 2048.0);\n   vec2 animFrameOffset = aAnim - animCount * 2048.0;\n   vec2 animOffset = animFrameOffset * floor(mod(animationFrame + 0.5, animCount));\n\n   vTextureCoord = aTextureCoord + animOffset;\n   vFrame = aFrame + vec4(animOffset, animOffset);\n   vTextureId = aTextureId;\n}\n";
     var TilemapShader = (function (_super) {
         __extends(TilemapShader, _super);
         function TilemapShader(maxTextures, shaderVert, shaderFrag) {

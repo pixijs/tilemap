@@ -15,12 +15,16 @@ declare module PIXI.tilemap {
         modificationMarker: number;
         shadowColor: Float32Array;
         _globalMat: PIXI.Matrix;
+        _lastLayer: RectTileLayer;
         texPerChild: number;
         initialize(zIndex?: number, bitmaps?: Array<PIXI.Texture>, texPerChild?: number): void;
         setBitmaps(bitmaps: Array<PIXI.Texture>): void;
         clear(): void;
-        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number, rotate?: number): void;
-        addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX?: number, animY?: number): boolean;
+        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number, rotate?: number, animWidth?: number, animHeight?: number): this;
+        tileRotate(rotate: number): this;
+        tileAnimX(offset: number, count: number): this;
+        tileAnimY(offset: number, count: number): this;
+        addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX?: number, animY?: number, animWidth?: number, animHeight?: number): this;
         renderCanvas(renderer: any): void;
         render(renderer: PIXI.Renderer): void;
         isModified(anim: boolean): boolean;
@@ -63,7 +67,7 @@ declare module PIXI.tilemap {
     }
 }
 declare module PIXI.tilemap {
-    const POINT_STRUCT_SIZE = 10;
+    const POINT_STRUCT_SIZE = 12;
     class RectTileLayer extends PIXI.Container {
         constructor(zIndex: number, texture: PIXI.Texture | Array<PIXI.Texture>);
         zIndex: number;
@@ -79,7 +83,10 @@ declare module PIXI.tilemap {
         initialize(zIndex: number, textures: PIXI.Texture | Array<PIXI.Texture>): void;
         clear(): void;
         addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX: number, animY: number): boolean;
-        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number, rotate?: number): void;
+        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number, rotate?: number, animCountX?: number, animCountY?: number): this;
+        tileRotate(rotate: number): void;
+        tileAnimX(offset: number, count: number): void;
+        tileAnimY(offset: number, count: number): void;
         renderCanvas(renderer: any): void;
         renderCanvasCore(renderer: any): void;
         vbId: number;
