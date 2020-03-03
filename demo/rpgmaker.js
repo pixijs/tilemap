@@ -1371,10 +1371,10 @@ function requireRpgMaker() {
                     })
                 }
             }
-            loader.on('progress', progress);
+            loader.onProgress.add(progress);
             //0. load tilesets
             if (this.tilesetResource)
-                progress(self.tilesetResource);
+                progress(loader, self.tilesetResource);
             else
                 loader.add('tilesets', 'rpgmaker/data/Tilesets.json');
             loader.load(function(loader, resources) {
