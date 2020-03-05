@@ -173,7 +173,6 @@ namespace pixi_tilemap {
             renderer.globalUniforms.uniforms.projectionMatrix.copyTo(this._globalMat).append(this.worldTransform);
             shader.uniforms.shadowColor = this.shadowColor;
             shader.uniforms.animationFrame = plugin.tileAnim;
-            renderer.shader.bind(shader, false);
             this.renderWebGLCore(renderer, plugin);
         }
 
@@ -187,6 +186,7 @@ namespace pixi_tilemap {
             if (textures.length === 0) return;
 
             plugin.bindTextures(renderer, shader, textures);
+            renderer.shader.bind(shader, false);
 
             //lost context! recover!
             let vb = this.vb;

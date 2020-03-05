@@ -496,7 +496,6 @@ var pixi_tilemap;
             renderer.globalUniforms.uniforms.projectionMatrix.copyTo(this._globalMat).append(this.worldTransform);
             shader.uniforms.shadowColor = this.shadowColor;
             shader.uniforms.animationFrame = plugin.tileAnim;
-            renderer.shader.bind(shader, false);
             this.renderWebGLCore(renderer, plugin);
         };
         RectTileLayer.prototype.renderWebGLCore = function (renderer, plugin) {
@@ -509,6 +508,7 @@ var pixi_tilemap;
             if (textures.length === 0)
                 return;
             plugin.bindTextures(renderer, shader, textures);
+            renderer.shader.bind(shader, false);
             var vb = this.vb;
             if (!vb) {
                 vb = plugin.createVb();
