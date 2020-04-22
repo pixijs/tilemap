@@ -35,6 +35,12 @@ namespace pixi_tilemap {
         }
 
         setBitmaps(bitmaps: Array<PIXI.Texture>) {
+            for (let i=0;i<bitmaps.length;i++) {
+                if (bitmaps[i] && !bitmaps[i].baseTexture) {
+                    throw new Error(`pixi-tilemap cannot use destroyed textures. `+
+                        `Probably, you passed resources['myAtlas'].texture in pixi > 5.2.1, it does not exist there.`);
+                }
+            }
             let texPerChild = this.texPerChild;
             let len1 = this.children.length;
             let len2 = Math.ceil(bitmaps.length / texPerChild);

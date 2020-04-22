@@ -10,7 +10,7 @@ loader.load(function (loader, resources) {
     //first parameter means z-layer, which is not used yet
     //second parameter is list of textures for layers
     stage = new PIXI.Container();
-    tilemap = new PIXI.tilemap.CompositeRectTileLayer(0, [resources['atlas_image'].texture]);
+    tilemap = new PIXI.tilemap.CompositeRectTileLayer();
     stage.addChild(tilemap);
 
     animate();
