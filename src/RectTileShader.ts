@@ -50,7 +50,6 @@ void main(void){
 
 	export abstract class TilemapShader extends PIXI.Shader {
         maxTextures = 0;
-        startTime = Date.now();
 
 		constructor(maxTextures: number, shaderVert: string, shaderFrag: string) {
 			super(

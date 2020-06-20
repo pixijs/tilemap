@@ -100,7 +100,7 @@ namespace pixi_tilemap {
         }
 
         tileAnimX(offset: number, count: number, timeBetweenFrames?: number) {
-            // this.hasAnim = true;
+            this.hasAnim = true;
             const pb = this.pointsBuf;
 
             pb[pb.length - 6] = offset;
@@ -109,7 +109,7 @@ namespace pixi_tilemap {
         }
 
         tileAnimY(offset: number, count: number, timeBetweenFrames?: number) {
-            // this.hasAnim = true;
+            this.hasAnim = true;
             const pb = this.pointsBuf;
 
             pb[pb.length - 5] = offset;
@@ -143,9 +143,26 @@ namespace pixi_tilemap {
                 let w = points[i + 4];
                 let h = points[i + 5];
                 var rotate = points[i + 6];
-                x1 += points[i + 7] * renderer.plugins.tilemap.tileAnim[0];
-                y1 += points[i + 8] * renderer.plugins.tilemap.tileAnim[1];
                 let textureIndex = points[i + 9];
+                const animCountX = points[i + 10];
+                const animCountY = points[i + 11];
+                const timeBetweenFrames = points[i + 12];
+
+                // Animation
+                let currentFrameX = 0;
+                let currentFrameY = 0;
+                if (timeBetweenFrames > 0) {
+                    const time = Date.now() - renderer.plugins.tilemap.startTime;
+                    currentFrameX = Math.floor(time / timeBetweenFrames) % animCountX;
+                    currentFrameY = Math.floor(time / timeBetweenFrames) % animCountY;
+                } else {
+                    currentFrameX = renderer.plugins.tilemap.tileAnim[0] % animCountX;
+                    currentFrameY = renderer.plugins.tilemap.tileAnim[1] % animCountY;
+                }
+
+                x1 += points[i + 7] * (currentFrameX || 0);
+                y1 += points[i + 8] * (currentFrameY || 0);
+
                 // canvas does not work with rotate yet
                 if (textureIndex >= 0) {
                     renderer.context.drawImage((this.textures[textureIndex].baseTexture as any).getDrawableSource(), x1, y1, w, h, x2, y2, w, h);
@@ -178,7 +195,7 @@ namespace pixi_tilemap {
             renderer.globalUniforms.uniforms.projectionMatrix.copyTo(this._globalMat).append(this.worldTransform);
             shader.uniforms.shadowColor = this.shadowColor;
             shader.uniforms.animationFrame = plugin.tileAnim;
-            shader.uniforms.time = Date.now() - shader.startTime;
+            shader.uniforms.time = Date.now() - plugin.startTime;
             this.renderWebGLCore(renderer, plugin);
         }
 

@@ -14,7 +14,8 @@ namespace pixi_tilemap {
 		sn: number = -1;
 		indexBuffer: PIXI.Buffer = null;
 		ibLen: number = 0;
-		tileAnim = [0, 0];
+        tileAnim = [0, 0];
+        startTime = Date.now();
 		texLoc: Array<number> = [];
 
 		rectShader: RectTileShader;

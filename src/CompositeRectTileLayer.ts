@@ -206,7 +206,7 @@ namespace pixi_tilemap {
             renderer.globalUniforms.uniforms.projectionMatrix.copyTo(this._globalMat).append(this.worldTransform);
             shader.uniforms.shadowColor = this.shadowColor;
             shader.uniforms.animationFrame = plugin.tileAnim;
-            shader.uniforms.time = Date.now() - shader.startTime;
+            shader.uniforms.time = Date.now() - plugin.startTime;
             renderer.shader.bind(shader, false);
             let layers = this.children;
             for (let i = 0; i < layers.length; i++) {
