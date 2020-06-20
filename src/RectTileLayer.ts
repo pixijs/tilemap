@@ -1,6 +1,6 @@
 namespace pixi_tilemap {
     import groupD8 = PIXI.groupD8;
-    export const POINT_STRUCT_SIZE = 12;
+    export const POINT_STRUCT_SIZE = 13;
 
     export class RectTileLayer extends PIXI.Container {
         constructor(zIndex: number, texture: PIXI.Texture | Array<PIXI.Texture>) {
@@ -74,7 +74,7 @@ namespace pixi_tilemap {
         }
 
         addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number,
-                animX: number = 0, animY: number = 0, rotate: number = 0, animCountX: number = 1024, animCountY: number = 1024): this {
+                animX: number = 0, animY: number = 0, rotate: number = 0, animCountX: number = 1024, animCountY: number = 1024, timeBetweenFrames: number = 0): this {
             let pb = this.pointsBuf;
             this.hasAnim = this.hasAnim || animX > 0 || animY > 0;
             pb.push(u);
@@ -89,27 +89,32 @@ namespace pixi_tilemap {
             pb.push(textureIndex);
             pb.push(animCountX);
             pb.push(animCountY);
+            pb.push(timeBetweenFrames);
 
             return this;
         }
 
         tileRotate(rotate: number) {
             const pb = this.pointsBuf;
-            pb[pb.length - 3] = rotate;
+            pb[pb.length - 4] = rotate;
         }
 
-        tileAnimX(offset: number, count: number) {
+        tileAnimX(offset: number, count: number, timeBetweenFrames?: number) {
+            // this.hasAnim = true;
+            const pb = this.pointsBuf;
+
+            pb[pb.length - 6] = offset;
+            pb[pb.length - 3] = count;
+            pb[pb.length - 1] = timeBetweenFrames;
+        }
+
+        tileAnimY(offset: number, count: number, timeBetweenFrames?: number) {
+            // this.hasAnim = true;
             const pb = this.pointsBuf;
 
             pb[pb.length - 5] = offset;
             pb[pb.length - 2] = count;
-        }
-
-        tileAnimY(offset: number, count: number) {
-            const pb = this.pointsBuf;
-
-            pb[pb.length - 4] = offset;
-            pb[pb.length - 1] = count;
+            pb[pb.length - 1] = timeBetweenFrames;
         }
 
         renderCanvas(renderer: any) {
@@ -173,6 +178,7 @@ namespace pixi_tilemap {
             renderer.globalUniforms.uniforms.projectionMatrix.copyTo(this._globalMat).append(this.worldTransform);
             shader.uniforms.shadowColor = this.shadowColor;
             shader.uniforms.animationFrame = plugin.tileAnim;
+            shader.uniforms.time = Date.now() - shader.startTime;
             this.renderWebGLCore(renderer, plugin);
         }
 
@@ -253,6 +259,7 @@ namespace pixi_tilemap {
                     const animWidth = points[i + 10] || 1024, animHeight = points[i + 11] || 1024;
                     const animXEncoded = animX + (animWidth * 2048);
                     const animYEncoded = animY + (animHeight * 2048);
+                    const timeBetweenFrames = points[i + 12];
 
                     let u0: number, v0: number, u1: number, v1: number, u2: number, v2: number, u3: number, v3: number;
                     if (rotate === 0) {
@@ -302,6 +309,8 @@ namespace pixi_tilemap {
                     arr[sz++] = animXEncoded;
                     arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
+                    arr[sz++] = timeBetweenFrames;
+
                     arr[sz++] = x + w;
                     arr[sz++] = y;
                     arr[sz++] = u1;
@@ -313,6 +322,8 @@ namespace pixi_tilemap {
                     arr[sz++] = animXEncoded;
                     arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
+                    arr[sz++] = timeBetweenFrames;
+
                     arr[sz++] = x + w;
                     arr[sz++] = y + h;
                     arr[sz++] = u2;
@@ -324,6 +335,8 @@ namespace pixi_tilemap {
                     arr[sz++] = animXEncoded;
                     arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
+                    arr[sz++] = timeBetweenFrames;
+
                     arr[sz++] = x;
                     arr[sz++] = y + h;
                     arr[sz++] = u3;
@@ -335,6 +348,7 @@ namespace pixi_tilemap {
                     arr[sz++] = animXEncoded;
                     arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
+                    arr[sz++] = timeBetweenFrames;
                 }
 
                 vertexBuf.update(arr);

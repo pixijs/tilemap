@@ -23,9 +23,11 @@ attribute vec2 aTextureCoord;
 attribute vec4 aFrame;
 attribute vec2 aAnim;
 attribute float aTextureId;
+attribute float aTimeBetweenFrames;
 
 uniform mat3 projTransMatrix;
 uniform vec2 animationFrame;
+uniform float time;
 
 varying vec2 vTextureCoord;
 varying float vTextureId;
@@ -35,7 +37,10 @@ void main(void){
    gl_Position = vec4((projTransMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);
    vec2 animCount = floor((aAnim + 0.5) / 2048.0);
    vec2 animFrameOffset = aAnim - animCount * 2048.0;
-   vec2 animOffset = animFrameOffset * floor(mod(animationFrame + 0.5, animCount));
+   vec2 currentFrame = (aTimeBetweenFrames > 0.0)
+       ? vec2(floor(time / aTimeBetweenFrames))
+       : animationFrame;
+   vec2 animOffset = animFrameOffset * floor(mod(currentFrame + 0.5, animCount));
 
    vTextureCoord = aTextureCoord + animOffset;
    vFrame = aFrame + vec4(animOffset, animOffset);
@@ -44,7 +49,8 @@ void main(void){
 `;
 
 	export abstract class TilemapShader extends PIXI.Shader {
-		maxTextures = 0;
+        maxTextures = 0;
+        startTime = Date.now();
 
 		constructor(maxTextures: number, shaderVert: string, shaderFrag: string) {
 			super(
@@ -52,13 +58,14 @@ void main(void){
 					shaderVert,
 					shaderFrag),
 				{
-					animationFrame: new Float32Array(2),
+                    animationFrame: new Float32Array(2),
+                    time: 0.0,
 					uSamplers: [],
 					uSamplerSize: [],
 					projTransMatrix: new PIXI.Matrix()
 				}
 			);
-			this.maxTextures = maxTextures;
+            this.maxTextures = maxTextures;
 			shaderGenerator.fillSamplers(this, this.maxTextures);
 		}
 	}
@@ -75,7 +82,7 @@ void main(void){
 	}
 
 	export class RectTileGeom extends PIXI.Geometry {
-		vertSize = 11;
+		vertSize = 12;
 		vertPerQuad = 4;
 		stride = this.vertSize * 4;
 		lastTimeAccess = 0;
@@ -86,7 +93,8 @@ void main(void){
 				.addAttribute('aTextureCoord', buf, 0, false, 0, this.stride, 2 * 4)
 				.addAttribute('aFrame', buf, 0, false, 0, this.stride, 4 * 4)
 				.addAttribute('aAnim', buf, 0, false, 0, this.stride, 8 * 4)
-				.addAttribute('aTextureId', buf, 0, false, 0, this.stride, 10 * 4);
+                .addAttribute('aTextureId', buf, 0, false, 0, this.stride, 10 * 4)
+                .addAttribute('aTimeBetweenFrames', buf, 0, false, 0, this.stride, 11 * 4);
 		}
 
 		buf: PIXI.Buffer;

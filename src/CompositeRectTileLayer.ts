@@ -64,13 +64,13 @@ namespace pixi_tilemap {
             this.modificationMarker = 0;
         }
 
-        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number, rotate?: number, animWidth?: number, animHeight?: number): this {
+        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number, rotate?: number, animWidth?: number, animHeight?: number, timeBetweenFrames?: number): this {
             const childIndex: number = textureIndex / this.texPerChild >> 0;
             const textureId: number = textureIndex % this.texPerChild;
 
             if (this.children[childIndex] && (this.children[childIndex] as RectTileLayer).textures) {
                 this._lastLayer = (this.children[childIndex] as RectTileLayer);
-                this._lastLayer.addRect(textureId, u, v, x, y, tileWidth, tileHeight, animX, animY, rotate, animWidth, animHeight);
+                this._lastLayer.addRect(textureId, u, v, x, y, tileWidth, tileHeight, animX, animY, rotate, animWidth, animHeight, timeBetweenFrames);
             } else {
                 this._lastLayer = null;
             }
@@ -86,23 +86,23 @@ namespace pixi_tilemap {
             return this;
         }
 
-        tileAnimX(offset: number, count: number): this {
+        tileAnimX(offset: number, count: number, timeBetweenFrames: number = 0): this {
             if (this._lastLayer)
             {
-                this._lastLayer.tileAnimX(offset, count);
+                this._lastLayer.tileAnimX(offset, count, timeBetweenFrames);
             }
             return this;
         }
 
-        tileAnimY(offset: number, count: number): this {
+        tileAnimY(offset: number, count: number, timeBetweenFrames: number = 0): this {
             if (this._lastLayer)
             {
-                this._lastLayer.tileAnimY(offset, count);
+                this._lastLayer.tileAnimY(offset, count, timeBetweenFrames);
             }
             return this;
         }
 
-        addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX?: number, animY?: number, animWidth?: number, animHeight?: number): this {
+        addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX?: number, animY?: number, animWidth?: number, animHeight?: number, timeBetweenFrames?: number): this {
             let texture: PIXI.Texture;
             let layer: RectTileLayer = null;
             let ind: number = 0;
@@ -168,7 +168,7 @@ namespace pixi_tilemap {
             }
 
             this._lastLayer = layer;
-            layer.addRect(ind, texture.frame.x, texture.frame.y, x, y, texture.orig.width, texture.orig.height, animX, animY, texture.rotate, animWidth, animHeight);
+            layer.addRect(ind, texture.frame.x, texture.frame.y, x, y, texture.orig.width, texture.orig.height, animX, animY, texture.rotate, animWidth, animHeight, timeBetweenFrames);
             return this;
         }
 
@@ -206,6 +206,7 @@ namespace pixi_tilemap {
             renderer.globalUniforms.uniforms.projectionMatrix.copyTo(this._globalMat).append(this.worldTransform);
             shader.uniforms.shadowColor = this.shadowColor;
             shader.uniforms.animationFrame = plugin.tileAnim;
+            shader.uniforms.time = Date.now() - shader.startTime;
             renderer.shader.bind(shader, false);
             let layers = this.children;
             for (let i = 0; i < layers.length; i++) {
