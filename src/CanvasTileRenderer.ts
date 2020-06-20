@@ -3,7 +3,6 @@ namespace pixi_tilemap {
     export class CanvasTileRenderer {
         renderer: any;
         tileAnim = [0, 0];
-        startTime = Date.now();
         dontUseTransform = false;
 
         constructor(renderer: any) {

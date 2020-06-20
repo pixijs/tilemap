@@ -23,11 +23,10 @@ attribute vec2 aTextureCoord;
 attribute vec4 aFrame;
 attribute vec2 aAnim;
 attribute float aTextureId;
-attribute float aTimeBetweenFrames;
+attribute float aAnimDuration;
 
 uniform mat3 projTransMatrix;
 uniform vec2 animationFrame;
-uniform float time;
 
 varying vec2 vTextureCoord;
 varying float vTextureId;
@@ -37,9 +36,7 @@ void main(void){
    gl_Position = vec4((projTransMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);
    vec2 animCount = floor((aAnim + 0.5) / 2048.0);
    vec2 animFrameOffset = aAnim - animCount * 2048.0;
-   vec2 currentFrame = (aTimeBetweenFrames > 0.0)
-       ? vec2(floor(time / aTimeBetweenFrames))
-       : animationFrame;
+   vec2 currentFrame = floor(animationFrame / aAnimDuration);
    vec2 animOffset = animFrameOffset * floor(mod(currentFrame + 0.5, animCount));
 
    vTextureCoord = aTextureCoord + animOffset;
@@ -58,7 +55,6 @@ void main(void){
 					shaderFrag),
 				{
                     animationFrame: new Float32Array(2),
-                    time: 0.0,
 					uSamplers: [],
 					uSamplerSize: [],
 					projTransMatrix: new PIXI.Matrix()
@@ -93,7 +89,7 @@ void main(void){
 				.addAttribute('aFrame', buf, 0, false, 0, this.stride, 4 * 4)
 				.addAttribute('aAnim', buf, 0, false, 0, this.stride, 8 * 4)
                 .addAttribute('aTextureId', buf, 0, false, 0, this.stride, 10 * 4)
-                .addAttribute('aTimeBetweenFrames', buf, 0, false, 0, this.stride, 11 * 4);
+                .addAttribute('aAnimDuration', buf, 0, false, 0, this.stride, 11 * 4);
 		}
 
 		buf: PIXI.Buffer;

@@ -74,7 +74,7 @@ namespace pixi_tilemap {
         }
 
         addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number,
-                animX: number = 0, animY: number = 0, rotate: number = 0, animCountX: number = 1024, animCountY: number = 1024, timeBetweenFrames: number = 0): this {
+                animX: number = 0, animY: number = 0, rotate: number = 0, animCountX: number = 1024, animCountY: number = 1024, animDuration: number = 1): this {
             let pb = this.pointsBuf;
             this.hasAnim = this.hasAnim || animX > 0 || animY > 0;
             pb.push(u);
@@ -89,7 +89,7 @@ namespace pixi_tilemap {
             pb.push(textureIndex);
             pb.push(animCountX);
             pb.push(animCountY);
-            pb.push(timeBetweenFrames);
+            pb.push(animDuration);
 
             return this;
         }
@@ -99,22 +99,22 @@ namespace pixi_tilemap {
             pb[pb.length - 4] = rotate;
         }
 
-        tileAnimX(offset: number, count: number, timeBetweenFrames?: number) {
+        tileAnimX(offset: number, count: number, duration: number = 1) {
             this.hasAnim = true;
             const pb = this.pointsBuf;
 
             pb[pb.length - 6] = offset;
             pb[pb.length - 3] = count;
-            pb[pb.length - 1] = timeBetweenFrames;
+            pb[pb.length - 1] = duration;
         }
 
-        tileAnimY(offset: number, count: number, timeBetweenFrames?: number) {
+        tileAnimY(offset: number, count: number, duration: number = 1) {
             this.hasAnim = true;
             const pb = this.pointsBuf;
 
             pb[pb.length - 5] = offset;
             pb[pb.length - 2] = count;
-            pb[pb.length - 1] = timeBetweenFrames;
+            pb[pb.length - 1] = duration;
         }
 
         renderCanvas(renderer: any) {
@@ -146,20 +146,11 @@ namespace pixi_tilemap {
                 let textureIndex = points[i + 9];
                 const animCountX = points[i + 10];
                 const animCountY = points[i + 11];
-                const timeBetweenFrames = points[i + 12];
+                const animDuration = points[i + 12];
 
                 // Animation
-                let currentFrameX = 0;
-                let currentFrameY = 0;
-                if (timeBetweenFrames > 0) {
-                    const time = Date.now() - renderer.plugins.tilemap.startTime;
-                    currentFrameX = Math.floor(time / timeBetweenFrames) % animCountX;
-                    currentFrameY = Math.floor(time / timeBetweenFrames) % animCountY;
-                } else {
-                    currentFrameX = renderer.plugins.tilemap.tileAnim[0] % animCountX;
-                    currentFrameY = renderer.plugins.tilemap.tileAnim[1] % animCountY;
-                }
-
+                let currentFrameX = Math.floor(renderer.plugins.tilemap.tileAnim[0] / animDuration) % animCountX;
+                let currentFrameY = Math.floor(renderer.plugins.tilemap.tileAnim[1] / animDuration) % animCountY;
                 x1 += points[i + 7] * (currentFrameX || 0);
                 y1 += points[i + 8] * (currentFrameY || 0);
 
@@ -195,7 +186,6 @@ namespace pixi_tilemap {
             renderer.globalUniforms.uniforms.projectionMatrix.copyTo(this._globalMat).append(this.worldTransform);
             shader.uniforms.shadowColor = this.shadowColor;
             shader.uniforms.animationFrame = plugin.tileAnim;
-            shader.uniforms.time = Date.now() - plugin.startTime;
             this.renderWebGLCore(renderer, plugin);
         }
 
@@ -276,7 +266,7 @@ namespace pixi_tilemap {
                     const animWidth = points[i + 10] || 1024, animHeight = points[i + 11] || 1024;
                     const animXEncoded = animX + (animWidth * 2048);
                     const animYEncoded = animY + (animHeight * 2048);
-                    const timeBetweenFrames = points[i + 12];
+                    const animDuration = points[i + 12];
 
                     let u0: number, v0: number, u1: number, v1: number, u2: number, v2: number, u3: number, v3: number;
                     if (rotate === 0) {
@@ -326,7 +316,7 @@ namespace pixi_tilemap {
                     arr[sz++] = animXEncoded;
                     arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
-                    arr[sz++] = timeBetweenFrames;
+                    arr[sz++] = animDuration;
 
                     arr[sz++] = x + w;
                     arr[sz++] = y;
@@ -339,7 +329,7 @@ namespace pixi_tilemap {
                     arr[sz++] = animXEncoded;
                     arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
-                    arr[sz++] = timeBetweenFrames;
+                    arr[sz++] = animDuration;
 
                     arr[sz++] = x + w;
                     arr[sz++] = y + h;
@@ -352,7 +342,7 @@ namespace pixi_tilemap {
                     arr[sz++] = animXEncoded;
                     arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
-                    arr[sz++] = timeBetweenFrames;
+                    arr[sz++] = animDuration;
 
                     arr[sz++] = x;
                     arr[sz++] = y + h;
@@ -365,7 +355,7 @@ namespace pixi_tilemap {
                     arr[sz++] = animXEncoded;
                     arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
-                    arr[sz++] = timeBetweenFrames;
+                    arr[sz++] = animDuration;
                 }
 
                 vertexBuf.update(arr);
