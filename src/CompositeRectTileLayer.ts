@@ -4,7 +4,7 @@ namespace pixi_tilemap {
 
     export class CompositeRectTileLayer extends PIXI.Container {
 
-        constructor(zIndex?: number, bitmaps?: Array<PIXI.Texture>, texPerChild?: number) {
+        constructor(zIndex?: number, bitmaps?: Array<PIXI.Texture>, texPerChild?: number, alpha?: number) {
             super();
             this.initialize.apply(this, arguments);
         }
@@ -19,16 +19,18 @@ namespace pixi_tilemap {
         shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
         _globalMat: PIXI.Matrix = null;
         _lastLayer: RectTileLayer = null;
+        _alpha: number;
 
         texPerChild: number;
 
-        initialize(zIndex?: number, bitmaps?: Array<PIXI.Texture>, texPerChild?: number) {
+        initialize(zIndex?: number, bitmaps?: Array<PIXI.Texture>, texPerChild?: number, alpha?: number) {
             if (texPerChild as any === true) {
                 //old format, ignore it!
                 texPerChild = 0;
             }
             this.z = this.zIndex = zIndex;
             this.texPerChild = texPerChild || Constant.boundCountPerBuffer * Constant.maxTextures;
+            this._alpha = alpha || 1.0;
             if (bitmaps) {
                 this.setBitmaps(bitmaps);
             }
@@ -64,13 +66,14 @@ namespace pixi_tilemap {
             this.modificationMarker = 0;
         }
 
-        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number, rotate?: number, animWidth?: number, animHeight?: number): this {
+        addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number, rotate?: number, animWidth?: number, animHeight?: number, alpha?: number): this {
             const childIndex: number = textureIndex / this.texPerChild >> 0;
             const textureId: number = textureIndex % this.texPerChild;
 
             if (this.children[childIndex] && (this.children[childIndex] as RectTileLayer).textures) {
                 this._lastLayer = (this.children[childIndex] as RectTileLayer);
-                this._lastLayer.addRect(textureId, u, v, x, y, tileWidth, tileHeight, animX, animY, rotate, animWidth, animHeight);
+                const tileAlpha = alpha || this._alpha;
+                this._lastLayer.addRect(textureId, u, v, x, y, tileWidth, tileHeight, animX, animY, rotate, animWidth, animHeight, tileAlpha);
             } else {
                 this._lastLayer = null;
             }
@@ -102,7 +105,29 @@ namespace pixi_tilemap {
             return this;
         }
 
-        addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX?: number, animY?: number, animWidth?: number, animHeight?: number): this {
+        /**
+         * Set the layer alpha. Every tile added to this layer will inherit this alpha value.
+         *
+         * @param {number} alpha Numeric value between 0.0 and 1.0.
+         */
+        setAlpha(alpha: number) {
+            this._alpha = alpha;
+        }
+
+        /**
+         * Set an specified alpha to the tile. By default, alpha is inherit from the tile's
+         * CompositeRectTileLayer unless it is overridden with this method.
+         *
+         * @param {number} alpha Numeric value between 0.0 and 1.0.
+         */
+        tileAlpha(alpha: number) {
+            if (this._lastLayer) {
+                this._lastLayer.tileAlpha(alpha);
+            }
+            return this;
+        }
+
+        addFrame(texture_: PIXI.Texture | String | number, x: number, y: number, animX?: number, animY?: number, animWidth?: number, animHeight?: number, alpha?: number): this {
             let texture: PIXI.Texture;
             let layer: RectTileLayer = null;
             let ind: number = 0;
@@ -168,7 +193,8 @@ namespace pixi_tilemap {
             }
 
             this._lastLayer = layer;
-            layer.addRect(ind, texture.frame.x, texture.frame.y, x, y, texture.orig.width, texture.orig.height, animX, animY, texture.rotate, animWidth, animHeight);
+            const tileAlpha = alpha || this._alpha;
+            layer.addRect(ind, texture.frame.x, texture.frame.y, x, y, texture.orig.width, texture.orig.height, animX, animY, texture.rotate, animWidth, animHeight, tileAlpha);
             return this;
         }
 

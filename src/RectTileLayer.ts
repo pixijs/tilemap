@@ -1,6 +1,21 @@
 namespace pixi_tilemap {
     import groupD8 = PIXI.groupD8;
-    export const POINT_STRUCT_SIZE = 12;
+    enum PointStruct {
+        U = 0,
+        V,
+        X,
+        Y,
+        TileWidth,
+        TileHeight,
+        Rotate,
+        AnimX,
+        AnimY,
+        TextureIndex,
+        AnimCountX,
+        AnimCountY,
+        Alpha,
+    };
+    export const POINT_STRUCT_SIZE = (Object.keys(PointStruct).length / 2);
 
     export class RectTileLayer extends PIXI.Container {
         constructor(zIndex: number, texture: PIXI.Texture | Array<PIXI.Texture>) {
@@ -74,7 +89,7 @@ namespace pixi_tilemap {
         }
 
         addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number,
-                animX: number = 0, animY: number = 0, rotate: number = 0, animCountX: number = 1024, animCountY: number = 1024): this {
+                animX: number = 0, animY: number = 0, rotate: number = 0, animCountX: number = 1024, animCountY: number = 1024, alpha: number = 1): this {
             let pb = this.pointsBuf;
             this.hasAnim = this.hasAnim || animX > 0 || animY > 0;
             pb.push(u);
@@ -89,27 +104,33 @@ namespace pixi_tilemap {
             pb.push(textureIndex);
             pb.push(animCountX);
             pb.push(animCountY);
+            pb.push(alpha);
 
             return this;
         }
 
         tileRotate(rotate: number) {
             const pb = this.pointsBuf;
-            pb[pb.length - 3] = rotate;
+            pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.TextureIndex)] = rotate;
         }
 
         tileAnimX(offset: number, count: number) {
             const pb = this.pointsBuf;
 
-            pb[pb.length - 5] = offset;
-            pb[pb.length - 2] = count;
+            pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.AnimX)] = offset;
+            pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.AnimCountX)] = count;
         }
 
         tileAnimY(offset: number, count: number) {
             const pb = this.pointsBuf;
 
-            pb[pb.length - 4] = offset;
-            pb[pb.length - 1] = count;
+            pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.AnimY)] = offset;
+            pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.AnimCountY)] = count;
+        }
+
+        tileAlpha(alpha: number) {
+            const pb = this.pointsBuf;
+            pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.Alpha)] = alpha;
         }
 
         renderCanvas(renderer: any) {
@@ -133,22 +154,25 @@ namespace pixi_tilemap {
             let points = this.pointsBuf;
             renderer.context.fillStyle = '#000000';
             for (let i = 0, n = points.length; i < n; i += POINT_STRUCT_SIZE) {
-                let x1 = points[i], y1 = points[i + 1];
-                let x2 = points[i + 2], y2 = points[i + 3];
-                let w = points[i + 4];
-                let h = points[i + 5];
-                var rotate = points[i + 6];
-                x1 += points[i + 7] * renderer.plugins.tilemap.tileAnim[0];
-                y1 += points[i + 8] * renderer.plugins.tilemap.tileAnim[1];
-                let textureIndex = points[i + 9];
+                let x1 = points[i + PointStruct.U], y1 = points[i + PointStruct.V];
+                let x2 = points[i + PointStruct.X], y2 = points[i + PointStruct.Y];
+                let w = points[i + PointStruct.TileWidth];
+                let h = points[i + PointStruct.TileHeight];
+                var rotate = points[i + PointStruct.Rotate];
+                x1 += points[i + PointStruct.AnimX] * renderer.plugins.tilemap.tileAnim[0];
+                y1 += points[i + PointStruct.AnimY] * renderer.plugins.tilemap.tileAnim[1];
+                let textureIndex = points[i + PointStruct.TextureIndex];
+                const alpha = points[i + PointStruct.Alpha];
+
                 // canvas does not work with rotate yet
                 if (textureIndex >= 0) {
+                    renderer.context.globalAlpha = alpha;
                     renderer.context.drawImage((this.textures[textureIndex].baseTexture as any).getDrawableSource(), x1, y1, w, h, x2, y2, w, h);
                 } else {
                     renderer.context.globalAlpha = 0.5;
                     renderer.context.fillRect(x2, y2, w, h);
-                    renderer.context.globalAlpha = 1;
                 }
+                renderer.context.globalAlpha = 1;
             }
         }
 
@@ -233,26 +257,28 @@ namespace pixi_tilemap {
                 for (let i = 0; i < points.length; i += POINT_STRUCT_SIZE) {
                     let eps = 0.5;
                     if (this.compositeParent) {
+                        const textureIndex = points[i + PointStruct.TextureIndex];
                         if (boundCountPerBuffer > 1) {
                             //TODO: what if its more than 4?
-                            textureId = (points[i + 9] >> 2);
-                            shiftU = this.offsetX * (points[i + 9] & 1);
-                            shiftV = this.offsetY * ((points[i + 9] >> 1) & 1);
+                            textureId = (textureIndex >> 2);
+                            shiftU = this.offsetX * (textureIndex & 1);
+                            shiftV = this.offsetY * ((textureIndex >> 1) & 1);
                         } else {
-                            textureId = points[i + 9];
+                            textureId = textureIndex;
                             shiftU = 0;
                             shiftV = 0;
                         }
                     }
-                    let x = points[i + 2], y = points[i + 3];
-                    let w = points[i + 4], h = points[i + 5];
-                    let u = points[i] + shiftU, v = points[i + 1] + shiftV;
-                    let rotate = points[i + 6];
+                    let x = points[i + PointStruct.X], y = points[i + PointStruct.Y];
+                    let w = points[i + PointStruct.TileWidth], h = points[i + PointStruct.TileHeight];
+                    let u = points[i + PointStruct.U] + shiftU, v = points[i + PointStruct.V] + shiftV;
+                    let rotate = points[i + PointStruct.Rotate];
 
-                    const animX = points[i + 7], animY = points[i + 8];
-                    const animWidth = points[i + 10] || 1024, animHeight = points[i + 11] || 1024;
+                    const animX = points[i + PointStruct.AnimX], animY = points[i + PointStruct.AnimY];
+                    const animWidth = points[i + PointStruct.AnimCountX] || 1024, animHeight = points[i + PointStruct.AnimCountY] || 1024;
                     const animXEncoded = animX + (animWidth * 2048);
                     const animYEncoded = animY + (animHeight * 2048);
+                    const alpha = points[i + PointStruct.Alpha];
 
                     let u0: number, v0: number, u1: number, v1: number, u2: number, v2: number, u3: number, v3: number;
                     if (rotate === 0) {
@@ -302,6 +328,8 @@ namespace pixi_tilemap {
                     arr[sz++] = animXEncoded;
                     arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
+                    arr[sz++] = alpha;
+
                     arr[sz++] = x + w;
                     arr[sz++] = y;
                     arr[sz++] = u1;
@@ -313,6 +341,8 @@ namespace pixi_tilemap {
                     arr[sz++] = animXEncoded;
                     arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
+                    arr[sz++] = alpha;
+
                     arr[sz++] = x + w;
                     arr[sz++] = y + h;
                     arr[sz++] = u2;
@@ -324,6 +354,8 @@ namespace pixi_tilemap {
                     arr[sz++] = animXEncoded;
                     arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
+                    arr[sz++] = alpha;
+
                     arr[sz++] = x;
                     arr[sz++] = y + h;
                     arr[sz++] = u3;
@@ -335,6 +367,7 @@ namespace pixi_tilemap {
                     arr[sz++] = animXEncoded;
                     arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
+                    arr[sz++] = alpha;
                 }
 
                 vertexBuf.update(arr);
