@@ -14,8 +14,7 @@ void main(void){
 
    vec4 color;
    %forloop%
-   gl_FragColor = color;
-   gl_FragColor.rgb *= vAlpha;
+   gl_FragColor = (color * vAlpha) + (gl_FragColor * (1.0 - vAlpha));
 }
 `;
 

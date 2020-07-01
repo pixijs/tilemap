@@ -19,7 +19,6 @@ namespace pixi_tilemap {
         shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
         _globalMat: PIXI.Matrix = null;
         _lastLayer: RectTileLayer = null;
-        _alpha: number;
 
         texPerChild: number;
 
@@ -30,7 +29,7 @@ namespace pixi_tilemap {
             }
             this.z = this.zIndex = zIndex;
             this.texPerChild = texPerChild || Constant.boundCountPerBuffer * Constant.maxTextures;
-            this._alpha = alpha || 1.0;
+            this.alpha = alpha ?? 1.0;
             if (bitmaps) {
                 this.setBitmaps(bitmaps);
             }
@@ -72,7 +71,7 @@ namespace pixi_tilemap {
 
             if (this.children[childIndex] && (this.children[childIndex] as RectTileLayer).textures) {
                 this._lastLayer = (this.children[childIndex] as RectTileLayer);
-                const tileAlpha = alpha || this._alpha;
+                const tileAlpha = this.worldAlpha * (alpha ?? 1.0);
                 this._lastLayer.addRect(textureId, u, v, x, y, tileWidth, tileHeight, animX, animY, rotate, animWidth, animHeight, tileAlpha);
             } else {
                 this._lastLayer = null;
@@ -106,15 +105,6 @@ namespace pixi_tilemap {
         }
 
         /**
-         * Set the layer alpha. Every tile added to this layer will inherit this alpha value.
-         *
-         * @param {number} alpha Numeric value between 0.0 and 1.0.
-         */
-        setAlpha(alpha: number) {
-            this._alpha = alpha;
-        }
-
-        /**
          * Set an specified alpha to the tile. By default, alpha is inherit from the tile's
          * CompositeRectTileLayer unless it is overridden with this method.
          *
@@ -122,7 +112,7 @@ namespace pixi_tilemap {
          */
         tileAlpha(alpha: number) {
             if (this._lastLayer) {
-                this._lastLayer.tileAlpha(alpha);
+                this._lastLayer.tileAlpha(this.worldAlpha * alpha);
             }
             return this;
         }
@@ -193,7 +183,7 @@ namespace pixi_tilemap {
             }
 
             this._lastLayer = layer;
-            const tileAlpha = alpha || this._alpha;
+            const tileAlpha = this.worldAlpha * (alpha ?? 1.0);
             layer.addRect(ind, texture.frame.x, texture.frame.y, x, y, texture.orig.width, texture.orig.height, animX, animY, texture.rotate, animWidth, animHeight, tileAlpha);
             return this;
         }
