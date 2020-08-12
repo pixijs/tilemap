@@ -23,6 +23,7 @@
     "prebuild": "yarn cleanup",
     "make:dts": "node scripts/make_dts.js",
     "build": "tsc && yarn make:dts",
+    "build:umd": "yarn build && rollup dist/pixi-tilemap.js --format umd --name pixi-tilemap --sourceMap --file dist/pixi-tilemap.umd.js",
     "docs": "typedoc --out ./docs/ --readme README.md ./src/",
     "check:browserify": "yarn checkpack browserify -e test/checkpack.ts",
     "check:webpack": "yarn checkpack webpack -e test/checkpack.ts",
@@ -44,6 +45,7 @@
     "parallelshell": "^2.0.0",
     "pixi.js": "~5.2.0",
     "rimraf": "^2.5.3",
+    "rollup": "^2.23.1",
     "tsify": "^4.0.1",
     "typescript": "^3.5.3"
   }
