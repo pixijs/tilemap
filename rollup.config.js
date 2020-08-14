@@ -54,7 +54,7 @@ const globals = {
 const name = 'pixi_tilemap';
 const footer = `
 PIXI.tilemap = PIXI.tilemap || {};
-Object.assign(PIXI.tilemap, _pixi_tilemap)
+Object.assign(PIXI.tilemap, pixi_tilemap)
 `;
 
 export default [
