@@ -26,3 +26,6 @@ docs/
 
 # jetBrains IDE ignores
 .idea
+
+# tsc compile
+compile

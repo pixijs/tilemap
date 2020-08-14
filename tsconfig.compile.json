@@ -4,10 +4,11 @@
         "noImplicitAny": true,
         "removeComments": true,
         "preserveConstEnums": true,
+        "outDir": "compile",
         "sourceMap": true,
         "inlineSources": true,
         "declaration": true,
-        "esModuleInterop": true
+        "emitDeclarationOnly": true
     },
     "include": [
         "src/**/*"
