@@ -43,13 +43,13 @@ const external = [
     '@pixi/graphics'
 ];
 const globals = {
-    '@pixi/core': '_pixi_core',
-    '@pixi/display': '_pixi_display',
-    '@pixi/constants': '_pixi_constants',
-    '@pixi/sprite': '_pixi_sprite',
-    '@pixi/math': '_pixi_math',
-    '@pixi/utils': '_pixi_utils',
-    '@pixi/graphics': '_pixi_graphics'
+    '@pixi/core': 'PIXI',
+    '@pixi/display': 'PIXI',
+    '@pixi/constants': 'PIXI',
+    '@pixi/sprite': 'PIXI',
+    '@pixi/math': 'PIXI',
+    '@pixi/utils': 'PIXI',
+    '@pixi/graphics': 'PIXI'
 }
 const name = 'pixi_tilemap';
 
