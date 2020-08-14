@@ -1,6 +1,8 @@
+/* eslint-disable */
+ 
 /*!
  * pixi-tilemap - v2.0.6
- * Compiled Fri, 14 Aug 2020 02:19:53 UTC
+ * Compiled Fri, 14 Aug 2020 02:36:52 UTC
  *
  * pixi-tilemap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license

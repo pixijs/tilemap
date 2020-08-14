@@ -15,6 +15,8 @@ const plugins = [
 ];
 const compiled = (new Date()).toUTCString().replace(/GMT/g, 'UTC');
 const banner = [
+    `/* eslint-disable */`,
+    ` `,
     `/*!`,
     ` * ${pkg.name} - v${pkg.version}`,
     ` * Compiled ${compiled}`,

@@ -24,7 +24,7 @@
     "watch": "tsc -w",
     "prebuild": "yarn cleanup",
     "make:dts": "node scripts/make_dts.js",
-    "build": "tsc && yarn make:dts",
+    "build": "rollup -c && yarn build:types",
     "build:types": "rm -rf ./compile && tsc -p ./tsconfig.compile.json && api-extractor run",
     "docs": "typedoc --out ./docs/ --readme README.md ./src/",
     "check:browserify": "yarn checkpack browserify -e test/checkpack.ts",
