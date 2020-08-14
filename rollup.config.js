@@ -52,6 +52,10 @@ const globals = {
     '@pixi/graphics': 'PIXI'
 }
 const name = 'pixi_tilemap';
+const footer = `
+PIXI.tilemap = PIXI.tilemap || {};
+Object.assign(PIXI.tilemap, _pixi_tilemap)
+`;
 
 export default [
     {
@@ -89,7 +93,8 @@ export default [
                 file: path.join(__dirname, 'dist/pixi-tilemap.umd.js'),
                 format: 'iife',
                 freeze,
-                sourcemap
+                sourcemap,
+                footer
             }
         ]
     },
@@ -105,7 +110,8 @@ export default [
                 file: path.join(__dirname, 'dist/pixi-tilemap.umd.min.js'),
                 format: 'iife',
                 freeze,
-                sourcemap
+                sourcemap,
+                footer
             }
         ]
     }
