@@ -21,7 +21,7 @@ export function fillSamplers(shader: TilemapShader, maxTextures: number) {
 
 export function generateFragmentSrc(maxTextures: number, fragmentSrc: string) {
     return fragmentSrc.replace(/%count%/gi, maxTextures + "")
-        .replace(/%forloop%/gi, this.generateSampleSrc(maxTextures));
+        .replace(/%forloop%/gi, generateSampleSrc(maxTextures));
 }
 
 export function generateSampleSrc(maxTextures: number) {
