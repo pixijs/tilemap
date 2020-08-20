@@ -1,5 +1,11 @@
-namespace pixi_tilemap {
-	let rectShaderFrag = `
+/// <reference path="types.d.ts" />
+
+import * as shaderGenerator from './shaderGenerator';
+
+import { Buffer, Geometry, Shader } from '@pixi/core';
+import { Matrix } from '@pixi/math';
+
+let rectShaderFrag = `
 varying vec2 vTextureCoord;
 varying vec4 vFrame;
 varying float vTextureId;
@@ -16,8 +22,7 @@ void main(void){
    gl_FragColor = color;
 }
 `;
-
-	let rectShaderVert = `
+let rectShaderVert = `
 attribute vec2 aVertexPosition;
 attribute vec2 aTextureCoord;
 attribute vec4 aFrame;
@@ -43,52 +48,52 @@ void main(void){
 }
 `;
 
-	export abstract class TilemapShader extends PIXI.Shader {
-		maxTextures = 0;
+export abstract class TilemapShader extends Shader {
+	maxTextures = 0;
 
-		constructor(maxTextures: number, shaderVert: string, shaderFrag: string) {
-			super(
-				new PIXI.Program(
-					shaderVert,
-					shaderFrag),
-				{
-					animationFrame: new Float32Array(2),
-					uSamplers: [],
-					uSamplerSize: [],
-					projTransMatrix: new PIXI.Matrix()
-				}
-			);
-			this.maxTextures = maxTextures;
-			shaderGenerator.fillSamplers(this, this.maxTextures);
-		}
+	constructor(maxTextures: number, shaderVert: string, shaderFrag: string) {
+		super(
+			new PIXI.Program(
+				shaderVert,
+				shaderFrag),
+			{
+				animationFrame: new Float32Array(2),
+				uSamplers: [],
+				uSamplerSize: [],
+				projTransMatrix: new Matrix()
+			}
+		);
+		this.maxTextures = maxTextures;
+		shaderGenerator.fillSamplers(this, this.maxTextures);
+	}
+}
+
+export class RectTileShader extends TilemapShader {
+	constructor(maxTextures: number) {
+		super(
+			maxTextures,
+			rectShaderVert,
+			shaderGenerator.generateFragmentSrc(maxTextures, rectShaderFrag)
+		);
+		shaderGenerator.fillSamplers(this, this.maxTextures);
+	}
+}
+
+export class RectTileGeom extends Geometry {
+	vertSize = 11;
+	vertPerQuad = 4;
+	stride = this.vertSize * 4;
+	lastTimeAccess = 0;
+
+	constructor() {
+		super();
+		const buf = this.buf = new Buffer(new Float32Array(2), true, false);
+		this.addAttribute('aVertexPosition', buf, 0, false, 0, this.stride, 0)
+			.addAttribute('aTextureCoord', buf, 0, false, 0, this.stride, 2 * 4)
+			.addAttribute('aFrame', buf, 0, false, 0, this.stride, 4 * 4)
+			.addAttribute('aAnim', buf, 0, false, 0, this.stride, 8 * 4)
+			.addAttribute('aTextureId', buf, 0, false, 0, this.stride, 10 * 4);
 	}
 
-	export class RectTileShader extends TilemapShader {
-		constructor(maxTextures: number) {
-			super(
-				maxTextures,
-				rectShaderVert,
-				shaderGenerator.generateFragmentSrc(maxTextures, rectShaderFrag)
-			);
-			shaderGenerator.fillSamplers(this, this.maxTextures);
-		}
-	}
-
-	export class RectTileGeom extends PIXI.Geometry {
-		vertSize = 11;
-		vertPerQuad = 4;
-		stride = this.vertSize * 4;
-		lastTimeAccess = 0;
-		constructor() {
-			super();
-			const buf = this.buf = new PIXI.Buffer(new Float32Array(2), true, false);
-			this.addAttribute('aVertexPosition', buf, 0, false, 0, this.stride, 0)
-				.addAttribute('aTextureCoord', buf, 0, false, 0, this.stride, 2 * 4)
-				.addAttribute('aFrame', buf, 0, false, 0, this.stride, 4 * 4)
-				.addAttribute('aAnim', buf, 0, false, 0, this.stride, 8 * 4)
-				.addAttribute('aTextureId', buf, 0, false, 0, this.stride, 10 * 4);
-		}
-
-		buf: PIXI.Buffer;
-	}
+	buf: PIXI.Buffer;
 }

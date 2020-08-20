@@ -1,0 +1,51 @@
+/*
+ * Temporary hack until pixi.js releases typings at a per-package basis.
+ */
+
+declare module "@pixi/constants" {
+    export {
+        ALPHA_MODES,
+        DRAW_MODES,
+        WRAP_MODES
+    } from 'pixi.js';
+}
+
+declare module "@pixi/core" {
+    export { 
+        BaseTexture,
+        Buffer,
+        Texture,
+        ObjectRenderer,
+        Renderer,
+        GLTexture,
+        Geometry,
+        Shader,
+        resources
+    } from 'pixi.js';
+}
+
+declare module "@pixi/display" {
+    export {
+        DisplayObject,
+        Container
+    } from 'pixi.js';
+}
+
+declare module "@pixi/math" {
+    export {
+        Matrix,
+        groupD8
+    } from 'pixi.js';
+}
+
+declare module "@pixi/graphics" {
+    export { 
+        Graphics
+    } from 'pixi.js';
+}
+
+declare module "@pixi/sprite" {
+    export {
+        Sprite
+    } from 'pixi.js';
+}
