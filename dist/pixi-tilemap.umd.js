@@ -2,7 +2,7 @@
  
 /*!
  * pixi-tilemap - v2.0.6
- * Compiled Tue, 25 Aug 2020 16:41:44 UTC
+ * Compiled Tue, 25 Aug 2020 16:49:06 UTC
  *
  * pixi-tilemap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -10,6 +10,7 @@
  * Copyright 2019-2020, Ivan Popelyshev, All Rights Reserved
  */
 this.PIXI = this.PIXI || {};
+this.PIXI.tilemap = this.PIXI.tilemap || {};
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@pixi/display'), require('@pixi/core'), require('@pixi/constants'), require('@pixi/math'), require('@pixi/graphics'), require('@pixi/sprite')) :
     typeof define === 'function' && define.amd ? define(['exports', '@pixi/display', '@pixi/core', '@pixi/constants', '@pixi/math', '@pixi/graphics', '@pixi/sprite'], factory) :
@@ -1148,5 +1149,5 @@ this.PIXI = this.PIXI || {};
     Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
-Object.assign(this.PIXI, pixi_tilemap);
+Object.assign(this.PIXI.tilemap, pixi_tilemap);
 //# sourceMappingURL=pixi-tilemap.umd.js.map

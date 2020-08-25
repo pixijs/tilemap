@@ -9,6 +9,7 @@
   "main": "./dist/pixi-tilemap.js",
   "module": "./lib/pixi-tilemap.es.js",
   "bundle": "./dist/pixi-tilemap.umd.js",
+  "namespace": "PIXI.tilemap",
   "types": "./index.d.ts",
   "homepage": "http://www.rpgmakerweb.com/",
   "bugs": "https://github.com/pixijs/pixi-tilemap/issues",
