@@ -8,6 +8,7 @@ import { Matrix } from '@pixi/math';
 import { ObjectRenderer } from '@pixi/core';
 import { Renderer } from '@pixi/core';
 import { resources } from '@pixi/core';
+import { SCALE_MODES } from '@pixi/constants';
 import { Shader } from '@pixi/core';
 import { Sprite } from '@pixi/sprite';
 import { Texture } from '@pixi/core';
@@ -49,7 +50,7 @@ export declare const Constant: {
     boundSize: number;
     boundCountPerBuffer: number;
     use32bitIndex: boolean;
-    SCALE_MODE: PIXI.SCALE_MODES;
+    SCALE_MODE: SCALE_MODES;
     DO_CLEAR: boolean;
 };
 

@@ -2,12 +2,12 @@
  
 /*!
  * pixi-tilemap - v2.0.6
- * Compiled Thu, 20 Aug 2020 02:13:52 UTC
+ * Compiled Tue, 25 Aug 2020 16:41:44 UTC
  *
  * pixi-tilemap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
  * 
- * Copyright 2016-20, Ivan Popelyshev All Rights Reserved
+ * Copyright 2019-2020, Ivan Popelyshev, All Rights Reserved
  */
 'use strict';
 
@@ -69,7 +69,7 @@ var Constant = {
     boundSize: 1024,
     boundCountPerBuffer: 1,
     use32bitIndex: false,
-    SCALE_MODE: PIXI.SCALE_MODES.LINEAR,
+    SCALE_MODE: constants.SCALE_MODES.LINEAR,
     DO_CLEAR: true
 };
 
