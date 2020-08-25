@@ -6,7 +6,8 @@ declare module "@pixi/constants" {
     export {
         ALPHA_MODES,
         DRAW_MODES,
-        WRAP_MODES
+        WRAP_MODES,
+        SCALE_MODES
     } from 'pixi.js';
 }
 
