@@ -29,3 +29,12 @@ docs/
 
 # tsc compile
 compile
+
+# yarn
+yarn.lock
+
+# CommonJS
+./dist/pixi-tilemap.js
+
+# ESM
+./lib

@@ -7,6 +7,18 @@
 
 Library that helps with tilemaps, provide special shaders and canvas fallback. Works with pixi >= 5.0.4
 
+## Type of builds (**Important!**)
+
+Beware, we've changed the filename of good old ES5 build, according to pixi-build-tools rollup config!
+
+```
+<script src="dist/pixi-tilemap.umd.js"></script>
+```
+
+CommonJS build is located in `dist/pixi-tilemap.js`.
+
+ESM is specified in `package.json`.
+
 ## Multi-texture Configuration (**Important!**) :page_facing_up:
 
 Please specify how many base textures do you want to use. That's the default:

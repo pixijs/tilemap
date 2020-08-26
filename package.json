@@ -1,6 +1,6 @@
 {
   "name": "pixi-tilemap",
-  "version": "2.0.6",
+  "version": "2.1.0",
   "description": "Pixi-tilemap provides tilemap shaders and tilemap renderer for pixi.js (v3 and v4). Used in rpgmaker MV.",
   "author": "Ivan Popelyshev",
   "contributors": [
@@ -24,14 +24,9 @@
     "start": "parallelshell \"yarn watch\"",
     "watch": "tsc -w",
     "prebuild": "yarn cleanup",
-    "make:dts": "node scripts/make_dts.js",
     "build": "rollup -c node_modules/@pixi-build-tools/rollup-configurator/index.js && yarn build:types",
-    "build:types": "rm -rf ./compile && tsc -p ./tsconfig.compile.json && api-extractor run",
-    "docs": "typedoc --out ./docs/ --readme README.md ./src/",
-    "check:browserify": "yarn checkpack browserify -e test/checkpack.ts",
-    "check:webpack": "yarn checkpack webpack -e test/checkpack.ts",
-    "check:vanillajs": "yarn checkpack vanillajs -e test/checkpack.ts",
-    "check:all": "yarn build && yarn check:browserify && yarn check:webpack && yarn check:vanillajs"
+    "build:types": "rimraf ./compile && tsc -p ./tsconfig.compile.json && api-extractor run",
+    "docs": "typedoc --out ./docs/ --readme README.md ./src/"
   },
   "files": [
     "dist/",
@@ -58,19 +53,17 @@
     "@pixi/math": "^5.3.3",
     "@pixi/sprite": "^5.3.3",
     "@rollup/plugin-node-resolve": "^8.4.0",
-    "checkpack": "^0.3",
     "del": "^2.2.0",
-    "jaguarjs-jsdoc": "^1.0.1",
     "jsdoc": "^3.4.0",
     "mkdirp": "^0.5.1",
     "parallelshell": "^2.0.0",
-    "pixi.js": "^5.3.3",
+	"pixi.js": "^5.3.3",
     "rimraf": "^2.5.3",
     "rollup": "^2.23.1",
     "rollup-plugin-sourcemaps": "^0.6.2",
     "rollup-plugin-terser": "^7.0.0",
     "rollup-plugin-typescript": "^1.0.1",
-    "tsify": "^4.0.1",
+    "tslib": "^2.0.1",
     "typescript": "^3.9.7"
   }
 }
