@@ -38,7 +38,7 @@ export class ZLayer extends Container {
         let tempRender = this._tempRender;
         if (!buf) {
             buf = this.canvasBuffer = document.createElement('canvas');
-            tempRender = this._tempRender = new (PIXI as any).CanvasRenderer(100, 100, {view: buf});
+            tempRender = this._tempRender = new (PIXI as any).CanvasRenderer({width: 100, height: 100, view: buf});
             tempRender.context = tempRender.rootContext;
             tempRender.plugins.tilemap.dontUseTransform = true;
         }

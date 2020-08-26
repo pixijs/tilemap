@@ -19,7 +19,7 @@
     "url": "https://github.com/pixijs/pixi-tilemap.git"
   },
   "scripts": {
-    "cleanup": "rimraf dist && mkdirp dist",
+    "cleanup": "rimraf dist && mkdirp dist && rimraf lib && mkdirp lib && rimraf compile",
     "prestart": "yarn cleanup",
     "start": "parallelshell \"yarn watch\"",
     "watch": "tsc -w",

@@ -1,4 +1,4 @@
-var renderer = PIXI.autoDetectRenderer(800, 600);
+var renderer = PIXI.autoDetectRenderer({width: 800, height: 600});
 document.body.appendChild(renderer.view);
 
 var stage, tilemap;

@@ -34,7 +34,8 @@ compile
 yarn.lock
 
 # CommonJS
-./dist/pixi-tilemap.js
+dist/pixi-tilemap.js
+dist/pixi-tilemap.js.map
 
 # ESM
-./lib
+lib
