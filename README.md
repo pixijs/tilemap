@@ -1,10 +1,13 @@
 # pixi-tilemap
 
 [![Build Status](https://travis-ci.org/pixijs/pixi-tilemap.svg?branch=master)](https://travis-ci.org/pixijs/pixi-tilemap)
+<p align="center">
+<img src="https://i.imgur.com/hfoiBRk.png" width="1280px" />
+<p/>
 
 Library that helps with tilemaps, provide special shaders and canvas fallback. Works with pixi >= 5.0.4
 
-## Multi-texture Configuration (**Important!**)
+## Multi-texture Configuration (**Important!**) :page_facing_up:
 
 Please specify how many base textures do you want to use. That's the default:
 
@@ -52,7 +55,7 @@ Canvas fallback is 5x slower than vanilla rpgmaker. Webgl version is faster and 
 
 [canvas](https://pixijs.github.io/pixi-tilemap/?canvas)
 
-### Basic demo
+### Basic demo :pen:
 
 [webgl](https://pixijs.github.io/pixi-tilemap/basic.html)
 
@@ -86,6 +89,6 @@ loader.load(function(loader, resources) {
 });
 ```
 
-### More tutorials
+### More tutorials :link:
 
 [Alan01252 tutorial](https://github.com/Alan01252/pixi-tilemap-tutorial)
