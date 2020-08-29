@@ -12,10 +12,6 @@ export class CompositeRectTileLayer extends Container {
         this.initialize.apply(this, arguments);
     }
 
-    updateTransform() {
-        (this as any).displayObjectUpdateTransform();
-    }
-
     z: number;
     zIndex: number;
     modificationMarker = 0;
@@ -164,7 +160,7 @@ export class CompositeRectTileLayer extends Container {
                     layer.compositeParent = true;
                     layer.offsetX = Constant.boundSize;
                     layer.offsetY = Constant.boundSize;
-                    children.push(layer);
+                    this.addChild(layer);
                     ind = 0;
                 }
             }

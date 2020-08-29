@@ -19,6 +19,7 @@ export class RectTileLayer extends Container {
 
     zIndex = 0;
     modificationMarker = 0;
+    _$_localBounds = new PIXI.Bounds();
     shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
     _globalMat: Matrix = null;
 
@@ -44,6 +45,7 @@ export class RectTileLayer extends Container {
     clear() {
         this.pointsBuf.length = 0;
         this.modificationMarker = 0;
+        this._$_localBounds.clear();
         this.hasAnim = false;
     }
 
@@ -98,6 +100,8 @@ export class RectTileLayer extends Container {
         pb.push(textureIndex);
         pb.push(animCountX);
         pb.push(animCountY);
+
+        this._$_localBounds.addFramePad(x, y, x+tileWidth, y+tileHeight, 0, 0);
 
         return this;
     }
@@ -363,6 +367,24 @@ export class RectTileLayer extends Container {
 
     clearModify() {
         this.modificationMarker = this.pointsBuf.length;
+    }
+
+    protected _calculateBounds(): void
+    {
+        const { minX, minY, maxX, maxY } = this._$_localBounds;
+
+        this._bounds.addFrame(this.transform, minX, minY, maxX, maxY);
+    }
+
+    public getLocalBounds(rect?: PIXI.Rectangle): PIXI.Rectangle
+    {
+        // we can do a fast local bounds if the sprite has no children!
+        if (this.children.length === 0)
+        {
+            return this._$_localBounds.getRectangle(rect);
+        }
+
+        return super.getLocalBounds.call(this, rect);
     }
 
     destroy(options?: any) {
