@@ -22,7 +22,6 @@ export declare class CanvasTileRenderer {
 
 export declare class CompositeRectTileLayer extends Container {
     constructor(zIndex?: number, bitmaps?: Array<Texture>, texPerChild?: number);
-    updateTransform(): void;
     z: number;
     zIndex: number;
     modificationMarker: number;
@@ -124,6 +123,7 @@ export declare class RectTileLayer extends Container {
     constructor(zIndex: number, texture: Texture | Array<Texture>);
     zIndex: number;
     modificationMarker: number;
+    _$_localBounds: PIXI.Bounds;
     shadowColor: Float32Array;
     _globalMat: Matrix;
     pointsBuf: Array<number>;
@@ -151,6 +151,8 @@ export declare class RectTileLayer extends Container {
     renderWebGLCore(renderer: Renderer, plugin: TileRenderer): void;
     isModified(anim: boolean): boolean;
     clearModify(): void;
+    protected _calculateBounds(): void;
+    getLocalBounds(rect?: PIXI.Rectangle): PIXI.Rectangle;
     destroy(options?: any): void;
 }
 
