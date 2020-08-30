@@ -2,7 +2,7 @@
  
 /*!
  * pixi-tilemap - v2.1.2
- * Compiled Sun, 30 Aug 2020 20:43:34 UTC
+ * Compiled Sun, 30 Aug 2020 20:45:56 UTC
  *
  * pixi-tilemap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -928,13 +928,7 @@ void main(void){
         }
     }
 
-    var pixi_tilemap;
-    (function (pixi_tilemap) {
-        PIXI.tilemap = pixi_tilemap;
-    })(pixi_tilemap || (pixi_tilemap = {}));
-    var exporter = {};
-
-    const pixi_tilemap$1 = {
+    const pixi_tilemap = {
         CanvasTileRenderer,
         CompositeRectTileLayer,
         Constant,
@@ -963,7 +957,7 @@ void main(void){
     exports.fillSamplers = fillSamplers;
     exports.generateFragmentSrc = generateFragmentSrc;
     exports.generateSampleSrc = generateSampleSrc;
-    exports.pixi_tilemap = pixi_tilemap$1;
+    exports.pixi_tilemap = pixi_tilemap;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 

@@ -1,4 +1,3 @@
-/// <reference types="pixi.js" />
 import { BaseTexture } from '@pixi/core';
 import { Bounds } from '@pixi/display';
 import { Buffer as Buffer_2 } from '@pixi/core';

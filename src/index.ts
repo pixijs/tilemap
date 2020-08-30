@@ -25,7 +25,6 @@ export const pixi_tilemap = {
 export * from './CanvasTileRenderer';
 export * from './CompositeRectTileLayer';
 export * from './Constant';
-export * from './exporter';
 export * from './GraphicsLayer';
 export * from './MultiTextureResource';
 export * from './RectTileLayer';
