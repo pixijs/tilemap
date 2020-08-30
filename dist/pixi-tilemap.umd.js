@@ -2,7 +2,7 @@
  
 /*!
  * pixi-tilemap - v2.1.2
- * Compiled Sun, 30 Aug 2020 00:12:54 UTC
+ * Compiled Sun, 30 Aug 2020 20:43:34 UTC
  *
  * pixi-tilemap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -968,5 +968,5 @@ void main(void){
     Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
-Object.assign(this.PIXI.tilemap, pixi_tilemap);
+if (typeof pixi_tilemap !== 'undefined') { Object.assign(this.PIXI.tilemap, pixi_tilemap); }
 //# sourceMappingURL=pixi-tilemap.umd.js.map
