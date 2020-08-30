@@ -1,11 +1,14 @@
 /// <reference types="pixi.js" />
 import { BaseTexture } from '@pixi/core';
+import { Bounds } from '@pixi/display';
+import { Buffer as Buffer_2 } from '@pixi/core';
 import { Container } from '@pixi/display';
 import { Geometry } from '@pixi/core';
 import { GLTexture } from '@pixi/core';
 import { Graphics } from '@pixi/graphics';
 import { Matrix } from '@pixi/math';
 import { ObjectRenderer } from '@pixi/core';
+import { Rectangle } from '@pixi/math';
 import { Renderer } from '@pixi/core';
 import { resources } from '@pixi/core';
 import { SCALE_MODES } from '@pixi/constants';
@@ -116,14 +119,14 @@ export declare class RectTileGeom extends Geometry {
     stride: number;
     lastTimeAccess: number;
     constructor();
-    buf: PIXI.Buffer;
+    buf: Buffer_2;
 }
 
 export declare class RectTileLayer extends Container {
     constructor(zIndex: number, texture: Texture | Array<Texture>);
     zIndex: number;
     modificationMarker: number;
-    _$_localBounds: PIXI.Bounds;
+    _$_localBounds: Bounds;
     shadowColor: Float32Array;
     _globalMat: Matrix;
     pointsBuf: Array<number>;
@@ -152,7 +155,7 @@ export declare class RectTileLayer extends Container {
     isModified(anim: boolean): boolean;
     clearModify(): void;
     protected _calculateBounds(): void;
-    getLocalBounds(rect?: PIXI.Rectangle): PIXI.Rectangle;
+    getLocalBounds(rect?: Rectangle): Rectangle;
     destroy(options?: any): void;
 }
 
@@ -169,7 +172,7 @@ export declare class TileRenderer extends ObjectRenderer {
     renderer: Renderer;
     gl: WebGLRenderingContext;
     sn: number;
-    indexBuffer: PIXI.Buffer;
+    indexBuffer: Buffer_2;
     ibLen: number;
     tileAnim: number[];
     texLoc: Array<number>;

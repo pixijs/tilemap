@@ -12,7 +12,7 @@ declare module "@pixi/constants" {
 }
 
 declare module "@pixi/core" {
-    export { 
+    export {
         BaseTexture,
         Buffer,
         Texture,
@@ -21,6 +21,7 @@ declare module "@pixi/core" {
         GLTexture,
         Geometry,
         Shader,
+        Program,
         resources
     } from 'pixi.js';
 }
@@ -28,19 +29,21 @@ declare module "@pixi/core" {
 declare module "@pixi/display" {
     export {
         DisplayObject,
-        Container
+        Container,
+        Bounds
     } from 'pixi.js';
 }
 
 declare module "@pixi/math" {
     export {
         Matrix,
-        groupD8
+        groupD8,
+        Rectangle
     } from 'pixi.js';
 }
 
 declare module "@pixi/graphics" {
-    export { 
+    export {
         Graphics
     } from 'pixi.js';
 }

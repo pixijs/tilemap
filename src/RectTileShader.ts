@@ -2,7 +2,7 @@
 
 import * as shaderGenerator from './shaderGenerator';
 
-import { Buffer, Geometry, Shader } from '@pixi/core';
+import { Buffer, Geometry, Shader, Program } from '@pixi/core';
 import { Matrix } from '@pixi/math';
 
 let rectShaderFrag = `
@@ -53,7 +53,7 @@ export abstract class TilemapShader extends Shader {
 
 	constructor(maxTextures: number, shaderVert: string, shaderFrag: string) {
 		super(
-			new PIXI.Program(
+			new Program(
 				shaderVert,
 				shaderFrag),
 			{
@@ -95,5 +95,5 @@ export class RectTileGeom extends Geometry {
 			.addAttribute('aTextureId', buf, 0, false, 0, this.stride, 10 * 4);
 	}
 
-	buf: PIXI.Buffer;
+	buf: Buffer;
 }

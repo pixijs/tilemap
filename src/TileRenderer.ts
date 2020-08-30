@@ -13,7 +13,7 @@ export class TileRenderer extends ObjectRenderer {
 	renderer: Renderer;
 	gl: WebGLRenderingContext;
 	sn: number = -1;
-	indexBuffer: PIXI.Buffer = null;
+	indexBuffer: Buffer = null;
 	ibLen: number = 0;
 	tileAnim = [0, 0];
 	texLoc: Array<number> = [];

@@ -1,8 +1,8 @@
 /* eslint-disable */
  
 /*!
- * pixi-tilemap - v2.1.1
- * Compiled Sat, 29 Aug 2020 20:33:37 UTC
+ * pixi-tilemap - v2.1.2
+ * Compiled Sun, 30 Aug 2020 00:12:54 UTC
  *
  * pixi-tilemap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -46,7 +46,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             super();
             this.zIndex = 0;
             this.modificationMarker = 0;
-            this._$_localBounds = new PIXI.Bounds();
+            this._$_localBounds = new display.Bounds();
             this.shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
             this._globalMat = null;
             this.pointsBuf = [];
@@ -734,7 +734,7 @@ void main(void){
 `;
     class TilemapShader extends core.Shader {
         constructor(maxTextures, shaderVert, shaderFrag) {
-            super(new PIXI.Program(shaderVert, shaderFrag), {
+            super(new core.Program(shaderVert, shaderFrag), {
                 animationFrame: new Float32Array(2),
                 uSamplers: [],
                 uSamplerSize: [],
