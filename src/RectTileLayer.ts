@@ -30,6 +30,7 @@ export class RectTileLayer extends Container {
     offsetX = 0;
     offsetY = 0;
     compositeParent = false;
+    tileAnim: Array<number> = null;
 
     initialize(zIndex: number, textures: Texture | Array<Texture>) {
         if (!textures) {
@@ -144,6 +145,7 @@ export class RectTileLayer extends Container {
     renderCanvasCore(renderer: any) {
         if (this.textures.length === 0) return;
         let points = this.pointsBuf;
+        const tileAnim = this.tileAnim || renderer.plugins.tilemap.tileAnim;
         renderer.context.fillStyle = '#000000';
         for (let i = 0, n = points.length; i < n; i += POINT_STRUCT_SIZE) {
             let x1 = points[i], y1 = points[i + 1];
@@ -151,8 +153,8 @@ export class RectTileLayer extends Container {
             let w = points[i + 4];
             let h = points[i + 5];
             var rotate = points[i + 6];
-            x1 += points[i + 7] * renderer.plugins.tilemap.tileAnim[0];
-            y1 += points[i + 8] * renderer.plugins.tilemap.tileAnim[1];
+            x1 += points[i + 7] * tileAnim[0];
+            y1 += points[i + 8] * tileAnim[1];
             let textureIndex = points[i + 9];
             // canvas does not work with rotate yet
             if (textureIndex >= 0) {
@@ -185,7 +187,7 @@ export class RectTileLayer extends Container {
         this._globalMat = shader.uniforms.projTransMatrix;
         renderer.globalUniforms.uniforms.projectionMatrix.copyTo(this._globalMat).append(this.worldTransform);
         shader.uniforms.shadowColor = this.shadowColor;
-        shader.uniforms.animationFrame = plugin.tileAnim;
+        shader.uniforms.animationFrame = this.tileAnim || plugin.tileAnim;
         this.renderWebGLCore(renderer, plugin);
     }
 

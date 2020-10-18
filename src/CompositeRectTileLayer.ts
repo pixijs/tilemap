@@ -20,6 +20,7 @@ export class CompositeRectTileLayer extends Container {
     _lastLayer: RectTileLayer = null;
 
     texPerChild: number;
+    tileAnim: Array<number> = null;
 
     initialize(zIndex?: number, bitmaps?: Array<Texture>, texPerChild?: number) {
         if (texPerChild as any === true) {
@@ -189,7 +190,9 @@ export class CompositeRectTileLayer extends Container {
         }
         let layers = this.children;
         for (let i = 0; i < layers.length; i++) {
-            (layers[i] as RectTileLayer).renderCanvasCore(renderer);
+            const layer = (layers[i] as RectTileLayer);
+            layer.tileAnim = this.tileAnim;
+            layer.renderCanvasCore(renderer);
         }
     }
 
@@ -204,11 +207,12 @@ export class CompositeRectTileLayer extends Container {
         this._globalMat = shader.uniforms.projTransMatrix;
         renderer.globalUniforms.uniforms.projectionMatrix.copyTo(this._globalMat).append(this.worldTransform);
         shader.uniforms.shadowColor = this.shadowColor;
-        shader.uniforms.animationFrame = plugin.tileAnim;
+        shader.uniforms.animationFrame = this.tileAnim || plugin.tileAnim;
         renderer.shader.bind(shader, false);
         let layers = this.children;
         for (let i = 0; i < layers.length; i++) {
-            (layers[i] as RectTileLayer).renderWebGLCore(renderer, plugin);
+            const layer = (layers[i] as RectTileLayer);
+            layer.renderWebGLCore(renderer, plugin);
         }
     }
 
