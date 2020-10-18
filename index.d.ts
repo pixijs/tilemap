@@ -31,6 +31,7 @@ export declare class CompositeRectTileLayer extends Container {
     _globalMat: Matrix;
     _lastLayer: RectTileLayer;
     texPerChild: number;
+    tileAnim: Array<number>;
     initialize(zIndex?: number, bitmaps?: Array<Texture>, texPerChild?: number): void;
     setBitmaps(bitmaps: Array<Texture>): void;
     clear(): void;
@@ -134,6 +135,7 @@ export declare class RectTileLayer extends Container {
     offsetX: number;
     offsetY: number;
     compositeParent: boolean;
+    tileAnim: Array<number>;
     initialize(zIndex: number, textures: Texture | Array<Texture>): void;
     clear(): void;
     addFrame(texture_: Texture | String | number, x: number, y: number, animX: number, animY: number): boolean;
