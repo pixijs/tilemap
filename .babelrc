@@ -1,0 +1,16 @@
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "node": 10,
+          "browsers": ">1%, not IE 11"
+        },
+        "modules": true,
+        "shippedProposals": true,
+        "loose": true
+      }
+    ]
+  ]
+}

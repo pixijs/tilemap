@@ -1,34 +1,14 @@
-import { CanvasTileRenderer } from './CanvasTileRenderer';
-import { CompositeRectTileLayer } from './CompositeRectTileLayer';
-import { Constant } from './Constant';
-import { GraphicsLayer } from './GraphicsLayer';
-import { MultiTextureResource } from './MultiTextureResource';
-import { RectTileLayer } from './RectTileLayer';
-import { TilemapShader, RectTileShader, RectTileGeom } from './RectTileShader';
-import { TileRenderer } from './TileRenderer';
-import { ZLayer } from './ZLayer';
-
-export const pixi_tilemap = {
-    CanvasTileRenderer,
-    CompositeRectTileLayer,
-    Constant,
-    GraphicsLayer,
-    MultiTextureResource,
-    RectTileLayer,
-    TilemapShader,
-    RectTileShader,
-    RectTileGeom,
-    TileRenderer,
-    ZLayer,
-};
-
-export * from './CanvasTileRenderer';
-export * from './CompositeRectTileLayer';
-export * from './Constant';
-export * from './GraphicsLayer';
-export * from './MultiTextureResource';
-export * from './RectTileLayer';
-export * from './RectTileShader';
-export * from './shaderGenerator';
-export * from './TileRenderer';
-export * from './ZLayer';
+export { CanvasTileRenderer } from './CanvasTileRenderer.js';
+export { Constant } from './Constant.js';
+export { RectTileLayer } from './RectTileLayer.js';
+export { CompositeRectTileLayer } from './CompositeRectTileLayer.js';
+export { GraphicsLayer } from './GraphicsLayer.js';
+export { MultiTextureResource } from './MultiTextureResource.js';
+export {
+  fillSamplers,
+  generateFragmentSrc,
+  generateSampleSrc,
+} from './shaderGenerator.js';
+export { RectTileShader } from './RectTileShader.js';
+export { TileRenderer } from './TileRenderer.js';
+export { ZLayer } from './ZLayer.js';

@@ -6,11 +6,6 @@
   "contributors": [
     "Ivan Popelyshev <ivan.popelyshev@gmail.com>"
   ],
-  "main": "./dist/pixi-tilemap.js",
-  "module": "./lib/pixi-tilemap.es.js",
-  "bundle": "./dist/pixi-tilemap.umd.js",
-  "namespace": "PIXI.tilemap",
-  "types": "./index.d.ts",
   "homepage": "http://www.rpgmakerweb.com/",
   "bugs": "https://github.com/pixijs/pixi-tilemap/issues",
   "license": "MIT",
@@ -18,35 +13,50 @@
     "type": "git",
     "url": "https://github.com/pixijs/pixi-tilemap.git"
   },
+  "main": "dist/index.js",
+  "module": "dist/esm/index.js",
+  "typings": "./index.d.ts",
+  "types": "./index.d.ts",
+  "exports": {
+    "import": "./dist/esm/index.js",
+    "require": "./dist/index.js",
+    "browser": "./dist/pixi-tilemap.umd.production.min.js"
+  },
   "scripts": {
-    "cleanup": "rimraf dist && mkdirp dist && rimraf lib && mkdirp lib && rimraf compile",
-    "prestart": "yarn cleanup",
-    "start": "parallelshell \"yarn watch\"",
-    "watch": "tsc -w",
-    "prebuild": "yarn cleanup",
-    "build": "rollup -c node_modules/@pixi-build-tools/rollup-configurator/index.js && yarn build:types",
+    "start": "tsdx watch",
+    "build": "tsdx build --format cjs,esm,umd",
+    "test": "tsdx test",
+    "lint": "tsdx lint",
+    "prepare": "tsdx build",
+    "size": "size-limit",
+    "analyze": "size-limit --why",
+    "serve": "serve",
     "build:types": "rimraf ./compile && tsc -p ./tsconfig.compile.json && api-extractor run",
     "docs": "typedoc --out ./docs/ --readme README.md ./src/"
   },
   "files": [
-    "dist/",
-    "lib/",
+    "dist",
+    "src",
     "index.d.ts",
-    "LICENSE",
-    "package.json",
     "README.md"
   ],
-  "peerDependencies": {
-    "@pixi/constants": "^5.0.0",
-    "@pixi/core": "^5.0.0",
-    "@pixi/display": "^5.0.0",
-    "@pixi/graphics": "^5.0.0",
-    "@pixi/math": "^5.0.0",
-    "@pixi/sprite": "^5.0.0"
+  "engines": {
+    "node": ">=10"
   },
-  "devDependencies": {
-    "@microsoft/api-extractor": "^7.9.4",
-    "@pixi-build-tools/rollup-configurator": "^1.0.3",
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint"
+    }
+  },
+  "size-limit": [],
+  "prettier": {
+    "printWidth": 80,
+    "semi": true,
+    "useTabs": false,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  },
+  "peerDependencies": {
     "@pixi/canvas-renderer": "^5.3.3",
     "@pixi/constants": "^5.3.3",
     "@pixi/core": "^5.3.3",
@@ -54,18 +64,23 @@
     "@pixi/graphics": "^5.3.3",
     "@pixi/math": "^5.3.3",
     "@pixi/sprite": "^5.3.3",
-    "@rollup/plugin-node-resolve": "^8.4.0",
-    "del": "^2.2.0",
-    "jsdoc": "^3.4.0",
-    "mkdirp": "^0.5.1",
-    "parallelshell": "^2.0.0",
-    "pixi.js": "^5.3.3",
-    "rimraf": "^2.5.3",
-    "rollup": "^2.23.1",
-    "rollup-plugin-sourcemaps": "^0.6.2",
-    "rollup-plugin-terser": "^7.0.0",
-    "rollup-plugin-typescript": "^1.0.1",
-    "tslib": "^2.0.1",
-    "typescript": "^3.9.7"
+    "@pixi/utils": "^5.3.3",
+    "pixi.js": "^5.3.3"
+  },
+  "devDependencies": {
+    "@microsoft/api-extractor": "^7.11.4",
+    "@pixi-build-tools/globals": "1.0.2",
+    "@size-limit/preset-small-lib": "^4.7.0",
+    "del": "^6.0.0",
+    "husky": "^4.3.0",
+    "jsdoc": "^3.6.6",
+    "mkdirp": "^1.0.4",
+    "rimraf": "^3.0.2",
+    "serve": "^11.3.2",
+    "size-limit": "^4.7.0",
+    "tsdx": "^0.14.1",
+    "tslib": "^2.0.3",
+    "typedoc": "^0.19.2",
+    "typescript": "^4.0.5"
   }
 }

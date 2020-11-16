@@ -1,20 +1,8 @@
 {
-    "compilerOptions": {
-        "target": "es5",
-        "noImplicitAny": true,
-        "removeComments": true,
-        "preserveConstEnums": true,
-        "outDir": "compile",
-        "sourceMap": true,
-        "inlineSources": true,
-        "declaration": true,
-        "emitDeclarationOnly": true
-    },
-    "include": [
-        "src/**/*"
-    ],
-    "exclude": [
-        "node_modules/**/*",
-        "dist"
-    ]
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "compile",
+    "declaration": true,
+    "emitDeclarationOnly": true
+  }
 }

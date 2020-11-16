@@ -1,19 +1,17 @@
 {
     "compilerOptions": {
-        "target": "es6",
-        "noImplicitAny": true,
-        "removeComments": true,
-        "preserveConstEnums": true,
-        "sourceMap": true,
-        "inlineSources": true,
-        "declaration": true,
-        "esModuleInterop": true
+        "strict": true,
+        "module": "ESNext",
+        "target": "ESNext",
+        "declaration": false,
+        "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true,
+        "isolatedModules": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "resolveJsonModule": true,
+        "baseUrl": "./src"
     },
-    "include": [
-        "src/**/*"
-    ],
-    "exclude": [
-        "node_modules/**/*",
-        "dist"
-    ]
+    "include": ["src/**/*"],
+    "exclude": ["node_modules/**/*", "dist"]
 }

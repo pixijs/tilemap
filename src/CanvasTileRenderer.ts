@@ -1,20 +1,16 @@
-/// <reference path="types.d.ts" />
-
-import { Renderer } from '@pixi/core';
+import { CanvasRenderer } from '@pixi/canvas-renderer';
+import { Renderer } from 'pixi.js';
 
 export class CanvasTileRenderer {
-    renderer: Renderer;
-    tileAnim = [0, 0];
-    dontUseTransform = false;
+  renderer: Renderer;
+  tileAnim: number[];
+  dontUseTransform: boolean;
 
-    constructor(renderer: Renderer) {
-        this.renderer = renderer;
-        this.tileAnim = [0, 0];
-    }
+  constructor(renderer: Renderer) {
+    this.renderer = renderer;
+    this.tileAnim = [0, 0];
+    this.dontUseTransform = false;
+  }
 }
 
-const cr = (PIXI as any).CanvasRenderer;
-
-if (cr) {
-    cr.registerPlugin('tilemap', CanvasTileRenderer);
-}
+CanvasRenderer.registerPlugin('tilemap', CanvasTileRenderer);

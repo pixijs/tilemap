@@ -1,3 +1,4 @@
+/// <reference types="types" />
 import { BaseTexture } from '@pixi/core';
 import { Bounds } from '@pixi/display';
 import { Buffer as Buffer_2 } from '@pixi/core';
@@ -8,7 +9,8 @@ import { Graphics } from '@pixi/graphics';
 import { Matrix } from '@pixi/math';
 import { ObjectRenderer } from '@pixi/core';
 import { Rectangle } from '@pixi/math';
-import { Renderer } from '@pixi/core';
+import { Renderer } from 'pixi.js';
+import { Renderer as Renderer_2 } from '@pixi/core';
 import { resources } from '@pixi/core';
 import { SCALE_MODES } from '@pixi/constants';
 import { Shader } from '@pixi/core';
@@ -28,10 +30,10 @@ export declare class CompositeRectTileLayer extends Container {
     zIndex: number;
     modificationMarker: number;
     shadowColor: Float32Array;
-    _globalMat: Matrix;
-    _lastLayer: RectTileLayer;
+    _globalMat?: Matrix;
+    _lastLayer?: RectTileLayer;
     texPerChild: number;
-    tileAnim: Array<number>;
+    tileAnim?: Array<number>;
     initialize(zIndex?: number, bitmaps?: Array<Texture>, texPerChild?: number): void;
     setBitmaps(bitmaps: Array<Texture>): void;
     clear(): void;
@@ -41,7 +43,7 @@ export declare class CompositeRectTileLayer extends Container {
     tileAnimY(offset: number, count: number): this;
     addFrame(texture_: Texture | String | number, x: number, y: number, animX?: number, animY?: number, animWidth?: number, animHeight?: number): this;
     renderCanvas(renderer: any): void;
-    render(renderer: Renderer): void;
+    render(renderer: Renderer_2): void;
     isModified(anim: boolean): boolean;
     clearModify(): void;
 }
@@ -80,36 +82,14 @@ export declare class MultiTextureResource extends resources.Resource {
     constructor(options: IMultiTextureOptions);
     DO_CLEAR: boolean;
     boundSize: number;
-    _clearBuffer: Uint8Array;
+    _clearBuffer?: Uint8Array;
     bind(baseTexture: BaseTexture): void;
-    baseTex: BaseTexture;
+    baseTex?: BaseTexture;
     boundSprites: Array<Sprite>;
     dirties: Array<number>;
     setTexture(ind: number, texture: Texture): void;
-    upload(renderer: Renderer, texture: BaseTexture, glTexture: GLTexture): boolean;
+    upload(renderer: Renderer_2, texture: BaseTexture, glTexture: GLTexture): boolean;
 }
-
-export declare const pixi_tilemap: {
-    CanvasTileRenderer: typeof CanvasTileRenderer;
-    CompositeRectTileLayer: typeof CompositeRectTileLayer;
-    Constant: {
-        maxTextures: number;
-        bufferSize: number;
-        boundSize: number;
-        boundCountPerBuffer: number;
-        use32bitIndex: boolean;
-        SCALE_MODE: PIXI.SCALE_MODES;
-        DO_CLEAR: boolean;
-    };
-    GraphicsLayer: typeof GraphicsLayer;
-    MultiTextureResource: typeof MultiTextureResource;
-    RectTileLayer: typeof RectTileLayer;
-    TilemapShader: typeof TilemapShader;
-    RectTileShader: typeof RectTileShader;
-    RectTileGeom: typeof RectTileGeom;
-    TileRenderer: typeof TileRenderer;
-    ZLayer: typeof ZLayer;
-};
 
 export declare const POINT_STRUCT_SIZE = 12;
 
@@ -128,14 +108,14 @@ export declare class RectTileLayer extends Container {
     modificationMarker: number;
     _$_localBounds: Bounds;
     shadowColor: Float32Array;
-    _globalMat: Matrix;
+    _globalMat?: Matrix;
     pointsBuf: Array<number>;
     hasAnim: boolean;
-    textures: Array<Texture>;
+    textures: Texture[];
     offsetX: number;
     offsetY: number;
     compositeParent: boolean;
-    tileAnim: Array<number>;
+    tileAnim?: number[];
     initialize(zIndex: number, textures: Texture | Array<Texture>): void;
     clear(): void;
     addFrame(texture_: Texture | String | number, x: number, y: number, animX: number, animY: number): boolean;
@@ -146,13 +126,13 @@ export declare class RectTileLayer extends Container {
     renderCanvas(renderer: any): void;
     renderCanvasCore(renderer: any): void;
     vbId: number;
-    vb: RectTileGeom;
-    vbBuffer: ArrayBuffer;
-    vbArray: Float32Array;
-    vbInts: Uint32Array;
+    vb?: RectTileGeom;
+    vbBuffer?: ArrayBuffer;
+    vbArray?: Float32Array;
+    vbInts?: Uint32Array;
     destroyVb(): void;
-    render(renderer: Renderer): void;
-    renderWebGLCore(renderer: Renderer, plugin: TileRenderer): void;
+    render(renderer: Renderer_2): void;
+    renderWebGLCore(renderer: Renderer_2, plugin: TileRenderer): void;
     isModified(anim: boolean): boolean;
     clearModify(): void;
     protected _calculateBounds(): void;
@@ -169,24 +149,25 @@ export declare abstract class TilemapShader extends Shader {
     constructor(maxTextures: number, shaderVert: string, shaderFrag: string);
 }
 
+/**
+ * Renderer for rectangle tiles.
+ */
 export declare class TileRenderer extends ObjectRenderer {
-    renderer: Renderer;
-    gl: WebGLRenderingContext;
     sn: number;
     indexBuffer: Buffer_2;
     ibLen: number;
     tileAnim: number[];
-    texLoc: Array<number>;
-    rectShader: RectTileShader;
-    texResources: Array<MultiTextureResource>;
-    constructor(renderer: Renderer);
+    texLoc: number[];
+    rectShader: RectTileShader | null;
+    texResources: MultiTextureResource[];
+    constructor(renderer: Renderer_2);
     initBounds(): void;
-    bindTexturesWithoutRT(renderer: Renderer, shader: TilemapShader, textures: Array<Texture>): void;
-    bindTextures(renderer: Renderer, shader: TilemapShader, textures: Array<Texture>): void;
+    bindTexturesWithoutRT(renderer: Renderer_2, shader: TilemapShader, textures: Array<Texture>): void;
+    bindTextures(renderer: Renderer_2, shader: TilemapShader, textures: Array<Texture>): void;
     start(): void;
     createVb(): RectTileGeom;
     checkIndexBuffer(size: number, vb?: RectTileGeom): void;
-    getShader(): TilemapShader;
+    getShader(): TilemapShader | null;
     destroy(): void;
 }
 

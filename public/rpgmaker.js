@@ -1356,7 +1356,7 @@ function requireRpgMaker() {
             function progress(loader, resource) {
                 if (resource.name == 'tilesets') {
                     //1. load the map
-                    loader.add(name, 'rpgmaker/data/'+name+'.json', {parentResource: resource });
+                    loader.add(name, 'public/rpgmaker/data/'+name+'.json', {parentResource: resource });
                     self.tilesetResource = resource;
                     tilesets = resource.data;
                 } else
@@ -1367,7 +1367,7 @@ function requireRpgMaker() {
                     tilesetNames = tileset['tilesetNames'];
                     tilesetNames.forEach(function(name) {
                         if (name.length>0 && !PIXI.utils.TextureCache[name])
-                            loader.add(name, 'rpgmaker/img/'+name +".png", {parentResource: resource });
+                            loader.add(name, 'public/rpgmaker/img/'+name +".png", {parentResource: resource });
                     })
                 }
             }
@@ -1376,7 +1376,7 @@ function requireRpgMaker() {
             if (this.tilesetResource)
                 progress(loader, self.tilesetResource);
             else
-                loader.add('tilesets', 'rpgmaker/data/Tilesets.json');
+                loader.add('tilesets', 'public/rpgmaker/data/Tilesets.json');
             loader.load(function(loader, resources) {
                 var result = new ShaderTilemap(300, 300);
                 for (var i=0;i<tilesetNames.length;i++) {
