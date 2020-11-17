@@ -158,5 +158,3 @@ export class TileRenderer extends ObjectRenderer {
     this.rectShader = null;
   }
 }
-
-Renderer.registerPlugin('tilemap', TileRenderer as any);

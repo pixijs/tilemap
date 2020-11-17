@@ -1,4 +1,3 @@
-import { CanvasRenderer } from '@pixi/canvas-renderer';
 import { Renderer } from 'pixi.js';
 
 export class CanvasTileRenderer {
@@ -12,5 +11,3 @@ export class CanvasTileRenderer {
     this.dontUseTransform = false;
   }
 }
-
-CanvasRenderer.registerPlugin('tilemap', CanvasTileRenderer);

@@ -57,7 +57,6 @@
     "trailingComma": "es5"
   },
   "peerDependencies": {
-    "@pixi/canvas-renderer": "^5.3.3",
     "@pixi/constants": "^5.3.3",
     "@pixi/core": "^5.3.3",
     "@pixi/display": "^5.3.3",
