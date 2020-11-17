@@ -12,6 +12,8 @@ var scale = +(getOptionValue('scale') || 1);
 var resolution = +(getOptionValue('resolution') || window.devicePixelRatio);
 var ratio = window.devicePixelRatio / resolution;
 
+PIXI.Renderer.registerPlugin('tilemap', pixi_tilemap.TileRenderer);
+
 PIXI.tilemap.Constant.boundCountPerBuffer = 4;
 // or
 // PIXI.tilemap.Constant.maxTextures = 16;
