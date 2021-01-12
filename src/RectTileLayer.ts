@@ -157,7 +157,7 @@ export class RectTileLayer extends Container {
             y1 += points[i + 8] * tileAnim[1];
             let textureIndex = points[i + 9];
             // canvas does not work with rotate yet
-            if (textureIndex >= 0 this.textures[textureIndex] !== undefined) {
+            if (textureIndex >= 0 && this.textures[textureIndex] !== undefined) {
                 renderer.context.drawImage((this.textures[textureIndex].baseTexture as any).getDrawableSource(), x1, y1, w, h, x2, y2, w, h);
             } else {
                 renderer.context.globalAlpha = 0.5;
