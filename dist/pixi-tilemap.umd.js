@@ -2,7 +2,7 @@
  
 /*!
  * pixi-tilemap - v2.1.4
- * Compiled Sun, 28 Feb 2021 01:52:13 UTC
+ * Compiled Sun, 28 Feb 2021 15:25:43 UTC
  *
  * pixi-tilemap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
