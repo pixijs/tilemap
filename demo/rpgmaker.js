@@ -11,6 +11,11 @@ function requireRpgMaker() {
         }
     };
 
+    if (PIXI.CanvasRenderer)
+    {
+        PIXI.CanvasRenderer.registerPlugin('tilemap', PIXI.tilemap.CanvasTileRenderer);
+    }
+
     /**
      * Vanilla rpgmaker tilemap from rpg_core.js v1.0.1
      *
