@@ -1,5 +1,3 @@
-/// <reference path="types.d.ts" />
-
 import * as shaderGenerator from './shaderGenerator';
 
 import { Buffer, Geometry, Shader, Program } from '@pixi/core';

@@ -1,5 +1,3 @@
-/// <reference path="types.d.ts" />
-
 import { Container, Bounds } from '@pixi/display';
 import { Constant } from './Constant';
 import { DRAW_MODES } from '@pixi/constants';
@@ -17,7 +15,7 @@ export class RectTileLayer extends Container {
         this.initialize(zIndex, texture);
     }
 
-    zIndex = 0;
+    // zIndex to zero by DisplayObject
     modificationMarker = 0;
     _$_localBounds = new Bounds();
     shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);

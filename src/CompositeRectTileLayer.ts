@@ -1,5 +1,3 @@
-/// <reference path="types.d.ts" />
-
 import { Container } from '@pixi/display';
 import { Texture, Renderer } from '@pixi/core';
 import { Matrix } from '@pixi/math';
@@ -13,7 +11,6 @@ export class CompositeRectTileLayer extends Container {
     }
 
     z: number;
-    zIndex: number;
     modificationMarker = 0;
     shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
     _globalMat: Matrix = null;

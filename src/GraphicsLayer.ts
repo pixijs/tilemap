@@ -1,15 +1,16 @@
-/// <reference path="types.d.ts" />
-
 import { Matrix } from '@pixi/math';
 import { Graphics } from '@pixi/graphics';
 
-export class GraphicsLayer extends Graphics {
-    constructor(zIndex: number) {
+export class GraphicsLayer extends Graphics
+{
+    constructor(zIndex: number)
+    {
         super();
         this.zIndex = zIndex;
     }
 
-    renderCanvas(renderer: any) {
+    renderCanvas(renderer: any)
+    {
         let wt: Matrix = null;
         if (renderer.plugins.tilemap.dontUseTransform) {
             wt = this.transform.worldTransform;
@@ -28,10 +29,12 @@ export class GraphicsLayer extends Graphics {
     //     super.renderWebGL(renderer)
     // }
 
-    isModified(anim: boolean): boolean {
+    isModified(anim: boolean): boolean
+    {
         return false;
     }
 
-    clearModify() {
+    clearModify()
+    {
     }
 }

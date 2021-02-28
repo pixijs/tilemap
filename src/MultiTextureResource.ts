@@ -1,7 +1,5 @@
-/// <reference path="types.d.ts" />
-
 import { ALPHA_MODES } from '@pixi/constants';
-import { BaseTexture, Renderer, Texture, GLTexture, resources } from '@pixi/core';
+import { BaseTexture, Renderer, Resource, Texture, GLTexture } from '@pixi/core';
 import { Sprite } from '@pixi/sprite';
 import { Constant } from './Constant';
 
@@ -12,8 +10,10 @@ export interface IMultiTextureOptions {
 	DO_CLEAR?: boolean;
 }
 
-export class MultiTextureResource extends resources.Resource {
-	constructor(options: IMultiTextureOptions) {
+export class MultiTextureResource extends Resource
+{
+	constructor(options: IMultiTextureOptions) 
+	{
 		super(options.bufferSize, options.bufferSize);
 
 		const bounds = this.boundSprites;
@@ -33,7 +33,8 @@ export class MultiTextureResource extends resources.Resource {
 	boundSize: number = 0;
 	_clearBuffer: Uint8Array = null;
 
-	bind(baseTexture: BaseTexture) {
+	bind(baseTexture: BaseTexture) 
+	{
 		if (this.baseTex) {
 			throw new Error('Only one baseTexture is allowed for this resource!')
 		}
@@ -45,7 +46,8 @@ export class MultiTextureResource extends resources.Resource {
 	boundSprites: Array<Sprite> = [];
 	dirties: Array<number> = [];
 
-	setTexture(ind: number, texture: Texture) {
+	setTexture(ind: number, texture: Texture) 
+	{
 		const spr = this.boundSprites[ind];
 		if (spr.texture.baseTexture === texture.baseTexture) {
 			return;
@@ -55,7 +57,8 @@ export class MultiTextureResource extends resources.Resource {
 		this.dirties[ind] = (this.baseTex as any).dirtyId;
 	}
 
-	upload(renderer: Renderer, texture: BaseTexture, glTexture: GLTexture) {
+	upload(renderer: Renderer, texture: BaseTexture, glTexture: GLTexture) 
+	{
 		const { gl } = renderer as any;
 
 		const {width, height} = this;

@@ -8,6 +8,10 @@ import { TilemapShader, RectTileShader, RectTileGeom } from './RectTileShader';
 import { TileRenderer } from './TileRenderer';
 import { ZLayer } from './ZLayer';
 
+// Prevent SCALE_MODES from becoming lazy import in Constant.ts - which causes a import() in the declaration file,
+// which causes API extractor to fail https://github.com/microsoft/rushstack/issues/2140
+import * as constants from '@pixi/constants';
+
 export const pixi_tilemap = {
     CanvasTileRenderer,
     CompositeRectTileLayer,

@@ -1,5 +1,3 @@
-/// <reference path="types.d.ts" />
-
 import { Renderer } from '@pixi/core';
 
 export class CanvasTileRenderer {
@@ -13,7 +11,7 @@ export class CanvasTileRenderer {
     }
 }
 
-const cr = (PIXI as any).CanvasRenderer;
+const cr = (globalThis as any).PIXI && (globalThis as any).PIXI.CanvasRenderer;
 
 if (cr) {
     cr.registerPlugin('tilemap', CanvasTileRenderer);

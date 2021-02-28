@@ -8,7 +8,9 @@
         "sourceMap": true,
         "inlineSources": true,
         "declaration": true,
-        "emitDeclarationOnly": true
+        "emitDeclarationOnly": true,
+        "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true
     },
     "include": [
         "src/**/*"

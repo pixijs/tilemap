@@ -1,8 +1,8 @@
 /* eslint-disable */
  
 /*!
- * pixi-tilemap - v2.1.3
- * Compiled Sun, 18 Oct 2020 17:08:58 UTC
+ * pixi-tilemap - v2.1.4
+ * Compiled Sun, 28 Feb 2021 01:34:02 UTC
  *
  * pixi-tilemap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -12,10 +12,10 @@
 this.PIXI = this.PIXI || {};
 this.PIXI.tilemap = this.PIXI.tilemap || {};
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@pixi/display'), require('@pixi/core'), require('@pixi/constants'), require('@pixi/math'), require('@pixi/graphics'), require('@pixi/sprite')) :
-    typeof define === 'function' && define.amd ? define(['exports', '@pixi/display', '@pixi/core', '@pixi/constants', '@pixi/math', '@pixi/graphics', '@pixi/sprite'], factory) :
-    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.pixi_tilemap = {}, global.PIXI, global.PIXI, global.PIXI, global.PIXI, global.PIXI, global.PIXI));
-}(this, (function (exports, display, core, constants, math, graphics, sprite) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@pixi/display'), require('@pixi/core'), require('@pixi/constants'), require('@pixi/math'), require('@pixi/graphics'), require('@pixi/sprite'), require('@pixi/utils')) :
+    typeof define === 'function' && define.amd ? define(['exports', '@pixi/display', '@pixi/core', '@pixi/constants', '@pixi/math', '@pixi/graphics', '@pixi/sprite', '@pixi/utils'], factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.pixi_tilemap = {}, global.PIXI, global.PIXI, global.PIXI, global.PIXI, global.PIXI, global.PIXI, global.PIXI));
+}(this, (function (exports, display, core, constants, math, graphics, sprite, utils) { 'use strict';
 
     class CanvasTileRenderer {
         constructor(renderer) {
@@ -25,7 +25,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             this.tileAnim = [0, 0];
         }
     }
-    const cr = PIXI.CanvasRenderer;
+    const cr = globalThis.PIXI && globalThis.PIXI.CanvasRenderer;
     if (cr) {
         cr.registerPlugin('tilemap', CanvasTileRenderer);
     }
@@ -44,7 +44,6 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
     class RectTileLayer extends display.Container {
         constructor(zIndex, texture) {
             super();
-            this.zIndex = 0;
             this.modificationMarker = 0;
             this._$_localBounds = new display.Bounds();
             this.shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
@@ -587,7 +586,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
         }
     }
 
-    class MultiTextureResource extends core.resources.Resource {
+    class MultiTextureResource extends core.Resource {
         constructor(options) {
             super(options.bufferSize, options.bufferSize);
             this.DO_CLEAR = false;
@@ -855,7 +854,7 @@ void main(void){
                 len <<= 1;
             }
             this.ibLen = totalIndices;
-            this.indexBuffer.update(PIXI.utils.createIndicesForQuads(size, Constant.use32bitIndex ? new Uint32Array(size * 6) : undefined));
+            this.indexBuffer.update(utils.createIndicesForQuads(size, Constant.use32bitIndex ? new Uint32Array(size * 6) : undefined));
         }
         getShader() {
             return this.rectShader;
@@ -880,7 +879,7 @@ void main(void){
                 layers[i].clear();
             this._previousLayers = 0;
         }
-        cacheIfDirty() {
+        cacheIfDirty(canvasRenderer) {
             let tilemap = this.tilemap;
             let layers = this.children;
             let modified = this._previousLayers !== layers.length;
@@ -889,7 +888,7 @@ void main(void){
             let tempRender = this._tempRender;
             if (!buf) {
                 buf = this.canvasBuffer = document.createElement('canvas');
-                tempRender = this._tempRender = new PIXI.CanvasRenderer({ width: 100, height: 100, view: buf });
+                tempRender = this._tempRender = new canvasRenderer.constructor({ width: 100, height: 100, view: buf });
                 tempRender.context = tempRender.rootContext;
                 tempRender.plugins.tilemap.dontUseTransform = true;
             }
@@ -926,7 +925,7 @@ void main(void){
             }
         }
         renderCanvas(renderer) {
-            this.cacheIfDirty();
+            this.cacheIfDirty(renderer);
             let wt = this.layerTransform;
             renderer.context.setTransform(wt.a, wt.b, wt.c, wt.d, wt.tx * renderer.resolution, wt.ty * renderer.resolution);
             let tilemap = this.tilemap;
