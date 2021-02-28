@@ -2,7 +2,7 @@
  
 /*!
  * pixi-tilemap - v2.1.4
- * Compiled Sun, 28 Feb 2021 15:25:43 UTC
+ * Compiled Sun, 28 Feb 2021 22:45:15 UTC
  *
  * pixi-tilemap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -17,21 +17,18 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
     (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.pixi_tilemap = {}, global.PIXI, global.PIXI, global.PIXI, global.PIXI, global.PIXI, global.PIXI, global.PIXI.utils));
 }(this, (function (exports, display, core, constants, math, graphics, sprite, utils) { 'use strict';
 
-    class CanvasTileRenderer {
+    // TODO: Move to @pixi/tilemap-canvas
+    class CanvasTileRenderer
+    {
         
         __init() {this.tileAnim = [0, 0];}
         __init2() {this.dontUseTransform = false;}
 
-        constructor(renderer) {;CanvasTileRenderer.prototype.__init.call(this);CanvasTileRenderer.prototype.__init2.call(this);
+        constructor(renderer)
+        {;CanvasTileRenderer.prototype.__init.call(this);CanvasTileRenderer.prototype.__init2.call(this);
             this.renderer = renderer;
             this.tileAnim = [0, 0];
         }
-    }
-
-    const cr = (globalThis ).PIXI && (globalThis ).PIXI.CanvasRenderer;
-
-    if (cr) {
-        cr.registerPlugin('tilemap', CanvasTileRenderer);
     }
 
     const Constant = {
@@ -163,7 +160,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
 
         renderCanvas(renderer) {
             let plugin = renderer.plugins.tilemap;
-            if (!plugin.dontUseTransform) {
+            if (plugin && !plugin.dontUseTransform) {
                 let wt = this.worldTransform;
                 renderer.context.setTransform(
                     wt.a,
@@ -180,7 +177,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
         renderCanvasCore(renderer) {
             if (this.textures.length === 0) return;
             let points = this.pointsBuf;
-            const tileAnim = this.tileAnim || renderer.plugins.tilemap.tileAnim;
+            const tileAnim = this.tileAnim || (renderer.plugins.tilemap && renderer.plugins.tilemap.tileAnim);
             renderer.context.fillStyle = '#000000';
             for (let i = 0, n = points.length; i < n; i += POINT_STRUCT_SIZE) {
                 let x1 = points[i], y1 = points[i + 1];
@@ -595,12 +592,17 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             return this;
         }
 
-        renderCanvas(renderer) {
-            if (!this.visible || this.worldAlpha <= 0 || !this.renderable) {
+        renderCanvas(renderer)
+        {
+            if (!this.visible || this.worldAlpha <= 0 || !this.renderable)
+            {
                 return;
             }
-            let plugin = renderer.plugins.tilemap;
-            if (!plugin.dontUseTransform) {
+
+            const tilemapPlugin = renderer.plugins.tilemap;
+
+            if (tilemapPlugin && !tilemapPlugin.dontUseTransform)
+            {
                 let wt = this.worldTransform;
                 renderer.context.setTransform(
                     wt.a,
@@ -611,8 +613,11 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
                     wt.ty * renderer.resolution
                 );
             }
+
             let layers = this.children;
-            for (let i = 0; i < layers.length; i++) {
+
+            for (let i = 0; i < layers.length; i++)
+            {
                 const layer = (layers[i] );
                 layer.tileAnim = this.tileAnim;
                 layer.renderCanvasCore(renderer);
@@ -671,15 +676,22 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
 
         renderCanvas(renderer)
         {
+            const tilemapPlugin = renderer.plugins.tilemap;
             let wt = null;
-            if (renderer.plugins.tilemap.dontUseTransform) {
+
+            if (tilemapPlugin && tilemapPlugin.dontUseTransform)
+            {
                 wt = this.transform.worldTransform;
                 this.transform.worldTransform = math.Matrix.IDENTITY;
             }
+
             renderer.plugins.graphics.render(this);
-            if (renderer.plugins.tilemap.dontUseTransform) {
+
+            if (tilemapPlugin && tilemapPlugin.dontUseTransform)
+            {
                 this.transform.worldTransform = wt;
             }
+
             renderer.context.globalAlpha = 1.0;
         }
 
@@ -1117,6 +1129,7 @@ void main(void){
             this._previousLayers = 0;
         }
 
+        // TODO: Move to @pixi/canvas-tilemap
         cacheIfDirty(canvasRenderer) {
             let tilemap = this.tilemap;
             let layers = this.children ;
@@ -1126,6 +1139,8 @@ void main(void){
             let tempRender = this._tempRender;
             if (!buf) {
                 buf = this.canvasBuffer = document.createElement('canvas');
+
+                (canvasRenderer.constructor ).registerPlugin('tilemap', CanvasTileRenderer);
                 tempRender = this._tempRender = new (canvasRenderer.constructor )({width: 100, height: 100, view: buf});
                 tempRender.context = tempRender.rootContext;
                 tempRender.plugins.tilemap.dontUseTransform = true;

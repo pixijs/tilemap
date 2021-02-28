@@ -11,15 +11,22 @@ export class GraphicsLayer extends Graphics
 
     renderCanvas(renderer: any)
     {
+        const tilemapPlugin = renderer.plugins.tilemap;
         let wt: Matrix = null;
-        if (renderer.plugins.tilemap.dontUseTransform) {
+
+        if (tilemapPlugin && tilemapPlugin.dontUseTransform)
+        {
             wt = this.transform.worldTransform;
             this.transform.worldTransform = Matrix.IDENTITY;
         }
+
         renderer.plugins.graphics.render(this);
-        if (renderer.plugins.tilemap.dontUseTransform) {
+
+        if (tilemapPlugin && tilemapPlugin.dontUseTransform)
+        {
             this.transform.worldTransform = wt;
         }
+
         renderer.context.globalAlpha = 1.0;
     }
 

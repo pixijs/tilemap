@@ -18,10 +18,10 @@ import { Sprite } from '@pixi/sprite';
 import { Texture } from '@pixi/core';
 
 export declare class CanvasTileRenderer {
-    renderer: Renderer;
+    renderer: AbstractRenderer;
     tileAnim: number[];
     dontUseTransform: boolean;
-    constructor(renderer: Renderer);
+    constructor(renderer: AbstractRenderer);
 }
 
 export declare class CompositeRectTileLayer extends Container {
