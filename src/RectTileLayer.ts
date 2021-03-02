@@ -1,5 +1,3 @@
-/// <reference path="types.d.ts" />
-
 import { Container, Bounds } from '@pixi/display';
 import { Constant } from './Constant';
 import { DRAW_MODES } from '@pixi/constants';
@@ -17,7 +15,7 @@ export class RectTileLayer extends Container {
         this.initialize(zIndex, texture);
     }
 
-    zIndex = 0;
+    // zIndex to zero by DisplayObject
     modificationMarker = 0;
     _$_localBounds = new Bounds();
     shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
@@ -128,7 +126,7 @@ export class RectTileLayer extends Container {
 
     renderCanvas(renderer: any) {
         let plugin = renderer.plugins.tilemap;
-        if (!plugin.dontUseTransform) {
+        if (plugin && !plugin.dontUseTransform) {
             let wt = this.worldTransform;
             renderer.context.setTransform(
                 wt.a,
@@ -145,7 +143,7 @@ export class RectTileLayer extends Container {
     renderCanvasCore(renderer: any) {
         if (this.textures.length === 0) return;
         let points = this.pointsBuf;
-        const tileAnim = this.tileAnim || renderer.plugins.tilemap.tileAnim;
+        const tileAnim = this.tileAnim || (renderer.plugins.tilemap && renderer.plugins.tilemap.tileAnim);
         renderer.context.fillStyle = '#000000';
         for (let i = 0, n = points.length; i < n; i += POINT_STRUCT_SIZE) {
             let x1 = points[i], y1 = points[i + 1];

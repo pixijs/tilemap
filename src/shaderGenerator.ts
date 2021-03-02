@@ -3,7 +3,8 @@ import { Constant } from './Constant';
 import type { TilemapShader } from './RectTileShader';
 
 
-export function fillSamplers(shader: TilemapShader, maxTextures: number) {
+export function fillSamplers(shader: TilemapShader, maxTextures: number)
+{
     let sampleValues: Array<number> = [];
     for (let i = 0; i < maxTextures; i++)
     {
@@ -19,12 +20,14 @@ export function fillSamplers(shader: TilemapShader, maxTextures: number) {
     shader.uniforms.uSamplerSize = samplerSize;
 }
 
-export function generateFragmentSrc(maxTextures: number, fragmentSrc: string) {
+export function generateFragmentSrc(maxTextures: number, fragmentSrc: string)
+{
     return fragmentSrc.replace(/%count%/gi, maxTextures + "")
         .replace(/%forloop%/gi, generateSampleSrc(maxTextures));
 }
 
-export function generateSampleSrc(maxTextures: number) {
+export function generateSampleSrc(maxTextures: number)
+{
     let src = '';
 
     src += '\n';

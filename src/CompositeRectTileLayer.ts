@@ -1,5 +1,3 @@
-/// <reference path="types.d.ts" />
-
 import { Container } from '@pixi/display';
 import { Texture, Renderer } from '@pixi/core';
 import { Matrix } from '@pixi/math';
@@ -13,7 +11,6 @@ export class CompositeRectTileLayer extends Container {
     }
 
     z: number;
-    zIndex: number;
     modificationMarker = 0;
     shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
     _globalMat: Matrix = null;
@@ -172,12 +169,17 @@ export class CompositeRectTileLayer extends Container {
         return this;
     }
 
-    renderCanvas(renderer: any) {
-        if (!this.visible || this.worldAlpha <= 0 || !this.renderable) {
+    renderCanvas(renderer: any)
+    {
+        if (!this.visible || this.worldAlpha <= 0 || !this.renderable)
+        {
             return;
         }
-        let plugin = renderer.plugins.tilemap;
-        if (!plugin.dontUseTransform) {
+
+        const tilemapPlugin = renderer.plugins.tilemap;
+
+        if (tilemapPlugin && !tilemapPlugin.dontUseTransform)
+        {
             let wt = this.worldTransform;
             renderer.context.setTransform(
                 wt.a,
@@ -188,8 +190,11 @@ export class CompositeRectTileLayer extends Container {
                 wt.ty * renderer.resolution
             );
         }
+
         let layers = this.children;
-        for (let i = 0; i < layers.length; i++) {
+
+        for (let i = 0; i < layers.length; i++)
+        {
             const layer = (layers[i] as RectTileLayer);
             layer.tileAnim = this.tileAnim;
             layer.renderCanvasCore(renderer);

@@ -1,15 +1,17 @@
 import { WRAP_MODES } from '@pixi/constants';
-import { BaseTexture, Buffer, resources, ObjectRenderer, Texture, Renderer } from '@pixi/core';
+import { BaseTexture, Buffer, ObjectRenderer, Texture, Renderer } from '@pixi/core';
 import { Constant } from './Constant';
 import { RectTileGeom, RectTileShader } from './RectTileShader';
 import { MultiTextureResource } from './MultiTextureResource';
+import * as utils from '@pixi/utils';
 
 import type { TilemapShader } from './RectTileShader';
 
 /**
  * Renderer for rectangle tiles.
  */
-export class TileRenderer extends ObjectRenderer {
+export class TileRenderer extends ObjectRenderer
+{
 	renderer: Renderer;
 	gl: WebGLRenderingContext;
 	sn: number = -1;
@@ -110,7 +112,7 @@ export class TileRenderer extends ObjectRenderer {
 		}
 
 		this.ibLen = totalIndices;
-		this.indexBuffer.update((PIXI as any).utils.createIndicesForQuads(size,
+		this.indexBuffer.update(utils.createIndicesForQuads(size,
 			Constant.use32bitIndex ? new Uint32Array(size * 6) : undefined));
 
 		// 	TODO: create new index buffer instead?

@@ -1,5 +1,3 @@
-/// <reference path="types.d.ts" />
-
 import { SCALE_MODES } from '@pixi/constants';
 
 export const Constant = {

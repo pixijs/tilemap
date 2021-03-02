@@ -7,7 +7,9 @@
         "sourceMap": true,
         "inlineSources": true,
         "declaration": true,
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true
     },
     "include": [
         "src/**/*"

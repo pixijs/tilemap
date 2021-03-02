@@ -1,7 +1,7 @@
-/// <reference path="types.d.ts" />
-
 import { Container } from '@pixi/display';
+import { CanvasTileRenderer } from './CanvasTileRenderer';
 
+import type { AbstractRenderer } from '@pixi/core';
 import type { CompositeRectTileLayer } from './CompositeRectTileLayer';
 import type { Matrix } from '@pixi/math';
 
@@ -15,7 +15,6 @@ export class ZLayer extends Container {
 
     tilemap: any;
     z: number;
-    zIndex: number;
     _previousLayers: number;
     canvasBuffer: HTMLCanvasElement;
     _tempRender: any;
@@ -29,7 +28,8 @@ export class ZLayer extends Container {
         this._previousLayers = 0;
     }
 
-    cacheIfDirty() {
+    // TODO: Move to @pixi/canvas-tilemap
+    cacheIfDirty(canvasRenderer: AbstractRenderer) {
         let tilemap: any = this.tilemap;
         let layers = this.children as Array<CompositeRectTileLayer>;
         let modified = this._previousLayers !== layers.length;
@@ -38,7 +38,9 @@ export class ZLayer extends Container {
         let tempRender = this._tempRender;
         if (!buf) {
             buf = this.canvasBuffer = document.createElement('canvas');
-            tempRender = this._tempRender = new (PIXI as any).CanvasRenderer({width: 100, height: 100, view: buf});
+
+            (canvasRenderer.constructor as any).registerPlugin('tilemap', CanvasTileRenderer);
+            tempRender = this._tempRender = new (canvasRenderer.constructor as any)({width: 100, height: 100, view: buf});
             tempRender.context = tempRender.rootContext;
             tempRender.plugins.tilemap.dontUseTransform = true;
         }
@@ -76,7 +78,7 @@ export class ZLayer extends Container {
     }
 
     renderCanvas(renderer: any) {
-        this.cacheIfDirty();
+        this.cacheIfDirty(renderer);
         let wt = this.layerTransform;
         renderer.context.setTransform(
             wt.a,

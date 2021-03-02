@@ -1,20 +1,15 @@
-/// <reference path="types.d.ts" />
+import type { AbstractRenderer } from '@pixi/core';
 
-import { Renderer } from '@pixi/core';
-
-export class CanvasTileRenderer {
-    renderer: Renderer;
+// TODO: Move to @pixi/tilemap-canvas
+export class CanvasTileRenderer
+{
+    renderer: AbstractRenderer;
     tileAnim = [0, 0];
     dontUseTransform = false;
 
-    constructor(renderer: Renderer) {
+    constructor(renderer: AbstractRenderer)
+    {
         this.renderer = renderer;
         this.tileAnim = [0, 0];
     }
-}
-
-const cr = (PIXI as any).CanvasRenderer;
-
-if (cr) {
-    cr.registerPlugin('tilemap', CanvasTileRenderer);
 }

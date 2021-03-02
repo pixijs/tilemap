@@ -1,6 +1,8 @@
+import type { AbstractRenderer } from '@pixi/core';
 import { BaseTexture } from '@pixi/core';
 import { Bounds } from '@pixi/display';
 import { Buffer as Buffer_2 } from '@pixi/core';
+import * as constants from '@pixi/constants';
 import { Container } from '@pixi/display';
 import { Geometry } from '@pixi/core';
 import { GLTexture } from '@pixi/core';
@@ -9,23 +11,22 @@ import { Matrix } from '@pixi/math';
 import { ObjectRenderer } from '@pixi/core';
 import { Rectangle } from '@pixi/math';
 import { Renderer } from '@pixi/core';
-import { resources } from '@pixi/core';
+import { Resource } from '@pixi/core';
 import { SCALE_MODES } from '@pixi/constants';
 import { Shader } from '@pixi/core';
 import { Sprite } from '@pixi/sprite';
 import { Texture } from '@pixi/core';
 
 export declare class CanvasTileRenderer {
-    renderer: Renderer;
+    renderer: AbstractRenderer;
     tileAnim: number[];
     dontUseTransform: boolean;
-    constructor(renderer: Renderer);
+    constructor(renderer: AbstractRenderer);
 }
 
 export declare class CompositeRectTileLayer extends Container {
     constructor(zIndex?: number, bitmaps?: Array<Texture>, texPerChild?: number);
     z: number;
-    zIndex: number;
     modificationMarker: number;
     shadowColor: Float32Array;
     _globalMat: Matrix;
@@ -76,7 +77,7 @@ export declare interface IMultiTextureOptions {
     DO_CLEAR?: boolean;
 }
 
-export declare class MultiTextureResource extends resources.Resource {
+export declare class MultiTextureResource extends Resource {
     constructor(options: IMultiTextureOptions);
     DO_CLEAR: boolean;
     boundSize: number;
@@ -98,7 +99,7 @@ export declare const pixi_tilemap: {
         boundSize: number;
         boundCountPerBuffer: number;
         use32bitIndex: boolean;
-        SCALE_MODE: PIXI.SCALE_MODES;
+        SCALE_MODE: constants.SCALE_MODES;
         DO_CLEAR: boolean;
     };
     GraphicsLayer: typeof GraphicsLayer;
@@ -124,7 +125,6 @@ export declare class RectTileGeom extends Geometry {
 
 export declare class RectTileLayer extends Container {
     constructor(zIndex: number, texture: Texture | Array<Texture>);
-    zIndex: number;
     modificationMarker: number;
     _$_localBounds: Bounds;
     shadowColor: Float32Array;
@@ -194,14 +194,13 @@ export declare class ZLayer extends Container {
     constructor(tilemap: Container, zIndex: number);
     tilemap: any;
     z: number;
-    zIndex: number;
     _previousLayers: number;
     canvasBuffer: HTMLCanvasElement;
     _tempRender: any;
     _lastAnimationFrame: number;
     layerTransform: Matrix;
     clear(): void;
-    cacheIfDirty(): void;
+    cacheIfDirty(canvasRenderer: AbstractRenderer): void;
     renderCanvas(renderer: any): void;
 }
 
