@@ -37,6 +37,7 @@
     "README.md"
   ],
   "peerDependencies": {
+    "@pixi/canvas-renderer": "^6.0.0-rc.3",
     "@pixi/constants": "^6.0.0-rc.3",
     "@pixi/core": "^6.0.0-rc.3",
     "@pixi/display": "^6.0.0-rc.3",
@@ -52,6 +53,7 @@
     "@pixi/constants": "^6.0.0-rc.3",
     "@pixi/core": "^6.0.0-rc.3",
     "@pixi/display": "^6.0.0-rc.3",
+    "@pixi/eslint-config": "^2.0.1",
     "@pixi/extract": "^6.0.0-rc.3",
     "@pixi/graphics": "^6.0.0-rc.3",
     "@pixi/math": "^6.0.0-rc.3",
@@ -59,7 +61,10 @@
     "@pixi/utils": "^6.0.0-rc.3",
     "@rollup/plugin-node-resolve": "^8.4.0",
     "@types/eventemitter3": "^2.0.2",
+    "@typescript-eslint/eslint-plugin": "^4.16.1",
+    "@typescript-eslint/parser": "^4.16.1",
     "del": "^2.2.0",
+    "eslint": "^7.21.0",
     "jsdoc": "^3.4.0",
     "mkdirp": "^0.5.1",
     "parallelshell": "^2.0.0",

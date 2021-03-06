@@ -1,4 +1,4 @@
-# pixi-tilemap
+# pixi-tilemap - PixiJS Tilemap Kit
 
 [![Build Status](https://travis-ci.org/pixijs/pixi-tilemap.svg?branch=master)](https://travis-ci.org/pixijs/pixi-tilemap)
 <p align="center">

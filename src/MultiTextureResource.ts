@@ -1,7 +1,7 @@
 import { ALPHA_MODES } from '@pixi/constants';
 import { BaseTexture, Renderer, Resource, Texture, GLTexture } from '@pixi/core';
 import { Sprite } from '@pixi/sprite';
-import { Constant } from './Constant';
+import { Constant } from './const';
 
 export interface IMultiTextureOptions {
 	boundCountPerBuffer: number;

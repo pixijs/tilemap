@@ -1,6 +1,6 @@
 import { WRAP_MODES } from '@pixi/constants';
 import { BaseTexture, Buffer, ObjectRenderer, Texture, Renderer } from '@pixi/core';
-import { Constant } from './Constant';
+import { Constant } from './const';
 import { RectTileGeom, RectTileShader } from './RectTileShader';
 import { MultiTextureResource } from './MultiTextureResource';
 import * as utils from '@pixi/utils';

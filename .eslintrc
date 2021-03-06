@@ -1,0 +1,9 @@
+{
+    "ignorePatterns": [
+        "lib",
+        "dist"
+    ],
+    "extends": [
+        "@pixi/eslint-config"
+    ]
+}
