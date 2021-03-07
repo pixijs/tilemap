@@ -76,8 +76,8 @@ value is 4, if the feature is desired.
 This is old RpgMakerMV-compatible setting:
 
 ```js
-PIXI.tilemap.Constant.TEXTILE_UNITS = 4;
-PIXI.tilemap.Constant.TEXTURES_PER_TILEMAP = 4;
+settings.TEXTILE_UNITS = 4;
+settings.TEXTURES_PER_TILEMAP = 4;
 ```
 
 #### use32bitIndex
@@ -85,7 +85,7 @@ PIXI.tilemap.Constant.TEXTURES_PER_TILEMAP = 4;
 There's also a limitation on 16k tiles per one tilemap. If you want to lift it, please use pixi v5.1.0 and following setting:
 
 ```js
-PIXI.tilemap.settings.use32bitIndex = true;
+settings.use32bitIndex = true;
 ```
 
 ## RPGMaker
