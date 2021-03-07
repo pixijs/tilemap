@@ -1,42 +1,15 @@
-import { Constant } from './const';
+import { Constant } from './settings';
 
 import type { TilemapShader } from './TilemapShader';
 
 /**
+ * This will generate fragment shader code that samples the correct texture into the "color" variable.
+ *
  * @internal
  * @ignore
- * @param shader
- * @param maxTextures
+ * @param maxTextures - The texture array length in the shader's uniforms.
  */
-export function fillSamplers(shader: TilemapShader, maxTextures: number): void
-{
-    const sampleValues: Array<number> = [];
-
-    for (let i = 0; i < maxTextures; i++)
-    {
-        sampleValues[i] = i;
-    }
-
-    shader.uniforms.uSamplers = sampleValues;
-
-    const samplerSize: Array<number> = [];
-
-    for (let i = 0; i < maxTextures; i++)
-    {
-        samplerSize.push(1.0 / Constant.bufferSize);
-        samplerSize.push(1.0 / Constant.bufferSize);
-    }
-
-    shader.uniforms.uSamplerSize = samplerSize;
-}
-
-/**
- * @internal
- * @ignore
- * @param maxTextures
- * @returns
- */
-export function generateSampleSrc(maxTextures: number): string
+function generateSampleSrc(maxTextures: number): string
 {
     let src = '';
 
@@ -65,6 +38,35 @@ export function generateSampleSrc(maxTextures: number): string
     src += '\n';
 
     return src;
+}
+
+/**
+ * @internal
+ * @ignore
+ * @param shader
+ * @param maxTextures
+ */
+export function fillSamplers(shader: TilemapShader, maxTextures: number): void
+{
+    const sampleValues: Array<number> = [];
+
+    for (let i = 0; i < maxTextures; i++)
+    {
+        sampleValues[i] = i;
+    }
+
+    shader.uniforms.uSamplers = sampleValues;
+
+    const samplerSize: Array<number> = [];
+
+    for (let i = 0; i < maxTextures; i++)
+    {
+        // These are overwritten by TileRenderer when textures actually bound.
+        samplerSize.push(1.0 / 2048);
+        samplerSize.push(1.0 / 2048);
+    }
+
+    shader.uniforms.uSamplerSize = samplerSize;
 }
 
 /**

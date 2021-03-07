@@ -1,5 +1,5 @@
 import { Container, Bounds } from '@pixi/display';
-import { Constant } from './const';
+import { Constant } from './settings';
 import { DRAW_MODES } from '@pixi/constants';
 import { Texture, Renderer } from '@pixi/core';
 import { TileRenderer } from './TileRenderer';
@@ -7,7 +7,7 @@ import { Matrix, Rectangle, groupD8 } from '@pixi/math';
 
 import type { CanvasRenderer } from '@pixi/canvas-renderer';
 import type { IDestroyOptions } from '@pixi/display';
-import type { RectTileGeom } from './TilemapShader';
+import type { TilemapGeometry } from './TilemapShader';
 
 export const POINT_STRUCT_SIZE = 12;
 
@@ -331,7 +331,7 @@ export class Tilemap extends Container
     }
 
     private vbId = 0;
-    private vb: RectTileGeom = null;
+    private vb: TilemapGeometry = null;
     private vbBuffer: ArrayBuffer = null;
     private vbArray: Float32Array = null;
     private vbInts: Uint32Array = null;
@@ -377,7 +377,7 @@ export class Tilemap extends Container
 
         if (textures.length === 0) return;
 
-        plugin.bindTextures(renderer, shader, textures);
+        plugin.bindTileTextures(renderer, textures);
         renderer.shader.bind(shader, false);
 
         // lost context! recover!
@@ -393,7 +393,7 @@ export class Tilemap extends Container
         }
 
         plugin.checkIndexBuffer(rectsCount, vb);
-        const boundCountPerBuffer = Constant.boundCountPerBuffer;
+        const boundCountPerBuffer = Constant.TEXTILE_UNITS;
 
         const vertexBuf = vb.getBuffer('aVertexPosition');
         // if layer was changed, re-upload vertices

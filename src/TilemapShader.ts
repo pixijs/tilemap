@@ -2,8 +2,8 @@
 ///<reference path="../global.d.ts" />
 
 import * as shaderGenerator from './shaderGenerator';
-import tilemapShaderVertexSrc from './tilemap.vert';
-import tilemapShaderFragmentSrc from './tilemap.frag';
+import tilemapVertexTemplateSrc from './tilemap.vert';
+import tilemapFragmentTemplateSrc from './tilemap.frag';
 
 import { Buffer, Geometry, Shader, Program } from '@pixi/core';
 import { Matrix } from '@pixi/math';
@@ -11,14 +11,17 @@ import { Matrix } from '@pixi/math';
 // For some reason ESLint goes mad with indendation in this file ^&^
 /* eslint-disable no-mixed-spaces-and-tabs, indent */
 
-export abstract class TilemapShader extends Shader
+export class TilemapShader extends Shader
 {
 	maxTextures = 0;
 
-	constructor(maxTextures: number, shaderVert: string, shaderFrag: string)
+	constructor(maxTextures: number)
 	{
 	    super(
-	        new Program(shaderVert, shaderFrag),
+	        new Program(
+				tilemapVertexTemplateSrc,
+				shaderGenerator.generateFragmentSrc(maxTextures, tilemapFragmentTemplateSrc)
+			),
 	        {
 	            animationFrame: new Float32Array(2),
 	            uSamplers: [],
@@ -32,20 +35,7 @@ export abstract class TilemapShader extends Shader
 	}
 }
 
-export class RectTileShader extends TilemapShader
-{
-    constructor(maxTextures: number)
-    {
-        super(
-            maxTextures,
-            tilemapShaderVertexSrc,
-            shaderGenerator.generateFragmentSrc(maxTextures, tilemapShaderFragmentSrc)
-        );
-        shaderGenerator.fillSamplers(this, this.maxTextures);
-    }
-}
-
-export class RectTileGeom extends Geometry
+export class TilemapGeometry extends Geometry
 {
 	vertSize = 11;
 	vertPerQuad = 4;

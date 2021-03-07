@@ -1,8 +1,8 @@
 import { Container } from '@pixi/display';
 import { Texture, Renderer } from '@pixi/core';
 import { Matrix } from '@pixi/math';
-import { Constant } from './const';
 import { Tilemap } from './Tilemap';
+import { settings } from './settings';
 
 import type { CanvasRenderer } from '@pixi/canvas-renderer';
 import type { TileRenderer } from './TileRenderer';
@@ -105,7 +105,7 @@ export class CompositeTilemap extends Container
 
         this.zIndex = zIndex;
         this.tileset(tileset);
-        this.texturesPerTilemap = texturesPerTilemap || Constant.boundCountPerBuffer * Constant.maxTextures;
+        this.texturesPerTilemap = texturesPerTilemap || settings.TEXTILE_UNITS * settings.TEXTURES_PER_TILEMAP;
     }
 
     /**
@@ -148,8 +148,8 @@ export class CompositeTilemap extends Container
             const layer = new Tilemap(this.zIndex, tileTextures.slice(i * texPerChild, (i + 1) * texPerChild));
 
             layer.compositeParent = true;
-            layer.offsetX = Constant.boundSize;
-            layer.offsetY = Constant.boundSize;
+            layer.offsetX = settings.TEXTILE_DIMEN;
+            layer.offsetY = settings.TEXTILE_DIMEN;
 
             this.addChild(layer);
         }
@@ -306,8 +306,8 @@ export class CompositeTilemap extends Container
                 {
                     layer = new Tilemap(this.zIndex, texture);
                     layer.compositeParent = true;
-                    layer.offsetX = Constant.boundSize;
-                    layer.offsetY = Constant.boundSize;
+                    layer.offsetX = settings.TEXTILE_DIMEN;
+                    layer.offsetY = settings.TEXTILE_DIMEN;
                     this.addChild(layer);
                     ind = 0;
                 }
@@ -506,7 +506,7 @@ export class CompositeTilemap extends Container
         }
 
         this.zIndex = zIndex;
-        (this as any).texturesPerTilemap = texPerChild || Constant.boundCountPerBuffer * Constant.maxTextures;
+        (this as any).texturesPerTilemap = texPerChild || settings.TEXTILE_UNITS * settings.TEXTURES_PER_TILEMAP;
 
         if (bitmaps)
         {

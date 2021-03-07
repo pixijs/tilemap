@@ -1,10 +1,10 @@
 /* eslint-disable */
  
 /*!
- * pixi-tilemap - v2.1.4
- * Compiled Sun, 07 Mar 2021 02:42:48 UTC
+ * @pixi/tilemap - v2.1.4
+ * Compiled Sun, 07 Mar 2021 17:22:41 UTC
  *
- * pixi-tilemap is licensed under the MIT License.
+ * @pixi/tilemap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
  * 
  * Copyright 2019-2020, Ivan Popelyshev, All Rights Reserved
@@ -12,10 +12,10 @@
 this.PIXI = this.PIXI || {};
 this.PIXI.tilemap = this.PIXI.tilemap || {};
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@pixi/display'), require('@pixi/core'), require('@pixi/constants'), require('@pixi/math'), require('@pixi/sprite'), require('@pixi/utils')) :
-    typeof define === 'function' && define.amd ? define(['exports', '@pixi/display', '@pixi/core', '@pixi/constants', '@pixi/math', '@pixi/sprite', '@pixi/utils'], factory) :
-    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.pixi_tilemap = {}, global.PIXI, global.PIXI, global.PIXI, global.PIXI, global.PIXI, global.PIXI.utils));
-}(this, (function (exports, display, core, constants, math, sprite, utils) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@pixi/display'), require('@pixi/core'), require('@pixi/constants'), require('@pixi/math'), require('@pixi/utils')) :
+    typeof define === 'function' && define.amd ? define(['exports', '@pixi/display', '@pixi/core', '@pixi/constants', '@pixi/math', '@pixi/utils'], factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global._pixi_tilemap = {}, global.PIXI, global.PIXI, global.PIXI, global.PIXI, global.PIXI.utils));
+}(this, (function (exports, display, core, constants, math, utils) { 'use strict';
 
     /**
      * The renderer plugin for canvas. It isn't registered by default.
@@ -49,15 +49,57 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
         }
     }
 
-    const Constant = {
-        maxTextures: 16,
-        bufferSize: 2048,
-        boundSize: 1024,
-        boundCountPerBuffer: 1,
+    /**
+     * These are additional @pixi/tilemap options.
+     *
+     * This settings should not be changed after the renderer has initialized; otherwise, the behavior
+     * is undefined.
+     */
+    const settings = {
+        /** The default number of textures per tilemap in a tilemap composite. */
+        TEXTURES_PER_TILEMAP: 16,
+
+        /**
+         * The width/height of each texture tile in a {@link TEXTILE_DIMEN}. This is 1024px by default.
+         *
+         * This should fit all tile base-textures; otherwise, {@link TextileResource} may fail to correctly
+         * upload the textures togther in a tiled fashion.
+         */
+        TEXTILE_DIMEN: 1024,
+
+        /**
+         * The number of texture tiles per {@link TextileResource}.
+         *
+         * Texture tiling is disabled by default, and so this is set to `1` by default. If it is set to a
+         * higher value, textures will be uploaded together in a tiled fashion.
+         *
+         * Since {@link TextileResource} is a dual-column format, this should be even for packing
+         * efficiency. The optimal value is usually 4.
+         */
+        TEXTILE_UNITS: 1,
+
+        /** The scaling mode of the combined texture tiling. */
+        TEXTILE_SCALE_MODE: constants.SCALE_MODES.LINEAR,
+
+        /** This will enable 32-bit index buffers. It's useful when you have more than 16K tiles. */
         use32bitIndex: false,
-        SCALE_MODE: constants.SCALE_MODES.LINEAR,
-        DO_CLEAR: true
+
+        /** Flags whether textiles should be cleared when each tile is uploaded. */
+        DO_CLEAR: true,
+
+        // Backward compatibility
+        get maxTextures() { return this.MAX_TEXTURES; },
+        set maxTextures(value) { this.MAX_TEXTURES = value; },
+
+        get boundSize() { return this.TEXTURE_TILE_DIMEN; },
+        set boundSize(value) { this.TILE_TEXTURE_DIMEN = value; },
+
+        get boundCountPerBuffer() { return this.TEXTILE_UNITS; },
+        set boundCountPerBuffer(value) { this.TEXTILE_UNITS = value; },
     };
+
+    // @deprecated
+    const Constant = settings;
 
     const POINT_STRUCT_SIZE = 12;
 
@@ -427,7 +469,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
 
             if (textures.length === 0) return;
 
-            plugin.bindTextures(renderer, shader, textures);
+            plugin.bindTileTextures(renderer, textures);
             renderer.shader.bind(shader, false);
 
             // lost context! recover!
@@ -443,7 +485,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             }
 
             plugin.checkIndexBuffer(rectsCount, vb);
-            const boundCountPerBuffer = Constant.boundCountPerBuffer;
+            const boundCountPerBuffer = Constant.TEXTILE_UNITS;
 
             const vertexBuf = vb.getBuffer('aVertexPosition');
             // if layer was changed, re-upload vertices
@@ -832,7 +874,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
 
             this.zIndex = zIndex;
             this.tileset(tileset);
-            this.texturesPerTilemap = texturesPerTilemap || Constant.boundCountPerBuffer * Constant.maxTextures;
+            this.texturesPerTilemap = texturesPerTilemap || settings.TEXTILE_UNITS * settings.TEXTURES_PER_TILEMAP;
         }
 
         /**
@@ -875,8 +917,8 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
                 const layer = new Tilemap(this.zIndex, tileTextures.slice(i * texPerChild, (i + 1) * texPerChild));
 
                 layer.compositeParent = true;
-                layer.offsetX = Constant.boundSize;
-                layer.offsetY = Constant.boundSize;
+                layer.offsetX = settings.TEXTILE_DIMEN;
+                layer.offsetY = settings.TEXTILE_DIMEN;
 
                 this.addChild(layer);
             }
@@ -1033,8 +1075,8 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
                     {
                         layer = new Tilemap(this.zIndex, texture);
                         layer.compositeParent = true;
-                        layer.offsetX = Constant.boundSize;
-                        layer.offsetY = Constant.boundSize;
+                        layer.offsetX = settings.TEXTILE_DIMEN;
+                        layer.offsetY = settings.TEXTILE_DIMEN;
                         this.addChild(layer);
                         ind = 0;
                     }
@@ -1233,7 +1275,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             }
 
             this.zIndex = zIndex;
-            (this ).texturesPerTilemap = texPerChild || Constant.boundCountPerBuffer * Constant.maxTextures;
+            (this ).texturesPerTilemap = texPerChild || settings.TEXTILE_UNITS * settings.TEXTURES_PER_TILEMAP;
 
             if (bitmaps)
             {
@@ -1260,71 +1302,99 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
     /* eslint-disable indent */
 
     /**
+     * This texture tiling resource can be used to upload multiple base-textures together.
+     *
+     * This resource combines multiple base-textures into a "textile". They're laid out in
+     * a dual column format, placed in row-order order. The size of each tile is predefined,
+     * and defaults to {@link settings.TEXTILE_DIMEN}. This means that each input base-texture
+     * must is smaller than that along both its width and height.
+     *
      * @internal
      * @ignore
+     * @see settings.TEXTILE_UNITS
      */
-    class MultiTextureResource extends core.Resource
+    class TextileResource extends core.Resource
     {
-    	 __init() {this.baseTex = null;}
+    	/** The base-texture that contains all the texture tiles. */
+    	 __init() {this.baseTexture = null;}
 
-    	 __init2() {this.DO_CLEAR = false;}
-    	 __init3() {this.boundSize = 0;}
-    	 __init4() {this._clearBuffer = null;}
-    	 __init5() {this.boundSprites = [];}
-    	 __init6() {this.dirties = [];}
+    	
+    	
+    	
 
-    	constructor(options)
+    	 __init2() {this._clearBuffer = null;}
+
+    	/**
+    	 * @param options - This will default to the "settings" exported by @pixi/tilemap.
+    	 * @param options.TEXTILE_DIMEN - The dimensions of each tile.
+    	 * @param options.TEXTILE_UNITS - The number of texture tiles.
+    	 */
+    	constructor(options = settings)
     	{
-    		super(options.bufferSize, options.bufferSize);MultiTextureResource.prototype.__init.call(this);MultiTextureResource.prototype.__init2.call(this);MultiTextureResource.prototype.__init3.call(this);MultiTextureResource.prototype.__init4.call(this);MultiTextureResource.prototype.__init5.call(this);MultiTextureResource.prototype.__init6.call(this);;
+    		super(
+    			options.TEXTILE_DIMEN * 2,
+    			options.TEXTILE_DIMEN * Math.ceil(options.TEXTILE_UNITS / 2),
+    		);TextileResource.prototype.__init.call(this);TextileResource.prototype.__init2.call(this);;
 
-    		const bounds = this.boundSprites;
-    		const dirties = this.dirties;
+    		const tiles = this.tiles = new Array(options.TEXTILE_UNITS);
 
-    		this.boundSize = options.boundSize;
+    		this.doClear = !!options.DO_CLEAR;
+    		this.tileDimen = options.TEXTILE_DIMEN;
 
-    		for (let j = 0; j < options.boundCountPerBuffer; j++)
+    		for (let j = 0; j < options.TEXTILE_UNITS; j++)
     		{
-    			const spr = new sprite.Sprite();
-
-    			spr.position.x = options.boundSize * (j & 1);
-    			spr.position.y = options.boundSize * (j >> 1);
-    			bounds.push(spr);
-    			dirties.push(0);
+    			tiles[j] = {
+    				dirtyId: 0,
+    				x: options.TEXTILE_DIMEN * (j & 1),
+    				y: options.TEXTILE_DIMEN * (j >> 1),
+    				texture: core.Texture.WHITE,
+    			};
     		}
-
-    		this.DO_CLEAR = !!options.DO_CLEAR;
     	}
 
-    	bind(baseTexture)
+    	/**
+    	 * Sets the texture to be uploaded for the given tile.
+    	 *
+    	 * @param index - The index of the tile being set.
+    	 * @param texture - The texture with the base-texture to upload.
+    	 */
+    	tile(index, texture)
     	{
-    		if (this.baseTex)
-    		{
-    			throw new Error('Only one baseTexture is allowed for this resource!');
-    		}
-    		this.baseTex = baseTexture;
-    		super.bind(baseTexture);
-    	}
-    	setTexture(ind, texture)
-    	{
-    		const spr = this.boundSprites[ind];
+    		const tile = this.tiles[index];
 
-    		if (spr.texture.baseTexture === texture.baseTexture)
+    		if (tile.texture.baseTexture === texture.baseTexture)
     		{
     			return;
     		}
-    		spr.texture = texture;
-    		this.baseTex.update();
-    		this.dirties[ind] = (this.baseTex ).dirtyId;
+
+    		tile.texture = texture;
+    		this.baseTexture.update();
+
+    		this.tiles[index].dirtyId = (this.baseTexture ).dirtyId;
     	}
 
+    	/** @override */
+    	bind(baseTexture)
+    	{
+    		if (this.baseTexture)
+    		{
+    			throw new Error('Only one baseTexture is allowed for this resource!');
+    		}
+
+    		this.baseTexture = baseTexture;
+    		super.bind(baseTexture);
+    	}
+
+    	/** @override */
     	upload(renderer, texture, glTexture)
     	{
-    		const { gl } = renderer ;
-
+    		const { gl } = renderer;
     		const { width, height } = this;
 
-    		gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.alphaMode === undefined
-    	|| texture.alphaMode === constants.ALPHA_MODES.UNPACK);
+    		gl.pixelStorei(
+    			gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,
+    			texture.alphaMode === undefined || texture.alphaMode === constants.ALPHA_MODES.UNPACK
+    		);
 
     		if (glTexture.dirtyId < 0)
     		{
@@ -1341,44 +1411,45 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
     				null);
     		}
 
-    		const doClear = this.DO_CLEAR;
+    		const doClear = this.doClear;
+    		const tiles = this.tiles;
 
     		if (doClear && !this._clearBuffer)
     		{
-    			this._clearBuffer = new Uint8Array(Constant.boundSize * Constant.boundSize * 4);
+    			this._clearBuffer = new Uint8Array(settings.TEXTILE_DIMEN * settings.TEXTILE_DIMEN * 4);
     		}
 
-    		const bounds = this.boundSprites;
-
-    		for (let i = 0; i < bounds.length; i++)
+    		for (let i = 0; i < tiles.length; i++)
     		{
-    			const spr = bounds[i];
+    			const spr = tiles[i];
     			const tex = spr.texture.baseTexture;
 
-    			if (glTexture.dirtyId >= this.dirties[i])
+    			if (glTexture.dirtyId >= this.tiles[i].dirtyId)
     			{
     				continue;
     			}
+
     			const res = tex.resource ;
 
     			if (!tex.valid || !res || !res.source)
     			{
     				continue;
     			}
-    			if (doClear && (tex.width < this.boundSize || tex.height < this.boundSize))
+    			if (doClear && (tex.width < this.tileDimen || tex.height < this.tileDimen))
     			{
     				gl.texSubImage2D(texture.target, 0,
-    					spr.position.x,
-    					spr.position.y,
-    					this.boundSize,
-    					this.boundSize,
+    					spr.x,
+    					spr.y,
+    					this.tileDimen,
+    					this.tileDimen,
     					texture.format,
     					texture.type,
     					this._clearBuffer);
     			}
+
     			gl.texSubImage2D(texture.target, 0,
-    				spr.position.x,
-    				spr.position.y,
+    				spr.x,
+    				spr.y,
     				texture.format,
     				texture.type,
     				res.source);
@@ -1389,38 +1460,11 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
     }
 
     /**
+     * This will generate fragment shader code that samples the correct texture into the "color" variable.
+     *
      * @internal
      * @ignore
-     * @param shader
-     * @param maxTextures
-     */
-    function fillSamplers(shader, maxTextures)
-    {
-        const sampleValues = [];
-
-        for (let i = 0; i < maxTextures; i++)
-        {
-            sampleValues[i] = i;
-        }
-
-        shader.uniforms.uSamplers = sampleValues;
-
-        const samplerSize = [];
-
-        for (let i = 0; i < maxTextures; i++)
-        {
-            samplerSize.push(1.0 / Constant.bufferSize);
-            samplerSize.push(1.0 / Constant.bufferSize);
-        }
-
-        shader.uniforms.uSamplerSize = samplerSize;
-    }
-
-    /**
-     * @internal
-     * @ignore
-     * @param maxTextures
-     * @returns
+     * @param maxTextures - The texture array length in the shader's uniforms.
      */
     function generateSampleSrc(maxTextures)
     {
@@ -1456,6 +1500,35 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
     /**
      * @internal
      * @ignore
+     * @param shader
+     * @param maxTextures
+     */
+    function fillSamplers(shader, maxTextures)
+    {
+        const sampleValues = [];
+
+        for (let i = 0; i < maxTextures; i++)
+        {
+            sampleValues[i] = i;
+        }
+
+        shader.uniforms.uSamplers = sampleValues;
+
+        const samplerSize = [];
+
+        for (let i = 0; i < maxTextures; i++)
+        {
+            // These are overwritten by TileRenderer when textures actually bound.
+            samplerSize.push(1.0 / 2048);
+            samplerSize.push(1.0 / 2048);
+        }
+
+        shader.uniforms.uSamplerSize = samplerSize;
+    }
+
+    /**
+     * @internal
+     * @ignore
      * @param maxTextures
      * @param fragmentSrc
      * @returns
@@ -1466,9 +1539,9 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             .replace(/%forloop%/gi, generateSampleSrc(maxTextures));
     }
 
-    var tilemapShaderVertexSrc = "attribute vec2 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec4 aFrame;\nattribute vec2 aAnim;\nattribute float aTextureId;\n\nuniform mat3 projTransMatrix;\nuniform vec2 animationFrame;\n\nvarying vec2 vTextureCoord;\nvarying float vTextureId;\nvarying vec4 vFrame;\n\nvoid main(void)\n{\n   gl_Position = vec4((projTransMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);\n   vec2 animCount = floor((aAnim + 0.5) / 2048.0);\n   vec2 animFrameOffset = aAnim - animCount * 2048.0;\n   vec2 animOffset = animFrameOffset * floor(mod(animationFrame + 0.5, animCount));\n\n   vTextureCoord = aTextureCoord + animOffset;\n   vFrame = aFrame + vec4(animOffset, animOffset);\n   vTextureId = aTextureId;\n}";
+    var tilemapVertexTemplateSrc = "attribute vec2 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec4 aFrame;\nattribute vec2 aAnim;\nattribute float aTextureId;\n\nuniform mat3 projTransMatrix;\nuniform vec2 animationFrame;\n\nvarying vec2 vTextureCoord;\nvarying float vTextureId;\nvarying vec4 vFrame;\n\nvoid main(void)\n{\n   gl_Position = vec4((projTransMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);\n   vec2 animCount = floor((aAnim + 0.5) / 2048.0);\n   vec2 animFrameOffset = aAnim - animCount * 2048.0;\n   vec2 animOffset = animFrameOffset * floor(mod(animationFrame + 0.5, animCount));\n\n   vTextureCoord = aTextureCoord + animOffset;\n   vFrame = aFrame + vec4(animOffset, animOffset);\n   vTextureId = aTextureId;\n}";
 
-    var tilemapShaderFragmentSrc = "varying vec2 vTextureCoord;\nvarying vec4 vFrame;\nvarying float vTextureId;\nuniform vec4 shadowColor;\nuniform sampler2D uSamplers[%count%];\nuniform vec2 uSamplerSize[%count%];\n\nvoid main(void)\n{\n   vec2 textureCoord = clamp(vTextureCoord, vFrame.xy, vFrame.zw);\n   float textureId = floor(vTextureId + 0.5);\n\n   vec4 color;\n   %forloop%\n   gl_FragColor = color;\n}";
+    var tilemapFragmentTemplateSrc = "varying vec2 vTextureCoord;\nvarying vec4 vFrame;\nvarying float vTextureId;\nuniform vec4 shadowColor;\nuniform sampler2D uSamplers[%count%];\nuniform vec2 uSamplerSize[%count%];\n\nvoid main(void)\n{\n   vec2 textureCoord = clamp(vTextureCoord, vFrame.xy, vFrame.zw);\n   float textureId = floor(vTextureId + 0.5);\n\n   vec4 color;\n   %forloop%\n   gl_FragColor = color;\n}";
 
     // eslint-disable-next-line @typescript-eslint/triple-slash-reference, spaced-comment
 
@@ -1479,10 +1552,13 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
     {
     	__init() {this.maxTextures = 0;}
 
-    	constructor(maxTextures, shaderVert, shaderFrag)
+    	constructor(maxTextures)
     	{
     	    super(
-    	        new core.Program(shaderVert, shaderFrag),
+    	        new core.Program(
+    				tilemapVertexTemplateSrc,
+    				generateFragmentSrc(maxTextures, tilemapFragmentTemplateSrc)
+    			),
     	        {
     	            animationFrame: new Float32Array(2),
     	            uSamplers: [],
@@ -1496,20 +1572,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
     	}
     }
 
-    class RectTileShader extends TilemapShader
-    {
-        constructor(maxTextures)
-        {
-            super(
-                maxTextures,
-                tilemapShaderVertexSrc,
-                generateFragmentSrc(maxTextures, tilemapShaderFragmentSrc)
-            );
-            fillSamplers(this, this.maxTextures);
-        }
-    }
-
-    class RectTileGeom extends core.Geometry
+    class TilemapGeometry extends core.Geometry
     {
     	__init2() {this.vertSize = 11;}
     	__init3() {this.vertPerQuad = 4;}
@@ -1518,7 +1581,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
 
     	constructor()
     	{
-    	    super();RectTileGeom.prototype.__init2.call(this);RectTileGeom.prototype.__init3.call(this);RectTileGeom.prototype.__init4.call(this);RectTileGeom.prototype.__init5.call(this);;
+    	    super();TilemapGeometry.prototype.__init2.call(this);TilemapGeometry.prototype.__init3.call(this);TilemapGeometry.prototype.__init4.call(this);TilemapGeometry.prototype.__init5.call(this);;
 
     	    const buf = this.buf = new core.Buffer(new Float32Array(2), true, false);
 
@@ -1545,60 +1608,101 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
     	 __init() {this.tileAnim = [0, 0];}
 
     	 __init2() {this.ibLen = 0;}// index buffer length
+
+    	/** The index buffer for the tilemaps to share. */
     	 __init3() {this.indexBuffer = null;}
+
+    	/** The shader used to render tilemaps. */
     	
-    	 __init4() {this.texResources = [];}
+
+    	/**
+    	 * {@link TextileResource} instances used to upload textures batched in tiled groups. This is
+    	 * used only if {@link settings.TEXTURES_PER_TILEMAP} is greater than 1.
+    	 */
+    	 __init4() {this.textiles = [];}
 
     	/** @param renderer - The managing renderer */
     	constructor(renderer)
     	{
     	    super(renderer);TileRenderer.prototype.__init.call(this);TileRenderer.prototype.__init2.call(this);TileRenderer.prototype.__init3.call(this);TileRenderer.prototype.__init4.call(this);;
-    	    this.shader = new RectTileShader(Constant.maxTextures);
+
+    	    this.shader = new TilemapShader(settings.TEXTURES_PER_TILEMAP);
     	    this.indexBuffer = new core.Buffer(undefined, true, true);
     	    this.checkIndexBuffer(2000);
-    	    this.initBounds();
+    	    this.makeTextiles();
     	}
 
     	/**
-    	 * This internal method is used to bind tile textures.
+    	 * Binds the tile textures to the renderer, and updates the tilemap shader's `uSamplerSize` uniform.
     	 *
-    	 * This method has some undocumented performance characteristics.
+    	 * If {@link settings.TEXTILE_UNITS}
+    	 *
+    	 * @param renderer - The renderer to which the textures are to be bound.
+    	 * @param textures - The tile textures being bound.
     	 */
-    	bindTextures(renderer, shader, textures)
+    	bindTileTextures(renderer, textures)
     	{
     	    const len = textures.length;
-    	    const maxTextures = Constant.maxTextures;
+    		const shader = this.shader;
+    	    const maxTextures = settings.TEXTURES_PER_TILEMAP;
+    		const samplerSize = shader.uniforms.uSamplerSize;
 
-    	    if (len > Constant.boundCountPerBuffer * maxTextures)
+    	    if (len > settings.TEXTILE_UNITS * maxTextures)
     	    {
-    	        return;
-    	    }
-    	    if (Constant.boundCountPerBuffer <= 1)
-    	    {
-    	        this.bindTexturesWithoutRT(renderer, shader, textures);
-
+    			// TODO: Show error message instead of silently failing!
     	        return;
     	    }
 
-    	    let i = 0;
-
-    	    for (; i < len; i++)
+    		if (settings.TEXTILE_UNITS <= 1)
     	    {
-    	        const texture = textures[i];
+    			// Bind each texture directly & update samplerSize.
+    			for (let i = 0; i < textures.length; i++)
+    			{
+    				const texture = textures[i];
 
-    	        if (!texture || !texture.valid) continue;
-    	        const multi = this.texResources[i >> 2];
+    				if (!texture || !texture.valid)
+    				{
+    					return;
+    				}
 
-    	        multi.setTexture(i & 3, texture);
+    				renderer.texture.bind(textures[i], i);
+
+    				samplerSize[i * 2] = 1.0 / textures[i].baseTexture.realWidth;
+    				samplerSize[(i * 2) + 1] = 1.0 / textures[i].baseTexture.realHeight;
+    			}
     	    }
+    		else
+    		{
+    			// Ensure we have enough textiles, in case settings.TEXTILE_UNITS was modified.
+    			this.makeTextiles();
 
-    	    const gltsUsed = (i + 3) >> 2;
+    			const usedTextiles = Math.ceil(len / settings.TEXTILE_UNITS);
 
-    	    for (i = 0; i < gltsUsed; i++)
-    	    {
-    	        // remove "i, true" after resolving a bug
-    	        renderer.texture.bind(this.texResources[i].baseTex, i);
-    	    }
+    			// First ensure each textile has all tiles point to the right textures.
+    			for (let i = 0; i < len; i++)
+    			{
+    				const texture = textures[i];
+
+    				if (texture && texture.valid)
+    				{
+    					const resourceIndex = Math.floor(i / settings.TEXTILE_UNITS);
+    					const tileIndex = i % settings.TEXTILE_UNITS;
+
+    					this.textiles[resourceIndex].tile(tileIndex, texture);
+    				}
+    			}
+
+    			// Then bind the textiles + update samplerSize.
+    			for (let i = 0; i < usedTextiles; i++)
+    			{
+    				renderer.texture.bind(this.textiles[i].baseTexture, i);
+
+    				samplerSize[i * 2] = 1.0 / this.textiles[i].width;
+    				samplerSize[(i * 2) + 1] = 1.0 / this.textiles[i].baseTexture.height;
+    			}
+    		}
+
+    		shader.uniforms.uSamplerSize = samplerSize;
     	}
 
     	start()
@@ -1612,7 +1716,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
     	 */
     	createVb()
     	{
-    	    const geom = new RectTileGeom();
+    	    const geom = new TilemapGeometry();
 
     	    geom.addIndex(this.indexBuffer);
     	    geom.lastTimeAccess = Date.now();
@@ -1648,7 +1752,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
 
     	    this.ibLen = totalIndices;
     	    this.indexBuffer.update(utils.createIndicesForQuads(size,
-    	        Constant.use32bitIndex ? new Uint32Array(size * 6) : undefined));
+    	        settings.use32bitIndex ? new Uint32Array(size * 6) : undefined));
 
     	    // 	TODO: create new index buffer instead?
     	    // if (vb) {
@@ -1659,45 +1763,26 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
     	    // }
     	}
 
-    	 initBounds()
+    	/** Makes textile resources and initializes {@link TileRenderer.textiles}. */
+    	 makeTextiles()
     	{
-    	    if (Constant.boundCountPerBuffer <= 1)
+    	    if (settings.TEXTILE_UNITS <= 1)
     	    {
     	        return;
     	    }
 
-    	    const maxTextures = Constant.maxTextures;
-
-    	    for (let i = 0; i < maxTextures; i++)
+    	    for (let i = 0; i < settings.TEXTILE_UNITS; i++)
     	    {
-    	        const resource = new MultiTextureResource(Constant);
+    			if (this.textiles[i]) continue;
+
+    			const resource = new TextileResource();
     	        const baseTex = new core.BaseTexture(resource);
 
-    	        baseTex.scaleMode = Constant.SCALE_MODE;
+    	        baseTex.scaleMode = settings.TEXTILE_SCALE_MODE;
     	        baseTex.wrapMode = constants.WRAP_MODES.CLAMP;
-    	        this.texResources.push(resource);
+
+    			this.textiles[i] = resource;
     	    }
-    	}
-
-    	 bindTexturesWithoutRT(renderer, shader, textures)
-    	{
-    	    const samplerSize = (shader ).uniforms.uSamplerSize;
-
-    		for (let i = 0; i < textures.length; i++)
-    	    {
-    	        const texture = textures[i];
-
-    	        if (!texture || !texture.valid)
-    	        {
-    	            return;
-    	        }
-
-    			renderer.texture.bind(textures[i], i);
-    	        // TODO: add resolution here
-    	        samplerSize[i * 2] = 1.0 / textures[i].baseTexture.width;
-    	        samplerSize[(i * 2) + 1] = 1.0 / textures[i].baseTexture.height;
-    	    }
-    	    (shader ).uniforms.uSamplerSize = samplerSize;
     	}
     }
 
@@ -1709,12 +1794,14 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
         CompositeRectTileLayer: CompositeTilemap,
         CompositeTilemap,
         Constant,
-        MultiTextureResource,
+        TextileResource,
+        MultiTextureResource: TextileResource,
         RectTileLayer: Tilemap,
         Tilemap,
         TilemapShader,
-        RectTileShader,
-        RectTileGeom,
+        TilemapGeometry,
+        RectTileShader: TilemapShader,
+        RectTileGeom: TilemapGeometry,
         TileRenderer,
     };
 
@@ -1722,21 +1809,20 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
     exports.CompositeRectTileLayer = CompositeTilemap;
     exports.CompositeTilemap = CompositeTilemap;
     exports.Constant = Constant;
-    exports.MultiTextureResource = MultiTextureResource;
     exports.POINT_STRUCT_SIZE = POINT_STRUCT_SIZE;
-    exports.RectTileGeom = RectTileGeom;
     exports.RectTileLayer = Tilemap;
-    exports.RectTileShader = RectTileShader;
+    exports.TextileResource = TextileResource;
     exports.TileRenderer = TileRenderer;
     exports.Tilemap = Tilemap;
+    exports.TilemapGeometry = TilemapGeometry;
     exports.TilemapShader = TilemapShader;
     exports.fillSamplers = fillSamplers;
     exports.generateFragmentSrc = generateFragmentSrc;
-    exports.generateSampleSrc = generateSampleSrc;
     exports.pixi_tilemap = pixi_tilemap;
+    exports.settings = settings;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
-if (typeof pixi_tilemap !== 'undefined') { Object.assign(this.PIXI.tilemap, pixi_tilemap); }
+if (typeof _pixi_tilemap !== 'undefined') { Object.assign(this.PIXI.tilemap, _pixi_tilemap); }
 //# sourceMappingURL=pixi-tilemap.umd.js.map

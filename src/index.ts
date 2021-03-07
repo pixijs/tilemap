@@ -1,9 +1,9 @@
 import { CanvasTileRenderer } from './CanvasTileRenderer';
 import { CompositeTilemap } from './CompositeTilemap';
-import { Constant } from './const';
-import { MultiTextureResource } from './MultiTextureResource';
+import { Constant } from './settings';
+import { TextileResource } from './TextileResource';
 import { Tilemap } from './Tilemap';
-import { TilemapShader, RectTileShader, RectTileGeom } from './TilemapShader';
+import { TilemapShader, TilemapGeometry } from './TilemapShader';
 import { TileRenderer } from './TileRenderer';
 
 // Prevent SCALE_MODES from becoming lazy import in Constant.ts - which causes a import() in the declaration file,
@@ -17,19 +17,21 @@ export const pixi_tilemap = {
     CompositeRectTileLayer: CompositeTilemap,
     CompositeTilemap,
     Constant,
-    MultiTextureResource,
+    TextileResource,
+    MultiTextureResource: TextileResource,
     RectTileLayer: Tilemap,
     Tilemap,
     TilemapShader,
-    RectTileShader,
-    RectTileGeom,
+    TilemapGeometry,
+    RectTileShader: TilemapShader,
+    RectTileGeom: TilemapGeometry,
     TileRenderer,
 };
 
 export * from './CanvasTileRenderer';
 export * from './CompositeTilemap';
-export * from './const';
-export * from './MultiTextureResource';
+export * from './settings';
+export * from './TextileResource';
 export * from './Tilemap';
 export * from './TilemapShader';
 export * from './shaderGenerator';

@@ -202,7 +202,7 @@
   dependencies:
     ismobilejs "^1.1.0"
 
-"@pixi/sprite@6.0.0-rc.3", "@pixi/sprite@^6.0.0-rc.3":
+"@pixi/sprite@6.0.0-rc.3":
   version "6.0.0-rc.3"
   resolved "https://registry.yarnpkg.com/@pixi/sprite/-/sprite-6.0.0-rc.3.tgz#9d4f6e9ee234b0db87027fef2964a8e6d5a0b002"
   integrity sha512-UrTfoYMNNmYyxuCENEV7cmHWm1vn48gB9hgdRLGFumCFHBU/JKGTU+BEB5tNt0+CIFAgkoPrw8iPxRqqBd6ADg==

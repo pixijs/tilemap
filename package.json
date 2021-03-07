@@ -45,7 +45,6 @@
     "@pixi/display": "^6.0.0-rc.3",
     "@pixi/graphics": "^6.0.0-rc.3",
     "@pixi/math": "^6.0.0-rc.3",
-    "@pixi/sprite": "^6.0.0-rc.3",
     "@pixi/utils": "^6.0.0-rc.3"
   },
   "devDependencies": {
@@ -59,7 +58,6 @@
     "@pixi/extract": "^6.0.0-rc.3",
     "@pixi/graphics": "^6.0.0-rc.3",
     "@pixi/math": "^6.0.0-rc.3",
-    "@pixi/sprite": "^6.0.0-rc.3",
     "@pixi/utils": "^6.0.0-rc.3",
     "@rollup/plugin-node-resolve": "^8.4.0",
     "@types/eventemitter3": "^2.0.2",
