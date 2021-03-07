@@ -2,7 +2,7 @@
  
 /*!
  * pixi-tilemap - v2.1.4
- * Compiled Sun, 07 Mar 2021 02:12:10 UTC
+ * Compiled Sun, 07 Mar 2021 02:13:58 UTC
  *
  * pixi-tilemap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -857,7 +857,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             const len1 = this.children.length;
             const len2 = Math.ceil(tileTextures.length / texPerChild);
 
-            for (let i = 0; i < Math.min(len1, len2); i++)
+            for (let i = 0; i < len1; i++)
             {
                 (this.children[i] ).setTileset(
                     tileTextures.slice(i * texPerChild, (i + 1) * texPerChild)
