@@ -112,6 +112,4 @@ function buildTilemap()
         tilemap.tile(tmpTex, i % 4 * size, ((i >> 2) * size) + (5 * size));
         // rotate is also last parameter in addFrame
     }
-    
-    window.ti = tilemap
 }

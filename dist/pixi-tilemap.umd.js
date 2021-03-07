@@ -2,7 +2,7 @@
  
 /*!
  * @pixi/tilemap - v2.1.4
- * Compiled Sun, 07 Mar 2021 17:22:41 UTC
+ * Compiled Sun, 07 Mar 2021 18:13:34 UTC
  *
  * @pixi/tilemap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -101,14 +101,20 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
     // @deprecated
     const Constant = settings;
 
+    function _nullishCoalesce(lhs, rhsFn) { if (lhs != null) { return lhs; } else { return rhsFn(); } }
+
+
+
+
+
     const POINT_STRUCT_SIZE = 12;
 
     /**
      * A rectangular tilemap implementation that renders a predefined set of tile textures.
      *
-     * The {@link Tilemap.tileset tileset} of a tilemap defines the list of textures that can be painted in the
-     * tilemap. The texture is identified using its index into the this list, i.e. changing the texture at a given
-     * index in the tileset modifies the paint of all tiles pointing to that index.
+     * The {@link Tilemap.tileset tileset} of a tilemap defines the list of base-textures that can be painted in the
+     * tilemap. A texture is identified using its base-texture's index into the this list, i.e. changing the base-texture
+     * at a given index in the tileset modifies the paint of all tiles pointing to that index.
      *
      * The size of the tileset is limited by the texture units supported by the client device. The minimum supported
      * value is 8, as defined by the WebGL 1 specification. `gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS`) can be used
@@ -125,17 +131,8 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
      * // Make the tilemap once the tileset assets are available.
      * Loader.shared.load(function onTilesetLoaded()
      * {
-     *      // These textures should've been in the spritesheet. If you don't
-     *      // use a spritesheet, this technique will still work as long as
-     *      // each individual texture is served.
-     *      const tilemap = new Tilemap([
-     *          Texture.from('grass.png'),
-     *          Texture.from('tough.png'),
-     *          Texture.from('brick.png'),
-     *          Texture.from('brick_wall.png'),
-     *          Texture.from('chest.png')
-     *      ])
-     *      // Now you defined each tile to generate the tilemap!
+     *      // The base-texture is shared between all the tile textures.
+     *      const tilemap = new Tilemap([Texture.from('grass.png').baseTexture])
      *          .tile('grass.png', 0, 0)
      *          .tile('grass.png', 100, 100)
      *          .tile('brick_wall.png', 0, 100);
@@ -143,17 +140,33 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
      */
     class Tilemap extends display.Container
     {
-        // zIndex to zero by DisplayObject
-        __init() {this.modificationMarker = 0;}
-        __init2() {this.shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);}
-        __init3() {this._globalMat = null;}
-        __init4() {this.offsetX = 0;}
-        __init5() {this.offsetY = 0;}
-        __init6() {this.compositeParent = false;}
-        __init7() {this.tileAnim = null;}
+        __init() {this.shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);}
+        __init2() {this._globalMat = null;}
 
         /**
-         * The list of textures being used in the tilemap.
+         * The tile animation frame.
+         *
+         * @see CompositeTilemap.tileAnim
+         */
+         __init3() {this.tileAnim = null;}
+
+        /**
+         * This is the last uploaded size of the tilemap geometry.
+         * @ignore
+         */
+        __init4() {this.modificationMarker = 0;}
+
+        /** @ignore */
+        __init5() {this.offsetX = 0;}
+
+        /** @ignore */
+        __init6() {this.offsetY = 0;}
+
+        /** @ignore */
+        __init7() {this.compositeParent = false;}
+
+        /**
+         * The list of base-textures being used in the tilemap.
          *
          * This should not be shuffled after tiles have been added into this tilemap. Usually, only tile textures
          * should be added after tiles have been added into the map.
@@ -172,19 +185,12 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
          __init10() {this.pointsBuf = [];}
 
         /**
-         * @param tileset - The tileset to use for the tilemap. This can be reset later with {@link Tilemap.setTileset}.
+         * @param tileset - The tileset to use for the tilemap. This can be reset later with {@link Tilemap.setTileset}. The
+         *      base-textures in this array must not be duplicated.
          */
-        
-
-
-        constructor(arg0, arg1)
+        constructor(tileset)
         {
             super();Tilemap.prototype.__init.call(this);Tilemap.prototype.__init2.call(this);Tilemap.prototype.__init3.call(this);Tilemap.prototype.__init4.call(this);Tilemap.prototype.__init5.call(this);Tilemap.prototype.__init6.call(this);Tilemap.prototype.__init7.call(this);Tilemap.prototype.__init8.call(this);Tilemap.prototype.__init9.call(this);Tilemap.prototype.__init10.call(this);Tilemap.prototype.__init11.call(this);Tilemap.prototype.__init12.call(this);Tilemap.prototype.__init13.call(this);Tilemap.prototype.__init14.call(this);Tilemap.prototype.__init15.call(this);;
-
-            const zIndex = typeof arg0 === 'number' ? arg0 : 0;
-            const tileset = typeof arg0 !== 'number' ? arg0 : arg1;
-
-            this.zIndex = zIndex;
             this.setTileset(tileset);
         }
 
@@ -207,6 +213,13 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             if (!Array.isArray(tileset))
             {
                 tileset = [tileset];
+            }
+            for (let i = 0; i < tileset.length; i++)
+            {
+                if ((tileset[i] ).baseTexture)
+                {
+                    tileset[i] = (tileset[i] ).baseTexture;
+                }
             }
 
             this.tileset = tileset;
@@ -261,41 +274,53 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
 
 
 
-
+     = {}
         )
         {
-            let texture;
+            let baseTexture;
             let textureIndex = -1;
 
             if (typeof tileTexture === 'number')
             {
                 textureIndex = tileTexture;
-                texture = this.tileset[textureIndex];
+                baseTexture = this.tileset[textureIndex];
             }
             else
             {
+                let texture;
+
                 if (typeof tileTexture === 'string')
                 {
                     texture = core.Texture.from(tileTexture);
                 }
                 else
                 {
-                    texture = tileTexture ;
+                    texture = tileTexture;
                 }
 
                 const textureList = this.tileset;
 
                 for (let i = 0; i < textureList.length; i++)
                 {
-                    if (textureList[i].baseTexture === texture.baseTexture)
+                    if (textureList[i] === texture.castToBaseTexture())
                     {
                         textureIndex = i;
                         break;
                     }
                 }
+
+                if ('baseTexture' in texture)
+                {
+                    options.u = _nullishCoalesce(options.u, () => ( texture.frame.x));
+                    options.v = _nullishCoalesce(options.v, () => ( texture.frame.y));
+                    options.tileWidth = _nullishCoalesce(options.tileWidth, () => ( texture.orig.width));
+                    options.tileHeight = _nullishCoalesce(options.tileHeight, () => ( texture.orig.height));
+                }
+
+                baseTexture = texture.castToBaseTexture();
             }
 
-            if (!texture || textureIndex < 0)
+            if (!baseTexture || textureIndex < 0)
             {
                 console.error('The tile texture was not found in the tilemap tileset.');
 
@@ -303,10 +328,10 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             }
 
             const {
-                u = texture.frame.x,
-                v = texture.frame.y,
-                tileWidth = texture.orig.width,
-                tileHeight = texture.orig.height,
+                u = 0,
+                v = 0,
+                tileWidth = baseTexture.realWidth,
+                tileHeight = baseTexture.realHeight,
                 animX = 0,
                 animY = 0,
                 rotate = 0,
@@ -409,7 +434,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
                 if (textureIndex >= 0 && this.tileset[textureIndex])
                 {
                     renderer.context.drawImage(
-                        (this.tileset[textureIndex].baseTexture ).getDrawableSource(),
+                        (this.tileset[textureIndex] ).getDrawableSource(),
                         x1, y1, w, h, x2, y2, w, h
                     );
                 }
@@ -485,7 +510,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             }
 
             plugin.checkIndexBuffer(rectsCount, vb);
-            const boundCountPerBuffer = Constant.TEXTILE_UNITS;
+            const boundCountPerBuffer = settings.TEXTILE_UNITS;
 
             const vertexBuf = vb.getBuffer('aVertexPosition');
             // if layer was changed, re-upload vertices
@@ -544,18 +569,18 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
                             shiftV = 0;
                         }
                     }
-                    const x = points[i + 2]; const
-                        y = points[i + 3];
-                    const w = points[i + 4]; const
-                        h = points[i + 5];
-                    const u = points[i] + shiftU; const
-                        v = points[i + 1] + shiftV;
+                    const x = points[i + 2];
+                    const y = points[i + 3];
+                    const w = points[i + 4];
+                    const h = points[i + 5];
+                    const u = points[i] + shiftU;
+                    const v = points[i + 1] + shiftV;
                     let rotate = points[i + 6];
 
-                    const animX = points[i + 7]; const
-                        animY = points[i + 8];
-                    const animWidth = points[i + 10] || 1024; const
-                        animHeight = points[i + 11] || 1024;
+                    const animX = points[i + 7];
+                    const animY = points[i + 8];
+                    const animWidth = points[i + 10] || 1024;
+                    const animHeight = points[i + 11] || 1024;
                     const animXEncoded = animX + (animWidth * 2048);
                     const animYEncoded = animY + (animHeight * 2048);
 
@@ -713,19 +738,6 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
         }
 
         /**
-         * This initialization routine has been replaced by {@link Tilemap.setTileset setTileset}.
-         *
-         * @deprecated Since @pixi/tilemap 3.
-         * @param zIndex - The z-index of the tilemap.
-         * @param textures - The tileset to use.
-         */
-        initialize(zIndex, textures)
-        {
-            this.zIndex = zIndex || 0;
-            this.setTileset(textures);
-        }
-
-        /**
          * Deprecated signature for {@link Tilemap.tile tile}.
          *
          * @deprecated Since @pixi/tilemap 3.
@@ -804,11 +816,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
      * // Initialize the tilemap scene when the assets load.
      * Loader.shared.load(function onTilesetLoaded()
      * {
-     *      // Preinitialize with two most used textures
-     *      const tilemap = new CompositeTilemap([
-     *          Texture.from('grass.png'),
-     *          Texture.from('dungeon.png'),
-     *      ]);
+     *      const tilemap = new CompositeTilemap();
      *
      *      // Setup the game level with grass and dungeons!
      *      for (let x = 0; x < 10; x++)
@@ -842,7 +850,16 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
         /** The hard limit on the number of tile textures used in each tilemap. */
         
 
-        /** The animation parameters */
+        /**
+         * The animation frame vector.
+         *
+         * Animated tiles have four parameters - `animX`, `animY`, `animCountX`, `animCountY`. The textures
+         * of adjacent animation frames are at offset `animX` or `animY` of each other, with `animCountX` per
+         * row and `animCountY` per column.
+         *
+         * The animation frame vector specifies which animation frame texture to use. If the x/y coordinate is
+         * larger than the `animCountX` or `animCountY` for a specific tile, the modulus is taken.
+         */
          __init() {this.tileAnim = null;}
 
         /** The last modified tilemap. */
@@ -853,28 +870,16 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
          __init5() {this._globalMat = null;}
 
         /**
-         * @param tileset - A list of tile textures that will be used to eagerly initialized the layered
+         * @param tileset - A list of tile base-textures that will be used to eagerly initialized the layered
          *  tilemaps. This is only an performance optimization, and using {@link CompositeTilemap.tile tile}
          *  will work equivalently.
-         * @param texturesPerTilemap - A custom limit on the number of tile textures used in each tilemap.
          */
-        
-
-
-
-
-        constructor(bitmaps, texPerChild, arg2)
+        constructor(tileset)
         {
             super();CompositeTilemap.prototype.__init.call(this);CompositeTilemap.prototype.__init2.call(this);CompositeTilemap.prototype.__init3.call(this);CompositeTilemap.prototype.__init4.call(this);CompositeTilemap.prototype.__init5.call(this);CompositeTilemap.prototype.__init6.call(this);;
 
-            const zIndex = typeof bitmaps === 'number' ? bitmaps : 0;
-            // eslint-disable-next-line no-nested-ternary
-            const tileset = Array.isArray(bitmaps) ? bitmaps : (Array.isArray(texPerChild) ? texPerChild : null);
-            const texturesPerTilemap = typeof texPerChild === 'number' ? texPerChild : arg2;
-
-            this.zIndex = zIndex;
             this.tileset(tileset);
-            this.texturesPerTilemap = texturesPerTilemap || settings.TEXTILE_UNITS * settings.TEXTURES_PER_TILEMAP;
+            this.texturesPerTilemap = settings.TEXTURES_PER_TILEMAP;
         }
 
         /**
@@ -892,16 +897,6 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
                 tileTextures = [];
             }
 
-            // Sanity check!
-            for (let i = 0; i < tileTextures.length; i++)
-            {
-                if (tileTextures[i] && !tileTextures[i].baseTexture)
-                {
-                    throw new Error(`pixi-tilemap cannot use destroyed textures. `
-                        + `Probably, you passed resources['myAtlas'].texture in pixi > 5.2.1, it does not exist there.`);
-                }
-            }
-
             const texPerChild = this.texturesPerTilemap;
             const len1 = this.children.length;
             const len2 = Math.ceil(tileTextures.length / texPerChild);
@@ -914,13 +909,14 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             }
             for (let i = len1; i < len2; i++)
             {
-                const layer = new Tilemap(this.zIndex, tileTextures.slice(i * texPerChild, (i + 1) * texPerChild));
+                const tilemap = new Tilemap(tileTextures.slice(i * texPerChild, (i + 1) * texPerChild));
 
-                layer.compositeParent = true;
-                layer.offsetX = settings.TEXTILE_DIMEN;
-                layer.offsetY = settings.TEXTILE_DIMEN;
+                tilemap.compositeParent = true;
+                tilemap.offsetX = settings.TEXTILE_DIMEN;
+                tilemap.offsetY = settings.TEXTILE_DIMEN;
 
-                this.addChild(layer);
+                // TODO: Don't use children
+                this.addChild(tilemap);
             }
 
             return this;
@@ -979,9 +975,23 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
          * @param x - The local x-coordinate of the tile's location.
          * @param y - The local y-coordinate of the tile's location.
          * @param options - Additional options to pass to {@link Tilemap.tile}.
+         * @param [options.u=texture.frame.x] - The x-coordinate of the texture in its base-texture's space.
+         * @param [options.v=texture.frame.y] - The y-coordinate of the texture in its base-texture's space.
+         * @param [options.tileWidth=texture.orig.width] - The local width of the tile.
+         * @param [options.tileHeight=texture.orig.height] - The local height of the tile.
+         * @param [options.animX=0] - For animated tiles, this is the "offset" along the x-axis for adjacent
+         *      animation frame textures in the base-texture.
+         * @param [options.animY=0] - For animated tiles, this is the "offset" along the y-axis for adjacent
+         *      animation frames textures in the base-texture.
+         * @param [options.rotate=0]
+         * @param [options.animCountX=1024] - For animated tiles, this is the number of animation frame textures
+         *      per row.
+         * @param [options.animCountY=1024] - For animated tiles, this is the number of animation frame textures
+         *      per column.
+         * @return This tilemap, good for chaining.
          */
         tile(
-            texture_,
+            tileTexture,
             x,
             y,
             options
@@ -997,46 +1007,47 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
      = {}
         )
         {
-            let texture;
-            let layer = null;
-            let ind  = 0;
+            let tilemap = null;
             const children = this.children;
 
             this.lastModifiedTilemap = null;
 
-            if (typeof texture_ === 'number')
+            if (typeof tileTexture === 'number')
             {
-                const childIndex = texture_ / this.texturesPerTilemap >> 0;
+                const childIndex = tileTexture / this.texturesPerTilemap >> 0;
+                let tileIndex  = 0;
 
-                layer = children[childIndex] ;
+                tilemap = children[childIndex] ;
 
-                if (!layer)
+                if (!tilemap)
                 {
-                    layer = children[0] ;
-                    if (!layer)
-                    {
-                        return this;
-                    }
-                    ind = 0;
+                    tilemap = children[0] ;
+
+                    // Silently fail if the tilemap doesn't exist
+                    if (!tilemap) return this;
+
+                    tileIndex = 0;
                 }
                 else
                 {
-                    ind = texture_ % this.texturesPerTilemap;
+                    tileIndex = tileTexture % this.texturesPerTilemap;
                 }
 
-                texture = layer.getTileset()[ind];
+                tilemap.tile(
+                    tileIndex,
+                    x,
+                    y,
+                    options,
+                );
             }
             else
             {
-                if (typeof texture_ === 'string')
+                if (typeof tileTexture === 'string')
                 {
-                    texture = core.Texture.from(texture_);
-                }
-                else
-                {
-                    texture = texture_ ;
+                    tileTexture = core.Texture.from(tileTexture);
                 }
 
+                // Probe all tilemaps to find which tileset contains the base-texture.
                 for (let i = 0; i < children.length; i++)
                 {
                     const child = children[i] ;
@@ -1044,52 +1055,56 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
 
                     for (let j = 0; j < tex.length; j++)
                     {
-                        if (tex[j] === texture)
+                        if (tex[j] === tileTexture.baseTexture)
                         {
-                            layer = child;
-                            ind = j;
+                            tilemap = child;
                             break;
                         }
                     }
-                    if (layer)
+
+                    if (tilemap)
                     {
                         break;
                     }
                 }
 
-                if (!layer)
+                // If no tileset contains the base-texture, attempt to add it.
+                if (!tilemap)
                 {
-                    for (let i = 0; i < children.length; i++)
+                    // Probe the tilemaps to find one below capacity. If so, add the texture into that tilemap.
+                    for (let i = children.length - 1; i >= 0; i--)
                     {
                         const child = children[i] ;
 
                         if (child.getTileset().length < this.texturesPerTilemap)
                         {
-                            layer = child;
-                            ind = child.getTileset().length;
-                            child.getTileset().push(texture);
+                            tilemap = child;
+                            child.getTileset().push(tileTexture.baseTexture);
                             break;
                         }
                     }
-                    if (!layer)
+
+                    // Otherwise, create a new tilemap initialized with that tile texture.
+                    if (!tilemap)
                     {
-                        layer = new Tilemap(this.zIndex, texture);
-                        layer.compositeParent = true;
-                        layer.offsetX = settings.TEXTILE_DIMEN;
-                        layer.offsetY = settings.TEXTILE_DIMEN;
-                        this.addChild(layer);
-                        ind = 0;
+                        tilemap = new Tilemap(tileTexture.baseTexture);
+                        tilemap.compositeParent = true;
+                        tilemap.offsetX = settings.TEXTILE_DIMEN;
+                        tilemap.offsetY = settings.TEXTILE_DIMEN;
+
+                        this.addChild(tilemap);
                     }
                 }
+
+                tilemap.tile(
+                    tileTexture,
+                    x,
+                    y,
+                    options,
+                );
             }
 
-            this.lastModifiedTilemap = layer;
-            layer.tile(
-                ind,
-                x,
-                y,
-                options,
-            );
+            this.lastModifiedTilemap = tilemap;
 
             return this;
         }
@@ -1259,31 +1274,6 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
         }
 
         /**
-         * This initialization routine is now done in the constructor.
-         *
-         * @deprecated Since @pixi/tilemap 3.
-         * @param zIndex - The z-index of the tilemap composite.
-         * @param bitmaps - The tileset to use.
-         * @param texPerChild - The number of textures per tilemap.
-         */
-        initialize(zIndex, bitmaps, texPerChild)
-        {
-            if (texPerChild  === true)
-            {
-                // old format, ignore it!
-                texPerChild = 0;
-            }
-
-            this.zIndex = zIndex;
-            (this ).texturesPerTilemap = texPerChild || settings.TEXTILE_UNITS * settings.TEXTURES_PER_TILEMAP;
-
-            if (bitmaps)
-            {
-                this.tileset(bitmaps);
-            }
-        }
-
-        /**
          * Alias for {@link CompositeTilemap.tileset tileset}.
          *
          * @deprecated Since @pixi/tilemap 3.
@@ -1309,8 +1299,6 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
      * and defaults to {@link settings.TEXTILE_DIMEN}. This means that each input base-texture
      * must is smaller than that along both its width and height.
      *
-     * @internal
-     * @ignore
      * @see settings.TEXTILE_UNITS
      */
     class TextileResource extends core.Resource
@@ -1347,7 +1335,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
     				dirtyId: 0,
     				x: options.TEXTILE_DIMEN * (j & 1),
     				y: options.TEXTILE_DIMEN * (j >> 1),
-    				texture: core.Texture.WHITE,
+    				baseTexture: core.Texture.WHITE.baseTexture,
     			};
     		}
     	}
@@ -1362,12 +1350,12 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
     	{
     		const tile = this.tiles[index];
 
-    		if (tile.texture.baseTexture === texture.baseTexture)
+    		if (tile.baseTexture === texture)
     		{
     			return;
     		}
 
-    		tile.texture = texture;
+    		tile.baseTexture = texture;
     		this.baseTexture.update();
 
     		this.tiles[index].dirtyId = (this.baseTexture ).dirtyId;
@@ -1422,7 +1410,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
     		for (let i = 0; i < tiles.length; i++)
     		{
     			const spr = tiles[i];
-    			const tex = spr.texture.baseTexture;
+    			const tex = spr.baseTexture;
 
     			if (glTexture.dirtyId >= this.tiles[i].dirtyId)
     			{
@@ -1598,7 +1586,9 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
     // For some reason ESLint goes mad with indendation in this file ^&^
     /* eslint-disable no-mixed-spaces-and-tabs, indent */
 
-    /** Rendering helper pipeline for tilemaps. */
+    /**
+     * Rendering helper pipeline for tilemaps. This plugin is registered automatically.
+     */
     class TileRenderer extends core.ObjectRenderer
     {
     	/** The managing renderer */
@@ -1667,8 +1657,8 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
 
     				renderer.texture.bind(textures[i], i);
 
-    				samplerSize[i * 2] = 1.0 / textures[i].baseTexture.realWidth;
-    				samplerSize[(i * 2) + 1] = 1.0 / textures[i].baseTexture.realHeight;
+    				samplerSize[i * 2] = 1.0 / textures[i].realWidth;
+    				samplerSize[(i * 2) + 1] = 1.0 / textures[i].realHeight;
     			}
     	    }
     		else

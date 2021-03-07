@@ -1,10 +1,11 @@
 import { Container, Bounds } from '@pixi/display';
-import { Constant } from './settings';
 import { DRAW_MODES } from '@pixi/constants';
 import { Texture, Renderer } from '@pixi/core';
 import { TileRenderer } from './TileRenderer';
 import { Matrix, Rectangle, groupD8 } from '@pixi/math';
+import { settings } from './settings';
 
+import type { BaseTexture } from '@pixi/core';
 import type { CanvasRenderer } from '@pixi/canvas-renderer';
 import type { IDestroyOptions } from '@pixi/display';
 import type { TilemapGeometry } from './TilemapShader';
@@ -14,9 +15,9 @@ export const POINT_STRUCT_SIZE = 12;
 /**
  * A rectangular tilemap implementation that renders a predefined set of tile textures.
  *
- * The {@link Tilemap.tileset tileset} of a tilemap defines the list of textures that can be painted in the
- * tilemap. The texture is identified using its index into the this list, i.e. changing the texture at a given
- * index in the tileset modifies the paint of all tiles pointing to that index.
+ * The {@link Tilemap.tileset tileset} of a tilemap defines the list of base-textures that can be painted in the
+ * tilemap. A texture is identified using its base-texture's index into the this list, i.e. changing the base-texture
+ * at a given index in the tileset modifies the paint of all tiles pointing to that index.
  *
  * The size of the tileset is limited by the texture units supported by the client device. The minimum supported
  * value is 8, as defined by the WebGL 1 specification. `gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS`) can be used
@@ -33,17 +34,8 @@ export const POINT_STRUCT_SIZE = 12;
  * // Make the tilemap once the tileset assets are available.
  * Loader.shared.load(function onTilesetLoaded()
  * {
- *      // These textures should've been in the spritesheet. If you don't
- *      // use a spritesheet, this technique will still work as long as
- *      // each individual texture is served.
- *      const tilemap = new Tilemap([
- *          Texture.from('grass.png'),
- *          Texture.from('tough.png'),
- *          Texture.from('brick.png'),
- *          Texture.from('brick_wall.png'),
- *          Texture.from('chest.png')
- *      ])
- *      // Now you defined each tile to generate the tilemap!
+ *      // The base-texture is shared between all the tile textures.
+ *      const tilemap = new Tilemap([Texture.from('grass.png').baseTexture])
  *          .tile('grass.png', 0, 0)
  *          .tile('grass.png', 100, 100)
  *          .tile('brick_wall.png', 0, 100);
@@ -51,22 +43,38 @@ export const POINT_STRUCT_SIZE = 12;
  */
 export class Tilemap extends Container
 {
-    // zIndex to zero by DisplayObject
-    modificationMarker = 0;
     shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
     _globalMat: Matrix = null;
-    offsetX = 0;
-    offsetY = 0;
-    compositeParent = false;
-    tileAnim: Array<number> = null;
 
     /**
-     * The list of textures being used in the tilemap.
+     * The tile animation frame.
+     *
+     * @see CompositeTilemap.tileAnim
+     */
+    public tileAnim: [number, number] = null;
+
+    /**
+     * This is the last uploaded size of the tilemap geometry.
+     * @ignore
+     */
+    modificationMarker = 0;
+
+    /** @ignore */
+    offsetX = 0;
+
+    /** @ignore */
+    offsetY = 0;
+
+    /** @ignore */
+    compositeParent = false;
+
+    /**
+     * The list of base-textures being used in the tilemap.
      *
      * This should not be shuffled after tiles have been added into this tilemap. Usually, only tile textures
      * should be added after tiles have been added into the map.
      */
-    protected tileset: Array<Texture>;
+    protected tileset: Array<BaseTexture>;
 
     /**
      * The local bounds of the tilemap itself. This does not include DisplayObject children.
@@ -80,26 +88,19 @@ export class Tilemap extends Container
     private pointsBuf: Array<number> = [];
 
     /**
-     * @param tileset - The tileset to use for the tilemap. This can be reset later with {@link Tilemap.setTileset}.
+     * @param tileset - The tileset to use for the tilemap. This can be reset later with {@link Tilemap.setTileset}. The
+     *      base-textures in this array must not be duplicated.
      */
-    constructor(tileset: Texture | Array<Texture>);
-    constructor(zIndex: number, textures: Texture | Array<Texture>);
-
-    constructor(arg0: Texture | Array<Texture> | number, arg1?: Texture | Array<Texture>)
+    constructor(tileset: BaseTexture | Array<BaseTexture>)
     {
         super();
-
-        const zIndex = typeof arg0 === 'number' ? arg0 : 0;
-        const tileset = typeof arg0 !== 'number' ? arg0 : arg1;
-
-        this.zIndex = zIndex;
         this.setTileset(tileset);
     }
 
     /**
      * @returns The tileset of this tilemap.
      */
-    getTileset(): Array<Texture>
+    getTileset(): Array<BaseTexture>
     {
         return this.tileset;
     }
@@ -110,11 +111,18 @@ export class Tilemap extends Container
      * @param tileset - The list of textures to use in the tilemap. If a texture (not array) is passed, it will
      *  be wrapped into an array.
      */
-    setTileset(tileset: Texture | Array<Texture> = []): this
+    setTileset(tileset: BaseTexture | Array<BaseTexture> = []): this
     {
         if (!Array.isArray(tileset))
         {
             tileset = [tileset];
+        }
+        for (let i = 0; i < tileset.length; i++)
+        {
+            if ((tileset[i] as unknown as Texture).baseTexture)
+            {
+                tileset[i] = (tileset[i] as unknown as Texture).baseTexture;
+            }
         }
 
         this.tileset = tileset;
@@ -156,7 +164,7 @@ export class Tilemap extends Container
      * @return This tilemap, good for chaining.
      */
     tile(
-        tileTexture: number | string | Texture,
+        tileTexture: number | string | Texture | BaseTexture,
         x: number,
         y: number,
         options: {
@@ -169,41 +177,53 @@ export class Tilemap extends Container
             rotate?: number,
             animCountX?: number,
             animCountY?: number
-        }
+        } = {}
     ): this
     {
-        let texture: Texture;
+        let baseTexture: BaseTexture;
         let textureIndex = -1;
 
         if (typeof tileTexture === 'number')
         {
             textureIndex = tileTexture;
-            texture = this.tileset[textureIndex];
+            baseTexture = this.tileset[textureIndex];
         }
         else
         {
+            let texture: Texture | BaseTexture;
+
             if (typeof tileTexture === 'string')
             {
                 texture = Texture.from(tileTexture);
             }
             else
             {
-                texture = tileTexture as Texture;
+                texture = tileTexture;
             }
 
             const textureList = this.tileset;
 
             for (let i = 0; i < textureList.length; i++)
             {
-                if (textureList[i].baseTexture === texture.baseTexture)
+                if (textureList[i] === texture.castToBaseTexture())
                 {
                     textureIndex = i;
                     break;
                 }
             }
+
+            if ('baseTexture' in texture)
+            {
+                options.u = options.u ?? texture.frame.x;
+                options.v = options.v ?? texture.frame.y;
+                options.tileWidth = options.tileWidth ?? texture.orig.width;
+                options.tileHeight = options.tileHeight ?? texture.orig.height;
+            }
+
+            baseTexture = texture.castToBaseTexture();
         }
 
-        if (!texture || textureIndex < 0)
+        if (!baseTexture || textureIndex < 0)
         {
             console.error('The tile texture was not found in the tilemap tileset.');
 
@@ -211,10 +231,10 @@ export class Tilemap extends Container
         }
 
         const {
-            u = texture.frame.x,
-            v = texture.frame.y,
-            tileWidth = texture.orig.width,
-            tileHeight = texture.orig.height,
+            u = 0,
+            v = 0,
+            tileWidth = baseTexture.realWidth,
+            tileHeight = baseTexture.realHeight,
             animX = 0,
             animY = 0,
             rotate = 0,
@@ -317,7 +337,7 @@ export class Tilemap extends Container
             if (textureIndex >= 0 && this.tileset[textureIndex])
             {
                 renderer.context.drawImage(
-                    (this.tileset[textureIndex].baseTexture as any).getDrawableSource(),
+                    (this.tileset[textureIndex] as any).getDrawableSource(),
                     x1, y1, w, h, x2, y2, w, h
                 );
             }
@@ -393,7 +413,7 @@ export class Tilemap extends Container
         }
 
         plugin.checkIndexBuffer(rectsCount, vb);
-        const boundCountPerBuffer = Constant.TEXTILE_UNITS;
+        const boundCountPerBuffer = settings.TEXTILE_UNITS;
 
         const vertexBuf = vb.getBuffer('aVertexPosition');
         // if layer was changed, re-upload vertices
@@ -452,18 +472,18 @@ export class Tilemap extends Container
                         shiftV = 0;
                     }
                 }
-                const x = points[i + 2]; const
-                    y = points[i + 3];
-                const w = points[i + 4]; const
-                    h = points[i + 5];
-                const u = points[i] + shiftU; const
-                    v = points[i + 1] + shiftV;
+                const x = points[i + 2];
+                const y = points[i + 3];
+                const w = points[i + 4];
+                const h = points[i + 5];
+                const u = points[i] + shiftU;
+                const v = points[i + 1] + shiftV;
                 let rotate = points[i + 6];
 
-                const animX = points[i + 7]; const
-                    animY = points[i + 8];
-                const animWidth = points[i + 10] || 1024; const
-                    animHeight = points[i + 11] || 1024;
+                const animX = points[i + 7];
+                const animY = points[i + 8];
+                const animWidth = points[i + 10] || 1024;
+                const animHeight = points[i + 11] || 1024;
                 const animXEncoded = animX + (animWidth * 2048);
                 const animYEncoded = animY + (animHeight * 2048);
 
@@ -618,19 +638,6 @@ export class Tilemap extends Container
     {
         super.destroy(options);
         this.destroyVb();
-    }
-
-    /**
-     * This initialization routine has been replaced by {@link Tilemap.setTileset setTileset}.
-     *
-     * @deprecated Since @pixi/tilemap 3.
-     * @param zIndex - The z-index of the tilemap.
-     * @param textures - The tileset to use.
-     */
-    initialize(zIndex: number, textures: Texture | Array<Texture>): void
-    {
-        this.zIndex = zIndex || 0;
-        this.setTileset(textures);
     }
 
     /**

@@ -1,5 +1,5 @@
 import { WRAP_MODES } from '@pixi/constants';
-import { BaseTexture, Buffer, ObjectRenderer, Texture, Renderer } from '@pixi/core';
+import { BaseTexture, Buffer, ObjectRenderer, Renderer } from '@pixi/core';
 import { settings } from './settings';
 import { TilemapGeometry, TilemapShader } from './TilemapShader';
 import { TextileResource } from './TextileResource';
@@ -52,7 +52,7 @@ export class TileRenderer extends ObjectRenderer
 	 * @param renderer - The renderer to which the textures are to be bound.
 	 * @param textures - The tile textures being bound.
 	 */
-	bindTileTextures(renderer: Renderer, textures: Array<Texture>): void
+	bindTileTextures(renderer: Renderer, textures: Array<BaseTexture>): void
 	{
 	    const len = textures.length;
 		const shader = this.shader;
@@ -79,8 +79,8 @@ export class TileRenderer extends ObjectRenderer
 
 				renderer.texture.bind(textures[i], i);
 
-				samplerSize[i * 2] = 1.0 / textures[i].baseTexture.realWidth;
-				samplerSize[(i * 2) + 1] = 1.0 / textures[i].baseTexture.realHeight;
+				samplerSize[i * 2] = 1.0 / textures[i].realWidth;
+				samplerSize[(i * 2) + 1] = 1.0 / textures[i].realHeight;
 			}
 	    }
 		else

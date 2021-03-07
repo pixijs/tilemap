@@ -13,7 +13,7 @@ type TextureTile = {
 	dirtyId: number;
 	x: number;
 	y: number;
-	texture: Texture;
+	baseTexture: BaseTexture;
 };
 
 // For some reason ESLint goes mad with indendation in this file ^&^
@@ -52,7 +52,7 @@ export class TextileResource extends Resource
 			options.TEXTILE_DIMEN * Math.ceil(options.TEXTILE_UNITS / 2),
 		);
 
-		const tiles = this.tiles = new Array(options.TEXTILE_UNITS);
+		const tiles: TextureTile[] = this.tiles = new Array(options.TEXTILE_UNITS);
 
 		this.doClear = !!options.DO_CLEAR;
 		this.tileDimen = options.TEXTILE_DIMEN;
@@ -63,7 +63,7 @@ export class TextileResource extends Resource
 				dirtyId: 0,
 				x: options.TEXTILE_DIMEN * (j & 1),
 				y: options.TEXTILE_DIMEN * (j >> 1),
-				texture: Texture.WHITE,
+				baseTexture: Texture.WHITE.baseTexture,
 			};
 		}
 	}
@@ -74,16 +74,16 @@ export class TextileResource extends Resource
 	 * @param index - The index of the tile being set.
 	 * @param texture - The texture with the base-texture to upload.
 	 */
-	tile(index: number, texture: Texture): void
+	tile(index: number, texture: BaseTexture): void
 	{
 		const tile = this.tiles[index];
 
-		if (tile.texture.baseTexture === texture.baseTexture)
+		if (tile.baseTexture === texture)
 		{
 			return;
 		}
 
-		tile.texture = texture;
+		tile.baseTexture = texture;
 		this.baseTexture.update();
 
 		this.tiles[index].dirtyId = (this.baseTexture as any).dirtyId;
@@ -138,7 +138,7 @@ export class TextileResource extends Resource
 		for (let i = 0; i < tiles.length; i++)
 		{
 			const spr = tiles[i];
-			const tex = spr.texture.baseTexture;
+			const tex = spr.baseTexture;
 
 			if (glTexture.dirtyId >= this.tiles[i].dirtyId)
 			{
