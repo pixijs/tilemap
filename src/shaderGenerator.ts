@@ -1,5 +1,3 @@
-import { Constant } from './settings';
-
 import type { TilemapShader } from './TilemapShader';
 
 /**
