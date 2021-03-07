@@ -3,7 +3,7 @@ import { CompositeTilemap } from './CompositeTilemap';
 import { Constant } from './const';
 import { MultiTextureResource } from './MultiTextureResource';
 import { Tilemap } from './Tilemap';
-import { TilemapShader, RectTileShader, RectTileGeom } from './RectTileShader';
+import { TilemapShader, RectTileShader, RectTileGeom } from './TilemapShader';
 import { TileRenderer } from './TileRenderer';
 
 // Prevent SCALE_MODES from becoming lazy import in Constant.ts - which causes a import() in the declaration file,
@@ -31,7 +31,7 @@ export * from './CompositeTilemap';
 export * from './const';
 export * from './MultiTextureResource';
 export * from './Tilemap';
-export * from './RectTileShader';
+export * from './TilemapShader';
 export * from './shaderGenerator';
 export * from './TileRenderer';
 

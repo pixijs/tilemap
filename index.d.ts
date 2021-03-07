@@ -2,11 +2,12 @@ import type { AbstractRenderer } from '@pixi/core';
 import { BaseTexture } from '@pixi/core';
 import { Bounds } from '@pixi/display';
 import { Buffer as Buffer_2 } from '@pixi/core';
+import type { CanvasRenderer } from '@pixi/canvas-renderer';
 import * as constants from '@pixi/constants';
 import { Container } from '@pixi/display';
 import { Geometry } from '@pixi/core';
 import { GLTexture } from '@pixi/core';
-import { Graphics } from '@pixi/graphics';
+import type { IDestroyOptions } from '@pixi/display';
 import { Matrix } from '@pixi/math';
 import { ObjectRenderer } from '@pixi/core';
 import { Rectangle } from '@pixi/math';
@@ -14,7 +15,6 @@ import { Renderer } from '@pixi/core';
 import { Resource } from '@pixi/core';
 import { SCALE_MODES } from '@pixi/constants';
 import { Shader } from '@pixi/core';
-import { Sprite } from '@pixi/sprite';
 import { Texture } from '@pixi/core';
 
 export declare class CanvasTileRenderer {
@@ -24,28 +24,43 @@ export declare class CanvasTileRenderer {
     constructor(renderer: AbstractRenderer);
 }
 
-export declare class CompositeRectTileLayer extends Container {
-    constructor(zIndex?: number, bitmaps?: Array<Texture>, texPerChild?: number);
-    z: number;
-    modificationMarker: number;
-    shadowColor: Float32Array;
-    _globalMat: Matrix;
-    _lastLayer: RectTileLayer;
-    texPerChild: number;
+declare class CompositeTilemap extends Container {
+    readonly texturesPerTilemap: number;
     tileAnim: Array<number>;
-    initialize(zIndex?: number, bitmaps?: Array<Texture>, texPerChild?: number): void;
-    setBitmaps(bitmaps: Array<Texture>): void;
-    clear(): void;
-    addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number, rotate?: number, animWidth?: number, animHeight?: number): this;
+    protected lastModifiedTilemap: Tilemap;
+    private modificationMarker;
+    private shadowColor;
+    private _globalMat;
+    constructor(tileset?: Array<Texture>, texturesPerTilemap?: number);
+    constructor(zIndex?: number, bitmaps?: Array<Texture>, texPerChild?: number);
+    tileset(tileTextures: Array<Texture>): this;
+    clear(): this;
     tileRotate(rotate: number): this;
     tileAnimX(offset: number, count: number): this;
     tileAnimY(offset: number, count: number): this;
-    addFrame(texture_: Texture | String | number, x: number, y: number, animX?: number, animY?: number, animWidth?: number, animHeight?: number): this;
-    renderCanvas(renderer: any): void;
+    tile(texture_: Texture | string | number, x: number, y: number, options?: {
+        u?: number;
+        v?: number;
+        tileWidth?: number;
+        tileHeight?: number;
+        animX?: number;
+        animY?: number;
+        rotate?: number;
+        animCountX?: number;
+        animCountY?: number;
+    }): this;
+    renderCanvas(renderer: CanvasRenderer): void;
     render(renderer: Renderer): void;
     isModified(anim: boolean): boolean;
     clearModify(): void;
+    addFrame(texture: Texture | string | number, x: number, y: number, animX?: number, animY?: number, animWidth?: number, animHeight?: number): this;
+    addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number, rotate?: number, animWidth?: number, animHeight?: number): this;
+    initialize(zIndex?: number, bitmaps?: Array<Texture>, texPerChild?: number): void;
+    setBitmaps: (tileTextures: Array<Texture>) => this;
+    get texPerChild(): number;
 }
+export { CompositeTilemap as CompositeRectTileLayer }
+export { CompositeTilemap }
 
 export declare const Constant: {
     maxTextures: number;
@@ -63,13 +78,6 @@ export declare function generateFragmentSrc(maxTextures: number, fragmentSrc: st
 
 export declare function generateSampleSrc(maxTextures: number): string;
 
-export declare class GraphicsLayer extends Graphics {
-    constructor(zIndex: number);
-    renderCanvas(renderer: any): void;
-    isModified(anim: boolean): boolean;
-    clearModify(): void;
-}
-
 export declare interface IMultiTextureOptions {
     boundCountPerBuffer: number;
     boundSize: number;
@@ -78,21 +86,22 @@ export declare interface IMultiTextureOptions {
 }
 
 export declare class MultiTextureResource extends Resource {
-    constructor(options: IMultiTextureOptions);
-    DO_CLEAR: boolean;
-    boundSize: number;
-    _clearBuffer: Uint8Array;
-    bind(baseTexture: BaseTexture): void;
     baseTex: BaseTexture;
-    boundSprites: Array<Sprite>;
-    dirties: Array<number>;
+    private DO_CLEAR;
+    private boundSize;
+    private _clearBuffer;
+    private boundSprites;
+    private dirties;
+    constructor(options: IMultiTextureOptions);
+    bind(baseTexture: BaseTexture): void;
     setTexture(ind: number, texture: Texture): void;
     upload(renderer: Renderer, texture: BaseTexture, glTexture: GLTexture): boolean;
 }
 
 export declare const pixi_tilemap: {
     CanvasTileRenderer: typeof CanvasTileRenderer;
-    CompositeRectTileLayer: typeof CompositeRectTileLayer;
+    CompositeRectTileLayer: typeof CompositeTilemap;
+    CompositeTilemap: typeof CompositeTilemap;
     Constant: {
         maxTextures: number;
         bufferSize: number;
@@ -102,14 +111,13 @@ export declare const pixi_tilemap: {
         SCALE_MODE: constants.SCALE_MODES;
         DO_CLEAR: boolean;
     };
-    GraphicsLayer: typeof GraphicsLayer;
     MultiTextureResource: typeof MultiTextureResource;
-    RectTileLayer: typeof RectTileLayer;
+    RectTileLayer: typeof Tilemap;
+    Tilemap: typeof Tilemap;
     TilemapShader: typeof TilemapShader;
     RectTileShader: typeof RectTileShader;
     RectTileGeom: typeof RectTileGeom;
     TileRenderer: typeof TileRenderer;
-    ZLayer: typeof ZLayer;
 };
 
 export declare const POINT_STRUCT_SIZE = 12;
@@ -123,46 +131,62 @@ export declare class RectTileGeom extends Geometry {
     buf: Buffer_2;
 }
 
-export declare class RectTileLayer extends Container {
-    constructor(zIndex: number, texture: Texture | Array<Texture>);
+export declare class RectTileShader extends TilemapShader {
+    constructor(maxTextures: number);
+}
+
+declare class Tilemap extends Container {
     modificationMarker: number;
-    _$_localBounds: Bounds;
     shadowColor: Float32Array;
     _globalMat: Matrix;
-    pointsBuf: Array<number>;
     hasAnim: boolean;
-    textures: Array<Texture>;
     offsetX: number;
     offsetY: number;
     compositeParent: boolean;
     tileAnim: Array<number>;
-    initialize(zIndex: number, textures: Texture | Array<Texture>): void;
-    clear(): void;
-    addFrame(texture_: Texture | String | number, x: number, y: number, animX: number, animY: number): boolean;
-    addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number, rotate?: number, animCountX?: number, animCountY?: number): this;
+    protected tileset: Array<Texture>;
+    protected readonly tilemapBounds: Bounds;
+    private pointsBuf;
+    constructor(tileset: Texture | Array<Texture>);
+    constructor(zIndex: number, textures: Texture | Array<Texture>);
+    getTileset(): Array<Texture>;
+    setTileset(tileset?: Texture | Array<Texture>): this;
+    clear(): this;
+    tile(tileTexture: number | string | Texture, x: number, y: number, options: {
+        u?: number;
+        v?: number;
+        tileWidth?: number;
+        tileHeight?: number;
+        animX?: number;
+        animY?: number;
+        rotate?: number;
+        animCountX?: number;
+        animCountY?: number;
+    }): this;
     tileRotate(rotate: number): void;
     tileAnimX(offset: number, count: number): void;
     tileAnimY(offset: number, count: number): void;
-    renderCanvas(renderer: any): void;
-    renderCanvasCore(renderer: any): void;
-    vbId: number;
-    vb: RectTileGeom;
-    vbBuffer: ArrayBuffer;
-    vbArray: Float32Array;
-    vbInts: Uint32Array;
-    destroyVb(): void;
+    renderCanvas(renderer: CanvasRenderer): void;
+    renderCanvasCore(renderer: CanvasRenderer): void;
+    private vbId;
+    private vb;
+    private vbBuffer;
+    private vbArray;
+    private vbInts;
+    private destroyVb;
     render(renderer: Renderer): void;
     renderWebGLCore(renderer: Renderer, plugin: TileRenderer): void;
     isModified(anim: boolean): boolean;
     clearModify(): void;
     protected _calculateBounds(): void;
     getLocalBounds(rect?: Rectangle): Rectangle;
-    destroy(options?: any): void;
+    destroy(options?: IDestroyOptions): void;
+    initialize(zIndex: number, textures: Texture | Array<Texture>): void;
+    addFrame(texture: Texture | string | number, x: number, y: number, animX: number, animY: number): boolean;
+    addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number, rotate?: number, animCountX?: number, animCountY?: number): this;
 }
-
-export declare class RectTileShader extends TilemapShader {
-    constructor(maxTextures: number);
-}
+export { Tilemap as RectTileLayer }
+export { Tilemap }
 
 export declare abstract class TilemapShader extends Shader {
     maxTextures: number;
@@ -170,38 +194,21 @@ export declare abstract class TilemapShader extends Shader {
 }
 
 export declare class TileRenderer extends ObjectRenderer {
-    renderer: Renderer;
-    gl: WebGLRenderingContext;
-    sn: number;
-    indexBuffer: Buffer_2;
-    ibLen: number;
+    readonly renderer: Renderer;
     tileAnim: number[];
-    texLoc: Array<number>;
-    rectShader: RectTileShader;
-    texResources: Array<MultiTextureResource>;
+    private ibLen;
+    private indexBuffer;
+    private shader;
+    private texResources;
     constructor(renderer: Renderer);
-    initBounds(): void;
-    bindTexturesWithoutRT(renderer: Renderer, shader: TilemapShader, textures: Array<Texture>): void;
     bindTextures(renderer: Renderer, shader: TilemapShader, textures: Array<Texture>): void;
     start(): void;
     createVb(): RectTileGeom;
-    checkIndexBuffer(size: number, vb?: RectTileGeom): void;
     getShader(): TilemapShader;
     destroy(): void;
-}
-
-export declare class ZLayer extends Container {
-    constructor(tilemap: Container, zIndex: number);
-    tilemap: any;
-    z: number;
-    _previousLayers: number;
-    canvasBuffer: HTMLCanvasElement;
-    _tempRender: any;
-    _lastAnimationFrame: number;
-    layerTransform: Matrix;
-    clear(): void;
-    cacheIfDirty(canvasRenderer: AbstractRenderer): void;
-    renderCanvas(renderer: any): void;
+    checkIndexBuffer(size: number, _vb?: RectTileGeom): void;
+    private initBounds;
+    private bindTexturesWithoutRT;
 }
 
 export { }

@@ -1,6 +1,6 @@
 import { Constant } from './const';
 
-import type { TilemapShader } from './RectTileShader';
+import type { TilemapShader } from './TilemapShader';
 
 /**
  * @internal
@@ -21,7 +21,8 @@ export function fillSamplers(shader: TilemapShader, maxTextures: number): void
 
     const samplerSize: Array<number> = [];
 
-    for (let i = 0; i < maxTextures; i++) {
+    for (let i = 0; i < maxTextures; i++)
+    {
         samplerSize.push(1.0 / Constant.bufferSize);
         samplerSize.push(1.0 / Constant.bufferSize);
     }
@@ -56,7 +57,7 @@ export function generateSampleSrc(maxTextures: number): string
         }
 
         src += '\n{';
-        src += `\n\tcolor = texture2D(uSamplers['+i+'], textureCoord * uSamplerSize[${i}]);`;
+        src += `\n\tcolor = texture2D(uSamplers[${i}], textureCoord * uSamplerSize[${i}]);`;
         src += '\n}';
     }
 

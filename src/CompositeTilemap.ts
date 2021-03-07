@@ -10,43 +10,142 @@ import type { TileRenderer } from './TileRenderer';
 /**
  * A tilemap composite that lazily builds tilesets layered into multiple tilemaps.
  *
- * NOTE: It is illegal to modify the children of a composite tilemap. A future release will enforce this.
+ * The composite tileset is the concatenatation of the individual tilesets used in the tilemaps. You can
+ * preinitialized it by passing a list of tile textures to the constructor. Otherwise, the composite tilemap
+ * is lazily built as you add more tiles with newer tile textures. A new tilemap is created once the last
+ * tilemap has reached its limit (as set by {@link CompositeTilemap.texturesPerTilemap texturesPerTilemap}).
+ *
+ * @example
+ * import { Application } from '@pixi/app';
+ * import { CompositeTilemap } from '@pixi/tilemap';
+ * import { Loader } from '@pixi/loaders';
+ *
+ * // Setup view & stage.
+ * const app = new Application();
+ *
+ * document.body.appendChild(app.renderer.view);
+ * app.stage.interactive = true;
+ *
+ * // Global reference to the tilemap.
+ * let globalTilemap: CompositeTilemap;
+ *
+ * // Load the tileset spritesheet!
+ * Loader.shared.load('atlas.json');
+ *
+ * // Initialize the tilemap scene when the assets load.
+ * Loader.shared.load(function onTilesetLoaded()
+ * {
+ *      // Preinitialize with two most used textures
+ *      const tilemap = new CompositeTilemap([
+ *          Texture.from('grass.png'),
+ *          Texture.from('dungeon.png'),
+ *      ]);
+ *
+ *      // Setup the game level with grass and dungeons!
+ *      for (let x = 0; x < 10; x++)
+ *      {
+ *          for (let y = 0; y < 10; y++)
+ *          {
+ *              tilemap.tile(
+ *                  x % 2 === 0 && (x === y || x + y === 10) ? 'dungeon.png' : 'grass.png',
+ *                  x * 100,
+ *                  y * 100,
+ *              );
+ *          }
+ *      }
+ *
+ *      globalTilemap = app.stage.addChild(tilemap);
+ * });
+ *
+ * // Show a bomb at a random location whenever the user clicks!
+ * app.stage.on('click', function onClick()
+ * {
+ *      if (!globalTilemap) return;
+ *
+ *      const x = Math.floor(Math.random() * 10);
+ *      const y = Math.floor(Math.random() * 10);
+ *
+ *      globalTilemap.tile('bomb.png', x * 100, y * 100);
+ * });
  */
 export class CompositeTilemap extends Container
 {
-    constructor(zIndex?: number, bitmaps?: Array<Texture>, texPerChild?: number)
+    /** The hard limit on the number of tile textures used in each tilemap. */
+    public readonly texturesPerTilemap: number;
+
+    /** The animation parameters */
+    public tileAnim: Array<number> = null;
+
+    /** The last modified tilemap. */
+    protected lastModifiedTilemap: Tilemap = null;
+
+    private modificationMarker = 0;
+    private shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
+    private _globalMat: Matrix = null;
+
+    /**
+     * @param tileset - A list of tile textures that will be used to eagerly initialized the layered
+     *  tilemaps. This is only an performance optimization, and using {@link CompositeTilemap.tile tile}
+     *  will work equivalently.
+     * @param texturesPerTilemap - A custom limit on the number of tile textures used in each tilemap.
+     */
+    constructor(tileset?: Array<Texture>, texturesPerTilemap?: number);
+
+    // @deprecated
+    constructor(zIndex?: number, bitmaps?: Array<Texture>, texPerChild?: number);
+
+    constructor(bitmaps?: Array<Texture> | number, texPerChild?: Array<Texture> | number, arg2?: number)
     {
         super();
-        this.initialize(zIndex, bitmaps, texPerChild);
+
+        const zIndex = typeof bitmaps === 'number' ? bitmaps : 0;
+        // eslint-disable-next-line no-nested-ternary
+        const tileset = Array.isArray(bitmaps) ? bitmaps : (Array.isArray(texPerChild) ? texPerChild : null);
+        const texturesPerTilemap = typeof texPerChild === 'number' ? texPerChild : arg2;
+
+        this.zIndex = zIndex;
+        this.tileset(tileset);
+        this.texturesPerTilemap = texturesPerTilemap || Constant.boundCountPerBuffer * Constant.maxTextures;
     }
 
-    z: number;
-    modificationMarker = 0;
-    shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
-    _globalMat: Matrix = null;
-    _lastLayer: Tilemap = null;
+    /**
+     * This will preinitialize the tilesets of the layered tilemaps.
+     *
+     * If used after a tilemap has been created (or a tile added), this will overwrite the tile textures of the
+     * existing tilemaps. Passing the tileset to the constructor instead is the best practice.
+     *
+     * @param tileTextures - The list of tile textures that make up the tileset.
+     */
+    tileset(tileTextures: Array<Texture>): this
+    {
+        if (!tileTextures)
+        {
+            tileTextures = [];
+        }
 
-    texPerChild: number;
-    tileAnim: Array<number> = null;
-
-    setBitmaps(bitmaps: Array<Texture>) {
-        for (let i=0;i<bitmaps.length;i++) {
-            if (bitmaps[i] && !bitmaps[i].baseTexture) {
-                throw new Error(`pixi-tilemap cannot use destroyed textures. `+
-                    `Probably, you passed resources['myAtlas'].texture in pixi > 5.2.1, it does not exist there.`);
+        // Sanity check!
+        for (let i = 0; i < tileTextures.length; i++)
+        {
+            if (tileTextures[i] && !tileTextures[i].baseTexture)
+            {
+                throw new Error(`pixi-tilemap cannot use destroyed textures. `
+                    + `Probably, you passed resources['myAtlas'].texture in pixi > 5.2.1, it does not exist there.`);
             }
         }
-        let texPerChild = this.texPerChild;
-        let len1 = this.children.length;
-        let len2 = Math.ceil(bitmaps.length / texPerChild);
-        let i: number;
-        for (i = 0; i < len1; i++) {
+
+        const texPerChild = this.texturesPerTilemap;
+        const len1 = this.children.length;
+        const len2 = Math.ceil(tileTextures.length / texPerChild);
+
+        for (let i = 0; i < Math.min(len1, len2); i++)
+        {
             (this.children[i] as Tilemap).setTileset(
-                bitmaps.slice(i * texPerChild, (i + 1) * texPerChild)
+                tileTextures.slice(i * texPerChild, (i + 1) * texPerChild)
             );
         }
-        for (i = len1; i < len2; i++) {
-            const layer = new Tilemap(this.zIndex, bitmaps.slice(i * texPerChild, (i + 1) * texPerChild));
+        for (let i = len1; i < len2; i++)
+        {
+            const layer = new Tilemap(this.zIndex, tileTextures.slice(i * texPerChild, (i + 1) * texPerChild));
 
             layer.compositeParent = true;
             layer.offsetX = Constant.boundSize;
@@ -54,108 +153,157 @@ export class CompositeTilemap extends Container
 
             this.addChild(layer);
         }
+
+        return this;
     }
 
-    clear() {
-        for (let i = 0; i < this.children.length; i++) {
+    /** Clears the tilemap composite. */
+    clear(): this
+    {
+        for (let i = 0; i < this.children.length; i++)
+        {
             (this.children[i] as Tilemap).clear();
         }
+
         this.modificationMarker = 0;
-    }
-
-    addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number, rotate?: number, animWidth?: number, animHeight?: number): this {
-        const childIndex: number = textureIndex / this.texPerChild >> 0;
-        const textureId: number = textureIndex % this.texPerChild;
-
-        if (this.children[childIndex] && (this.children[childIndex] as Tilemap).getTileset()) {
-            this._lastLayer = (this.children[childIndex] as Tilemap);
-            this._lastLayer.addRect(textureId, u, v, x, y, tileWidth, tileHeight, animX, animY, rotate, animWidth, animHeight);
-        } else {
-            this._lastLayer = null;
-        }
 
         return this;
     }
 
-    tileRotate(rotate: number): this {
-        if (this._lastLayer)
+    /** Changes the rotation of the last added tile. */
+    tileRotate(rotate: number): this
+    {
+        if (this.lastModifiedTilemap)
         {
-            this._lastLayer.tileRotate(rotate);
+            this.lastModifiedTilemap.tileRotate(rotate);
         }
+
         return this;
     }
 
-    tileAnimX(offset: number, count: number): this {
-        if (this._lastLayer)
+    /** Changes `animX`, `animCountX` of the last added tile. */
+    tileAnimX(offset: number, count: number): this
+    {
+        if (this.lastModifiedTilemap)
         {
-            this._lastLayer.tileAnimX(offset, count);
+            this.lastModifiedTilemap.tileAnimX(offset, count);
         }
+
         return this;
     }
 
-    tileAnimY(offset: number, count: number): this {
-        if (this._lastLayer)
+    /** Changes `animY`, `animCountY` of the last added tile. */
+    tileAnimY(offset: number, count: number): this
+    {
+        if (this.lastModifiedTilemap)
         {
-            this._lastLayer.tileAnimY(offset, count);
+            this.lastModifiedTilemap.tileAnimY(offset, count);
         }
+
         return this;
     }
 
-    addFrame(texture_: Texture | string | number, x: number, y: number, animX?: number, animY?: number, animWidth?: number, animHeight?: number): this {
+    /**
+     * Adds a tile that paints the given tile texture at (x, y).
+     *
+     * @param tileTexture - The tile texture. You can pass an index into the composite tilemap as well.
+     * @param x - The local x-coordinate of the tile's location.
+     * @param y - The local y-coordinate of the tile's location.
+     * @param options - Additional options to pass to {@link Tilemap.tile}.
+     */
+    tile(
+        texture_: Texture | string | number,
+        x: number,
+        y: number,
+        options: {
+            u?: number,
+            v?: number,
+            tileWidth?: number,
+            tileHeight?: number,
+            animX?: number,
+            animY?: number,
+            rotate?: number,
+            animCountX?: number,
+            animCountY?: number
+        } = {}
+    ): this
+    {
         let texture: Texture;
         let layer: Tilemap = null;
         let ind  = 0;
-        let children = this.children;
+        const children = this.children;
 
-        this._lastLayer = null;
-        if (typeof texture_ === "number") {
-            let childIndex = texture_ / this.texPerChild >> 0;
+        this.lastModifiedTilemap = null;
+
+        if (typeof texture_ === 'number')
+        {
+            const childIndex = texture_ / this.texturesPerTilemap >> 0;
+
             layer = children[childIndex] as Tilemap;
 
-            if (!layer) {
+            if (!layer)
+            {
                 layer = children[0] as Tilemap;
-                if (!layer) {
+                if (!layer)
+                {
                     return this;
                 }
                 ind = 0;
-            } else {
-                ind = texture_ % this.texPerChild;
+            }
+            else
+            {
+                ind = texture_ % this.texturesPerTilemap;
             }
 
             texture = layer.getTileset()[ind];
-        } else {
-            if (typeof texture_ === "string") {
+        }
+        else
+        {
+            if (typeof texture_ === 'string')
+            {
                 texture = Texture.from(texture_);
-            } else {
+            }
+            else
+            {
                 texture = texture_ as Texture;
             }
 
-            for (let i = 0; i < children.length; i++) {
-                let child = children[i] as Tilemap;
-                let tex = child.getTileset();
-                for (let j = 0; j < tex.length; j++) {
-                    if (tex[j].baseTexture === texture.baseTexture) {
+            for (let i = 0; i < children.length; i++)
+            {
+                const child = children[i] as Tilemap;
+                const tex = child.getTileset();
+
+                for (let j = 0; j < tex.length; j++)
+                {
+                    if (tex[j].baseTexture === texture.baseTexture)
+                    {
                         layer = child;
                         ind = j;
                         break;
                     }
                 }
-                if (layer) {
+                if (layer)
+                {
                     break;
                 }
             }
 
-            if (!layer) {
-                for (let i = 0; i < children.length; i++) {
-                    let child = children[i] as Tilemap;
-                    if (child.getTileset().length < this.texPerChild) {
+            if (!layer)
+            {
+                for (let i = 0; i < children.length; i++)
+                {
+                    const child = children[i] as Tilemap;
+
+                    if (child.getTileset().length < this.texturesPerTilemap)
+                    {
                         layer = child;
                         ind = child.getTileset().length;
                         child.getTileset().push(texture);
                         break;
                     }
                 }
-                if (!layer) {
+                if (!layer)
+                {
                     layer = new Tilemap(this.zIndex, texture);
                     layer.compositeParent = true;
                     layer.offsetX = Constant.boundSize;
@@ -166,8 +314,13 @@ export class CompositeTilemap extends Container
             }
         }
 
-        this._lastLayer = layer;
-        layer.addRect(ind, texture.frame.x, texture.frame.y, x, y, texture.orig.width, texture.orig.height, animX, animY, texture.rotate, animWidth, animHeight);
+        this.lastModifiedTilemap = layer;
+        layer.tile(
+            ind,
+            x,
+            y,
+            options,
+        );
 
         return this;
     }
@@ -208,7 +361,8 @@ export class CompositeTilemap extends Container
 
     render(renderer: Renderer): void
     {
-        if (!this.visible || this.worldAlpha <= 0 || !this.renderable) {
+        if (!this.visible || this.worldAlpha <= 0 || !this.renderable)
+        {
             return;
         }
 
@@ -265,30 +419,112 @@ export class CompositeTilemap extends Container
         const layers = this.children;
 
         this.modificationMarker = layers.length;
-        for (let i = 0; i < layers.length; i++) {
+        for (let i = 0; i < layers.length; i++)
+        {
             (layers[i] as Tilemap).clearModify();
         }
     }
 
     /**
-     * @deprecated
+     * @deprecated Since @pixi/tilemap 3.
+     * @see CompositeTilemap.tile
+     */
+    addFrame(
+        texture: Texture | string | number,
+        x: number,
+        y: number,
+        animX?: number,
+        animY?: number,
+        animWidth?: number,
+        animHeight?: number
+    ): this
+    {
+        return this.tile(
+            texture,
+            x, y,
+            {
+                animX,
+                animY,
+                animCountX: animWidth,
+                animCountY: animHeight,
+            }
+        );
+    }
+
+    /**
+     * @deprecated @pixi/tilemap 3
+     * @see CompositeTilemap.tile
+     */
+    // eslint-disable-next-line max-params
+    addRect(
+        textureIndex: number,
+        u: number,
+        v: number,
+        x: number,
+        y: number,
+        tileWidth: number,
+        tileHeight: number,
+        animX?: number,
+        animY?: number,
+        rotate?: number,
+        animWidth?: number,
+        animHeight?: number
+    ): this
+    {
+        const childIndex: number = textureIndex / this.texturesPerTilemap >> 0;
+        const textureId: number = textureIndex % this.texturesPerTilemap;
+
+        if (this.children[childIndex] && (this.children[childIndex] as Tilemap).getTileset())
+        {
+            this.lastModifiedTilemap = (this.children[childIndex] as Tilemap);
+            this.lastModifiedTilemap.addRect(
+                textureId, u, v, x, y, tileWidth, tileHeight, animX, animY, rotate, animWidth, animHeight
+            );
+        }
+        else
+        {
+            this.lastModifiedTilemap = null;
+        }
+
+        return this;
+    }
+
+    /**
+     * This initialization routine is now done in the constructor.
+     *
+     * @deprecated Since @pixi/tilemap 3.
      * @param zIndex - The z-index of the tilemap composite.
      * @param bitmaps - The tileset to use.
      * @param texPerChild - The number of textures per tilemap.
      */
     initialize(zIndex?: number, bitmaps?: Array<Texture>, texPerChild?: number): void
     {
-        if (texPerChild as any === true) {
+        if (texPerChild as any === true)
+        {
             // old format, ignore it!
             texPerChild = 0;
         }
 
-        this.z = this.zIndex = zIndex;
-        this.texPerChild = texPerChild || Constant.boundCountPerBuffer * Constant.maxTextures;
+        this.zIndex = zIndex;
+        (this as any).texturesPerTilemap = texPerChild || Constant.boundCountPerBuffer * Constant.maxTextures;
 
         if (bitmaps)
         {
-            this.setBitmaps(bitmaps);
+            this.tileset(bitmaps);
         }
     }
+
+    /**
+     * Alias for {@link CompositeTilemap.tileset tileset}.
+     *
+     * @deprecated Since @pixi/tilemap 3.
+     */
+    setBitmaps = this.tileset;
+
+    /**
+     * @deprecated Since @pixi/tilemap 3.
+     * @readonly
+     * @see CompositeTilemap.texturesPerTilemap
+     */
+    get texPerChild(): number { return this.texturesPerTilemap; }
 }

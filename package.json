@@ -26,7 +26,8 @@
     "prebuild": "yarn cleanup",
     "build": "rollup -c node_modules/@pixi-build-tools/rollup-configurator/index.js && yarn build:types",
     "build:types": "rimraf ./compile && tsc -p ./tsconfig.compile.json && api-extractor run",
-    "docs": "typedoc --out ./docs/ --readme README.md ./src/"
+    "docs": "typedoc --out ./docs/ --readme README.md ./src/",
+    "lint": "eslint ./src"
   },
   "files": [
     "dist/",

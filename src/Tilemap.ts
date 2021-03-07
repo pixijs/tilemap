@@ -7,7 +7,7 @@ import { Matrix, Rectangle, groupD8 } from '@pixi/math';
 
 import type { CanvasRenderer } from '@pixi/canvas-renderer';
 import type { IDestroyOptions } from '@pixi/display';
-import type { RectTileGeom } from './RectTileShader';
+import type { RectTileGeom } from './TilemapShader';
 
 export const POINT_STRUCT_SIZE = 12;
 
@@ -198,7 +198,9 @@ export class Tilemap extends Container
 
         if (!texture || textureIndex < 0)
         {
-            throw new Error('This tile texture was not found in the tilemap tileset.');
+            console.error('The tile texture was not found in the tilemap tileset.');
+
+            return this;
         }
 
         const {
@@ -614,7 +616,7 @@ export class Tilemap extends Container
     /**
      * This initialization routine has been replaced by {@link Tilemap.setTileset setTileset}.
      *
-     * @deprecated
+     * @deprecated Since @pixi/tilemap 3.
      * @param zIndex - The z-index of the tilemap.
      * @param textures - The tileset to use.
      */
@@ -627,7 +629,7 @@ export class Tilemap extends Container
     /**
      * Deprecated signature for {@link Tilemap.tile tile}.
      *
-     * @deprecated
+     * @deprecated Since @pixi/tilemap 3.
      */
     addFrame(texture: Texture | string | number, x: number, y: number, animX: number, animY: number): boolean
     {
@@ -647,7 +649,7 @@ export class Tilemap extends Container
     /**
      * Deprecated signature for {@link Tilemap.tile tile}.
      *
-     * @deprecated
+     * @deprecated Since @pixi/tilemap 3.
      */
     // eslint-disable-next-line max-params
     addRect(
