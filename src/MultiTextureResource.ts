@@ -1,55 +1,70 @@
 import { ALPHA_MODES } from '@pixi/constants';
 import { BaseTexture, Renderer, Resource, Texture, GLTexture } from '@pixi/core';
 import { Sprite } from '@pixi/sprite';
-import { Constant } from './Constant';
+import { Constant } from './const';
 
-export interface IMultiTextureOptions {
+export interface IMultiTextureOptions
+{
 	boundCountPerBuffer: number;
 	boundSize: number;
 	bufferSize: number;
 	DO_CLEAR?: boolean;
 }
 
+// For some reason ESLint goes mad with indendation in this file ^&^
+/* eslint-disable indent */
+
+/**
+ * @internal
+ * @ignore
+ */
 export class MultiTextureResource extends Resource
 {
-	constructor(options: IMultiTextureOptions) 
+	public baseTex: BaseTexture = null;
+
+	private DO_CLEAR = false;
+	private boundSize = 0;
+	private _clearBuffer: Uint8Array = null;
+	private boundSprites: Array<Sprite> = [];
+	private dirties: Array<number> = [];
+
+	constructor(options: IMultiTextureOptions)
 	{
 		super(options.bufferSize, options.bufferSize);
 
 		const bounds = this.boundSprites;
 		const dirties = this.dirties;
+
 		this.boundSize = options.boundSize;
-		for (let j = 0; j < options.boundCountPerBuffer; j++) {
+
+		for (let j = 0; j < options.boundCountPerBuffer; j++)
+		{
 			const spr = new Sprite();
+
 			spr.position.x = options.boundSize * (j & 1);
 			spr.position.y = options.boundSize * (j >> 1);
 			bounds.push(spr);
 			dirties.push(0);
 		}
+
 		this.DO_CLEAR = !!options.DO_CLEAR;
 	}
 
-	DO_CLEAR = false;
-	boundSize: number = 0;
-	_clearBuffer: Uint8Array = null;
-
-	bind(baseTexture: BaseTexture) 
+	bind(baseTexture: BaseTexture): void
 	{
-		if (this.baseTex) {
-			throw new Error('Only one baseTexture is allowed for this resource!')
+		if (this.baseTex)
+		{
+			throw new Error('Only one baseTexture is allowed for this resource!');
 		}
 		this.baseTex = baseTexture;
 		super.bind(baseTexture);
 	}
-
-	baseTex: BaseTexture = null;
-	boundSprites: Array<Sprite> = [];
-	dirties: Array<number> = [];
-
-	setTexture(ind: number, texture: Texture) 
+	setTexture(ind: number, texture: Texture): void
 	{
 		const spr = this.boundSprites[ind];
-		if (spr.texture.baseTexture === texture.baseTexture) {
+
+		if (spr.texture.baseTexture === texture.baseTexture)
+		{
 			return;
 		}
 		spr.texture = texture;
@@ -57,15 +72,17 @@ export class MultiTextureResource extends Resource
 		this.dirties[ind] = (this.baseTex as any).dirtyId;
 	}
 
-	upload(renderer: Renderer, texture: BaseTexture, glTexture: GLTexture) 
+	upload(renderer: Renderer, texture: BaseTexture, glTexture: GLTexture): boolean
 	{
 		const { gl } = renderer as any;
 
-		const {width, height} = this;
-		gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.alphaMode === undefined ||
-			texture.alphaMode === ALPHA_MODES.UNPACK);
+		const { width, height } = this;
 
-		if (glTexture.dirtyId < 0) {
+		gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.alphaMode === undefined
+	|| texture.alphaMode === ALPHA_MODES.UNPACK);
+
+		if (glTexture.dirtyId < 0)
+		{
 			(glTexture as any).width = width;
 			(glTexture as any).height = height;
 
@@ -80,19 +97,27 @@ export class MultiTextureResource extends Resource
 		}
 
 		const doClear = this.DO_CLEAR;
-		if (doClear && !this._clearBuffer) {
+
+		if (doClear && !this._clearBuffer)
+		{
 			this._clearBuffer = new Uint8Array(Constant.boundSize * Constant.boundSize * 4);
 		}
 
 		const bounds = this.boundSprites;
-		for (let i = 0; i < bounds.length; i++) {
+
+		for (let i = 0; i < bounds.length; i++)
+		{
 			const spr = bounds[i];
 			const tex = spr.texture.baseTexture;
-			if (glTexture.dirtyId >= this.dirties[i]) {
+
+			if (glTexture.dirtyId >= this.dirties[i])
+			{
 				continue;
 			}
 			const res = tex.resource as any;
-			if (!tex.valid || !res || !res.source) {
+
+			if (!tex.valid || !res || !res.source)
+			{
 				continue;
 			}
 			if (doClear && (tex.width < this.boundSize || tex.height < this.boundSize))

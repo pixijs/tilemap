@@ -1,10 +1,11 @@
 {
-  "name": "pixi-tilemap",
+  "name": "@pixi/tilemap",
   "version": "2.1.4",
-  "description": "Pixi-tilemap provides tilemap shaders and tilemap renderer for pixi.js (v3 and v4). Used in rpgmaker MV.",
+  "description": "A low-level, optimized rectangular tilemap implementation for PixiJS.",
   "author": "Ivan Popelyshev",
   "contributors": [
-    "Ivan Popelyshev <ivan.popelyshev@gmail.com>"
+    "Ivan Popelyshev <ivan.popelyshev@gmail.com>",
+    "Shukant Pal <shukant@pixijs.io>"
   ],
   "main": "./dist/pixi-tilemap.js",
   "module": "./lib/pixi-tilemap.es.js",
@@ -26,7 +27,8 @@
     "prebuild": "yarn cleanup",
     "build": "rollup -c node_modules/@pixi-build-tools/rollup-configurator/index.js && yarn build:types",
     "build:types": "rimraf ./compile && tsc -p ./tsconfig.compile.json && api-extractor run",
-    "docs": "typedoc --out ./docs/ --readme README.md ./src/"
+    "docs": "typedoc --out ./docs/ --readme README.md ./src/",
+    "lint": "eslint ./src"
   },
   "files": [
     "dist/",
@@ -37,6 +39,7 @@
     "README.md"
   ],
   "peerDependencies": {
+    "@pixi/canvas-renderer": "^6.0.0-rc.3",
     "@pixi/constants": "^6.0.0-rc.3",
     "@pixi/core": "^6.0.0-rc.3",
     "@pixi/display": "^6.0.0-rc.3",
@@ -52,6 +55,7 @@
     "@pixi/constants": "^6.0.0-rc.3",
     "@pixi/core": "^6.0.0-rc.3",
     "@pixi/display": "^6.0.0-rc.3",
+    "@pixi/eslint-config": "^2.0.1",
     "@pixi/extract": "^6.0.0-rc.3",
     "@pixi/graphics": "^6.0.0-rc.3",
     "@pixi/math": "^6.0.0-rc.3",
@@ -59,7 +63,10 @@
     "@pixi/utils": "^6.0.0-rc.3",
     "@rollup/plugin-node-resolve": "^8.4.0",
     "@types/eventemitter3": "^2.0.2",
+    "@typescript-eslint/eslint-plugin": "^4.16.1",
+    "@typescript-eslint/parser": "^4.16.1",
     "del": "^2.2.0",
+    "eslint": "^7.21.0",
     "jsdoc": "^3.4.0",
     "mkdirp": "^0.5.1",
     "parallelshell": "^2.0.0",
