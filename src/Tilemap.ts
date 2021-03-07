@@ -108,8 +108,8 @@ export class Tilemap extends Container
     /**
      * Define the tileset used by the tilemap.
      *
-     * @param tileset - The list of textures to use in the tilemap. If a texture (not array) is passed, it will
-     *  be wrapped into an array.
+     * @param tileset - The list of textures to use in the tilemap. If a base-texture (not array) is passed, it will
+     *  be wrapped into an array. This should not contain any duplicates.
      */
     setTileset(tileset: BaseTexture | Array<BaseTexture> = []): this
     {
