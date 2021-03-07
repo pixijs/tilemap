@@ -1,35 +1,60 @@
-# pixi-tilemap - PixiJS Tilemap Kit
+# @pixi/tilemap - PixiJS Tilemap Kit
 
 [![Build Status](https://travis-ci.org/pixijs/pixi-tilemap.svg?branch=master)](https://travis-ci.org/pixijs/pixi-tilemap)
 <p align="center">
 <img src="https://i.imgur.com/hfoiBRk.png" width="1280px" />
 <p/>
 
-Library that helps with tilemaps, provide special shaders and canvas fallback. Works with pixi >= 5.0.4
+This package provides a low-level rectangular tilemap implementation, optimized for high performance rendering and a
+out-of-the-box canvas fallback. It's designed to work with PixiJS 6. @pixi/tilemap 3 **has not been published yet. We
+are migrating from the pixi-tilemap name**
 
-## Type of builds (**Important!**)
+## Installation :package:
 
-Beware, we've changed the filename of good old ES5 build, according to pixi-build-tools rollup config!
+```bash
+# pixi-tilemap for older versions
+npm i --save @pixi/tilemap
+```
+
+You can also use the UMD flavor:
 
 ```
 <script src="dist/pixi-tilemap.umd.js"></script>
 ```
 
-CommonJS build is located in `dist/pixi-tilemap.js`.
+## Usage
 
-ESM is specified in `package.json`.
+In short, the tilemap you create will render each tile texture at the provided position and dimensions. Generally, a
+spritesheet is used to load the tileset assets:
 
-## Multi-texture Configuration (**Important!**) :page_facing_up:
+```ts
+import { Loader } from '@pixi/loaders';
+import { CompositeTilemap } from '@pixi/tilemap';
 
-Please specify how many base textures do you want to use. That's the default:
+Loader.shared.add('atlas.json');
+Loader.shared.onLoad(function onTilesetLoaded()
+{
+    const tilemap = new CompositeTilemap();
+
+    // Render your first tile at (0, 0)!
+    tilemap.add('grass.png', 0, 0);
+});
+```
+
+`CompositeTilemap` is actually a lazy composite of layered `Tilemap` instances. A `Tilemap` has a fixed number of tile
+textures (the tileset) it can render in one go. Usually, `CompositeTilemap` abstracts away this limitation in a robust
+enough manner.
+
+### Multi-texture Configuration (**Important!**) :page_facing_up:
+
+You can define the default tileset limit per tilemap. The default is 16.
 
 ```js
 PIXI.tilemap.Constant.maxTextures = 4;
 ```
 
-That means, if you use 5th baseTexture, compositeRectTileLayer will move it to second RectTileLayer and all tiles of that texture will go on different Z level!
-
-Specify bigger `maxTextures` if you want everything to be on the same Z.
+Here, for example, thee 5th tile texture will be rendered using a fresh tilemap. Specify bigger `maxTextures` if
+you want everything to be on the same Z.
 
 ```js
 PIXI.tilemap.Constant.maxTextures = 16;
@@ -61,45 +86,15 @@ Canvas fallback is 5x slower than vanilla rpgmaker. Webgl version is faster and 
 
 ### RPGMaker demo
 
-[webgl](https://pixijs.github.io/pixi-tilemap/): [zoomin](https://pixijs.github.io/pixi-tilemap/?scale=0.6) and [zoomout](https://pixijs.github.io/pixi-tilemap/?scale=1.4)
+[webgl](https://pixijs.github.io/tilemap/): [zoomin](https://pixijs.github.io/tilemap/?scale=0.6) and [zoomout](https://pixijs.github.io/tilemap/?scale=1.4)
 
-[retina webgl](https://pixijs.github.io/pixi-tilemap/?resolution=2): [zoomin](https://pixijs.github.io/pixi-tilemap/?resolution=2&scale=0.6) and [zoomout](https://pixijs.github.io/pixi-tilemap/?resolution=2&scale=1.4)
+[retina webgl](https://pixijs.github.io/tilemap/?resolution=2): [zoomin](https://pixijs.github.io/pixi-tilemap/?resolution=2&scale=0.6) and [zoomout](https://pixijs.github.io/pixi-tilemap/?resolution=2&scale=1.4)
 
-[canvas](https://pixijs.github.io/pixi-tilemap/?canvas)
+[canvas](https://pixijs.github.io/tilemap/?canvas)
 
 ### Basic demo :pen:
 
-[webgl](https://pixijs.github.io/pixi-tilemap/basic.html)
-
-```html
-<script src="https://github.com/pixijs/pixi-tilemap/blob/master/src/pixi-tilemap.js"></script>
-```
-
-```js
-var renderer = PIXI.autoDetectRenderer(800, 600);
-document.body.appendChild(renderer.view);
-
-var loader = new PIXI.loaders.Loader();
-loader.add('atlas', 'basic/atlas.json');
-loader.load(function(loader, resources) {
-	var tilemap = new PIXI.tilemap.CompositeRectTileLayer(0, [resources['atlas_image'].texture]);
-    var size = 32;
-    // bah, im too lazy, i just want to specify filenames from atlas
-    for (var i=0;i<7;i++)
-        for (var j=0;j<7;j++) {
-            tilemap.addFrame("grass.png", i*size, j*size);
-            if (i%2==1 && j%2==1)
-                tilemap.addFrame("tough.png", i*size, j*size);
-        }
-
-    // if you are lawful citizen, please use textures from the loader
-    var textures = resources.atlas.textures;
-    tilemap.addFrame(textures["brick.png"], 2*size, 2*size);
-    tilemap.addFrame(textures["brick_wall.png"], 2*size, 3*size);
-
-    renderer.render(tilemap);
-});
-```
+[webgl](https://pixijs.github.io/tilemap/basic.html)
 
 ### More tutorials :link:
 
