@@ -8,8 +8,8 @@ document.body.appendChild(renderer.view);
 
 const loader = new PIXI.Loader();
 
-loader.add('atlas', 'basic/atlas.json');
-loader.add('button', 'basic/button.png');
+loader.add('atlas', 'assets/atlas.json');
+loader.add('button', 'assets/button.png');
 loader.load(function onAssetsLoaded(loader, resources)
 {
     // first parameter means z-layer, which is not used yet
@@ -112,6 +112,4 @@ function buildTilemap()
         tilemap.tile(tmpTex, i % 4 * size, ((i >> 2) * size) + (5 * size));
         // rotate is also last parameter in addFrame
     }
-    
-    window.ti = tilemap
 }

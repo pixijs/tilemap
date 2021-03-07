@@ -45,38 +45,50 @@ Loader.shared.onLoad(function onTilesetLoaded()
 textures (the tileset) it can render in one go. Usually, `CompositeTilemap` abstracts away this limitation in a robust
 enough manner.
 
-### Multi-texture Configuration (**Important!**) :page_facing_up:
+### Basic demo :pen:
 
-You can define the default tileset limit per tilemap. The default is 16.
+[webgl](https://pixijs.github.io/tilemap/basic.html)
 
-```js
-PIXI.tilemap.Constant.maxTextures = 4;
+### Settings :page_facing_up:
+
+```ts
+import { settings } from '@pixi/tilemap';
 ```
 
-Here, for example, thee 5th tile texture will be rendered using a fresh tilemap. Specify bigger `maxTextures` if
-you want everything to be on the same Z.
+#### TEXTURES_PER_TILEMAP
+
+This is the limit on how many base-textures can be used in a tilemap. Using more than this limit will fail silently. `CompositeTilemap`
+gets around this by issuing new tilemaps whenever the tilemaps reach full capacity. This is 16 by default.
 
 ```js
-PIXI.tilemap.Constant.maxTextures = 16;
+settings.TEXTURES_PER_TILEMAP = 8;
 ```
 
-Not every device does have 16 texture locations, so, its possible to fit 4 textures of 1024 into 1 of 2048, that's why `boundCountPerBuffer` exists.
-In that case, if you render the tilemap with other textures, textures will be re-uploaded - that can slow down things due to extra `subTexImage2D` in frame.
+Here, for example, the 9th tile texture will be rendered using a fresh tilemap. You can specify a bigger value if
+you want everything to be on the same z-index.
+
+#### TEXTILE_UNITS
+
+@pixi/tilemap also provides a texture packing optimization - it will upload multiple tile base-textures by laying them
+in a 2-column format inside a larger base-texture. By default, this is disabled and TEXTILE_UNITS is set 1. The recommended
+value is 4, if the feature is desired.
 
 This is old RpgMakerMV-compatible setting:
 
 ```js
-PIXI.tilemap.Constant.boundCountPerBuffer = 4;
-PIXI.tilemap.Constant.maxTextures = 4;
+settings.TEXTILE_UNITS = 4;
+settings.TEXTURES_PER_TILEMAP = 4;
 ```
 
-Or you can just set `maxTextures` to 16 and forget about old devices and `texImage2D` slowdown.
+#### use32bitIndex
 
 There's also a limitation on 16k tiles per one tilemap. If you want to lift it, please use pixi v5.1.0 and following setting:
 
 ```js
-PIXI.tilemap.Constant.use32bitIndex = true;
+settings.use32bitIndex = true;
 ```
+
+## RPGMaker
 
 For RPGMaker MV please use [v4 branch](https://github.com/pixijs/pixi-tilemap/tree/v4.x) for pixi V4, npm version is `1.2.6`
 
@@ -92,10 +104,6 @@ Canvas fallback is 5x slower than vanilla rpgmaker. Webgl version is faster and 
 
 [canvas](https://pixijs.github.io/tilemap/?canvas)
 
-### Basic demo :pen:
-
-[webgl](https://pixijs.github.io/tilemap/basic.html)
-
-### More tutorials :link:
+## More tutorials :link:
 
 [Alan01252 tutorial](https://github.com/Alan01252/pixi-tilemap-tutorial)
