@@ -26,10 +26,10 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - name: Install dependencies
-    - run: yarn
+      run: yarn
     - name: Build & type-checking
-    - run: yarn build
+      run: yarn build
     - name: Lint
-    - run: yarn lint
+      run: yarn lint
     - name: Unit testing
-    - run: yarn unit-test
+      run: yarn unit-test
