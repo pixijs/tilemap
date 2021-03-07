@@ -29,7 +29,7 @@
     "build:types": "rimraf ./compile && tsc -p ./tsconfig.compile.json && api-extractor run",
     "docs": "typedoc --out ./docs/ --readme README.md ./src/",
     "lint": "eslint ./src",
-    "unit-test": "floss --path test --debug --"
+    "unit-test": "floss --path test --"
   },
   "files": [
     "dist/",
