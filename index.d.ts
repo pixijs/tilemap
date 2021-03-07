@@ -139,13 +139,13 @@ declare class Tilemap extends Container {
     modificationMarker: number;
     shadowColor: Float32Array;
     _globalMat: Matrix;
-    hasAnim: boolean;
     offsetX: number;
     offsetY: number;
     compositeParent: boolean;
     tileAnim: Array<number>;
     protected tileset: Array<Texture>;
     protected readonly tilemapBounds: Bounds;
+    protected hasAnimatedTile: boolean;
     private pointsBuf;
     constructor(tileset: Texture | Array<Texture>);
     constructor(zIndex: number, textures: Texture | Array<Texture>);

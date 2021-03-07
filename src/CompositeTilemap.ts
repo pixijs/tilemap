@@ -275,7 +275,7 @@ export class CompositeTilemap extends Container
 
                 for (let j = 0; j < tex.length; j++)
                 {
-                    if (tex[j].baseTexture === texture.baseTexture)
+                    if (tex[j] === texture)
                     {
                         layer = child;
                         ind = j;

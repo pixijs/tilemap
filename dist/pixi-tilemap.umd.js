@@ -2,7 +2,7 @@
  
 /*!
  * pixi-tilemap - v2.1.4
- * Compiled Sun, 07 Mar 2021 02:13:58 UTC
+ * Compiled Sun, 07 Mar 2021 02:42:48 UTC
  *
  * pixi-tilemap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -105,11 +105,10 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
         __init() {this.modificationMarker = 0;}
         __init2() {this.shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);}
         __init3() {this._globalMat = null;}
-        __init4() {this.hasAnim = false;}
-        __init5() {this.offsetX = 0;}
-        __init6() {this.offsetY = 0;}
-        __init7() {this.compositeParent = false;}
-        __init8() {this.tileAnim = null;}
+        __init4() {this.offsetX = 0;}
+        __init5() {this.offsetY = 0;}
+        __init6() {this.compositeParent = false;}
+        __init7() {this.tileAnim = null;}
 
         /**
          * The list of textures being used in the tilemap.
@@ -122,8 +121,12 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
         /**
          * The local bounds of the tilemap itself. This does not include DisplayObject children.
          */
-          __init9() {this.tilemapBounds = new display.Bounds();}
+          __init8() {this.tilemapBounds = new display.Bounds();}
 
+        /** Flags whether any animated tile was added. */
+         __init9() {this.hasAnimatedTile = false;}
+
+        /** The interleaved geometry of the tilemap. */
          __init10() {this.pointsBuf = [];}
 
         /**
@@ -175,7 +178,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             this.pointsBuf.length = 0;
             this.modificationMarker = 0;
             this.tilemapBounds.clear();
-            this.hasAnim = false;
+            this.hasAnimatedTile = false;
 
             return this;
         }
@@ -191,12 +194,16 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
          * @param [options.v=texture.frame.y] - The y-coordinate of the texture in its base-texture's space.
          * @param [options.tileWidth=texture.orig.width] - The local width of the tile.
          * @param [options.tileHeight=texture.orig.height] - The local height of the tile.
-         * @param [options.animX=0]
-         * @param [options.animY=0]
+         * @param [options.animX=0] - For animated tiles, this is the "offset" along the x-axis for adjacent
+         *      animation frame textures in the base-texture.
+         * @param [options.animY=0] - For animated tiles, this is the "offset" along the y-axis for adjacent
+         *      animation frames textures in the base-texture.
          * @param [options.rotate=0]
-         * @param [options.animCountX=1024]
-         * @param [options.animCountY=1024]
-         * @returns
+         * @param [options.animCountX=1024] - For animated tiles, this is the number of animation frame textures
+         *      per row.
+         * @param [options.animCountY=1024] - For animated tiles, this is the number of animation frame textures
+         *      per column.
+         * @return This tilemap, good for chaining.
          */
         tile(
             tileTexture,
@@ -267,7 +274,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
 
             const pb = this.pointsBuf;
 
-            this.hasAnim = this.hasAnim || animX > 0 || animY > 0;
+            this.hasAnimatedTile = this.hasAnimatedTile || animX > 0 || animY > 0;
 
             pb.push(u);
             pb.push(v);
@@ -292,7 +299,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
         {
             const pb = this.pointsBuf;
 
-            // This seems off.
+            // This seems off. Should be -6?
             pb[pb.length - 3] = rotate;
         }
 
@@ -617,7 +624,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
         isModified(anim)
         {
             if (this.modificationMarker !== this.pointsBuf.length
-                || (anim && this.hasAnim))
+                || (anim && this.hasAnimatedTile))
             {
                 return true;
             }
@@ -857,7 +864,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             const len1 = this.children.length;
             const len2 = Math.ceil(tileTextures.length / texPerChild);
 
-            for (let i = 0; i < len1; i++)
+            for (let i = 0; i < Math.min(len1, len2); i++)
             {
                 (this.children[i] ).setTileset(
                     tileTextures.slice(i * texPerChild, (i + 1) * texPerChild)
@@ -995,7 +1002,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
 
                     for (let j = 0; j < tex.length; j++)
                     {
-                        if (tex[j].baseTexture === texture.baseTexture)
+                        if (tex[j] === texture)
                         {
                             layer = child;
                             ind = j;

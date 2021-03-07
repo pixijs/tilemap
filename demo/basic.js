@@ -1,6 +1,6 @@
 /* global PIXI */
 
-const renderer = PIXI.autoDetectRenderer({width: 800, height: 600});
+const renderer = PIXI.autoDetectRenderer({ width: 800, height: 600 });
 let stage;
 let tilemap;
 
@@ -18,21 +18,26 @@ loader.load(function onAssetsLoaded(loader, resources)
     tilemap = new PIXI.tilemap.CompositeTilemap();
     stage.addChild(tilemap);
 
-    animate();
+    PIXI.Ticker.shared.add(() => renderer.render(stage));
 
-    var frame = 0;
+    let frame = 0;
+
     buildTilemap(frame++);
 
-    var pic = new PIXI.Sprite(resources['button'].texture);
+    const pic = new PIXI.Sprite(resources.button.texture);
+
     pic.position.set(200, 100);
     stage.addChild(pic);
+
     // ==== Old way to build animations: Rebuild tilemap every frame
-    function animRebuild() {
-        buildTilemap(frame++)
+    function animRebuild()
+    {
+        buildTilemap(frame++);
     }
 
     // ==== New way: animate shader
-    function animShader() {
+    function animShader()
+    {
         // animate X frames
         renderer.plugins.tilemap.tileAnim[0] = frame;
         // animate Y frames
@@ -43,7 +48,8 @@ loader.load(function onAssetsLoaded(loader, resources)
     setInterval(animShader, 400);
 });
 
-function buildTilemap(frame) {
+function buildTilemap()
+{
     // Clear everything, like a PIXI.Graphics
     tilemap.clear();
 
@@ -87,13 +93,14 @@ function buildTilemap(frame) {
     // canvas in pixi-tilemap does not work with rotate!!!!
     const origTex = textures['chest.png'];
 
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 8; i++)
+    {
         const frame = origTex.frame.clone();
         const orig = origTex.orig.clone();
         const trim = origTex.orig.clone();
         const rotate = i * 2;
 
-        if (rotate % 4 == 2)
+        if (rotate % 4 === 2)
         {
             orig.width = frame.height;
             orig.height = frame.width;
@@ -105,9 +112,6 @@ function buildTilemap(frame) {
         tilemap.tile(tmpTex, i % 4 * size, ((i >> 2) * size) + (5 * size));
         // rotate is also last parameter in addFrame
     }
-}
-
-function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(stage);
+    
+    window.ti = tilemap
 }

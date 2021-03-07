@@ -55,7 +55,6 @@ export class Tilemap extends Container
     modificationMarker = 0;
     shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
     _globalMat: Matrix = null;
-    hasAnim = false;
     offsetX = 0;
     offsetY = 0;
     compositeParent = false;
@@ -74,6 +73,10 @@ export class Tilemap extends Container
      */
     protected readonly tilemapBounds = new Bounds();
 
+    /** Flags whether any animated tile was added. */
+    protected hasAnimatedTile = false;
+
+    /** The interleaved geometry of the tilemap. */
     private pointsBuf: Array<number> = [];
 
     /**
@@ -125,7 +128,7 @@ export class Tilemap extends Container
         this.pointsBuf.length = 0;
         this.modificationMarker = 0;
         this.tilemapBounds.clear();
-        this.hasAnim = false;
+        this.hasAnimatedTile = false;
 
         return this;
     }
@@ -141,12 +144,16 @@ export class Tilemap extends Container
      * @param [options.v=texture.frame.y] - The y-coordinate of the texture in its base-texture's space.
      * @param [options.tileWidth=texture.orig.width] - The local width of the tile.
      * @param [options.tileHeight=texture.orig.height] - The local height of the tile.
-     * @param [options.animX=0]
-     * @param [options.animY=0]
+     * @param [options.animX=0] - For animated tiles, this is the "offset" along the x-axis for adjacent
+     *      animation frame textures in the base-texture.
+     * @param [options.animY=0] - For animated tiles, this is the "offset" along the y-axis for adjacent
+     *      animation frames textures in the base-texture.
      * @param [options.rotate=0]
-     * @param [options.animCountX=1024]
-     * @param [options.animCountY=1024]
-     * @returns
+     * @param [options.animCountX=1024] - For animated tiles, this is the number of animation frame textures
+     *      per row.
+     * @param [options.animCountY=1024] - For animated tiles, this is the number of animation frame textures
+     *      per column.
+     * @return This tilemap, good for chaining.
      */
     tile(
         tileTexture: number | string | Texture,
@@ -217,7 +224,7 @@ export class Tilemap extends Container
 
         const pb = this.pointsBuf;
 
-        this.hasAnim = this.hasAnim || animX > 0 || animY > 0;
+        this.hasAnimatedTile = this.hasAnimatedTile || animX > 0 || animY > 0;
 
         pb.push(u);
         pb.push(v);
@@ -242,7 +249,7 @@ export class Tilemap extends Container
     {
         const pb = this.pointsBuf;
 
-        // This seems off.
+        // This seems off. Should be -6?
         pb[pb.length - 3] = rotate;
     }
 
@@ -567,7 +574,7 @@ export class Tilemap extends Container
     isModified(anim: boolean): boolean
     {
         if (this.modificationMarker !== this.pointsBuf.length
-            || (anim && this.hasAnim))
+            || (anim && this.hasAnimatedTile))
         {
             return true;
         }
