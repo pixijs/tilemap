@@ -6,8 +6,7 @@
 <p/>
 
 This package provides a low-level rectangular tilemap implementation, optimized for high performance rendering and a
-out-of-the-box canvas fallback. It's designed to work with PixiJS 6. @pixi/tilemap 3 **has not been published yet. We
-are migrating from the pixi-tilemap name**
+out-of-the-box canvas fallback. It's designed to work with PixiJS 6. **We've migrated from pixi-tilemap to @pixi/tilemap on npm!**
 
 ## Installation :package:
 
