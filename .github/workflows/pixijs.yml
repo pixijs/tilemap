@@ -1,4 +1,4 @@
-name: Node.js CI
+name: Latest PixiJS Node.js CI
 
 on:
     push:
@@ -19,7 +19,7 @@ jobs:
               with:
                 path: tilemap
             - name: Go into tilemap directory
-              run: cd tilemap
+              run: cd tilemap && ls
             - name: Use Node.js ${{ matrix.node-version }}
               uses: actions/setup-node@v1
               with:
