@@ -19,7 +19,7 @@ jobs:
               with:
                 path: tilemap
             - name: Go into tilemap directory
-              run: cd tilemap && ls
+              run: cd tilemap && ls && cat package.json
             - name: Use Node.js ${{ matrix.node-version }}
               uses: actions/setup-node@v1
               with:
