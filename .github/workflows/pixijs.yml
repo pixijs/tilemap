@@ -33,7 +33,7 @@ jobs:
               uses: actions/checkout@v2
               with:
                 repository: pixijs/pixi.js
-                path: pixi.js
+                path: ../pixi.js
             - name: List dir
               run: cd .. && ls && cd tilemap
             - name: Install dependencies
