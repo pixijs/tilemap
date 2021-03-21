@@ -28,7 +28,7 @@ jobs:
               uses: r26d/jq-action@master
               with:
                 cmd: >
-                    cd tilemap; jq '.relativeDependencies = { "@pixi/canvas-renderer": "../pixi.js/packages/canvas/renderer", "@pixi/constants": "../pixi.js/packages/constants", "@pixi/core": "../pixi.js/packages/core", "@pixi/display": "../pixi.js/packages/display", "@pixi/graphics": "../pixi.js/packages/graphics", "@pixi/math": "../pixi.js/packages/math", "@pixi/utils": "../pixi.js/packages/utils" }' ./tilemap/package.json > ./tilemap/package2.json && mv ./tilemap/package2.json ./tilemap/package.json
+                    jq '.relativeDependencies = { "@pixi/canvas-renderer": "../pixi.js/packages/canvas/renderer", "@pixi/constants": "../pixi.js/packages/constants", "@pixi/core": "../pixi.js/packages/core", "@pixi/display": "../pixi.js/packages/display", "@pixi/graphics": "../pixi.js/packages/graphics", "@pixi/math": "../pixi.js/packages/math", "@pixi/utils": "../pixi.js/packages/utils" }' ./tilemap/package.json > ./tilemap/package2.json && mv ./tilemap/package2.json ./tilemap/package.json
             - name: Checkout PixiJS
               uses: actions/checkout@v2
               with:
