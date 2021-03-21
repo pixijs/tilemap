@@ -28,7 +28,10 @@ jobs:
               run: sudo apt-get install jq
             - name: Setup relativeDependencies
               run: >
-                jq '.scripts.prepare="relative-deps"'|'.relativeDependencies = { "@pixi/canvas-renderer": "../pixi.js/packages/canvas/renderer", "@pixi/constants": "../pixi.js/packages/constants", "@pixi/core": "../pixi.js/packages/core", "@pixi/display": "../pixi.js/packages/display", "@pixi/graphics": "../pixi.js/packages/graphics", "@pixi/math": "../pixi.js/packages/math", "@pixi/utils": "../pixi.js/packages/utils" }' ./tilemap/package.json > ./tilemap/package2.json && mv ./tilemap/package2.json ./tilemap/package.json
+                jq '.relativeDependencies = { "@pixi/canvas-renderer": "../pixi.js/packages/canvas/renderer", "@pixi/constants": "../pixi.js/packages/constants", "@pixi/core": "../pixi.js/packages/core", "@pixi/display": "../pixi.js/packages/display", "@pixi/graphics": "../pixi.js/packages/graphics", "@pixi/math": "../pixi.js/packages/math", "@pixi/utils": "../pixi.js/packages/utils" }' ./tilemap/package.json > ./tilemap/package2.json && mv ./tilemap/package2.json ./tilemap/package.json
+            - name: Setup prepare script
+              run: >
+                jq '.scripts.prepare="relative-deps"' ./tilemap/package.json > ./tilemap/package2.json && mv ./tilemap/package2.json ./tilemap/package.json
             - name: Checkout PixiJS
               uses: actions/checkout@v2
               with:
