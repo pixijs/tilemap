@@ -24,7 +24,7 @@ enum PointStruct {
     AnimCountX,
     AnimCountY,
     Alpha,
-};
+}
 
 export const POINT_STRUCT_SIZE = (Object.keys(PointStruct).length / 2);
 
