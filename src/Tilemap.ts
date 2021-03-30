@@ -10,7 +10,23 @@ import type { CanvasRenderer } from '@pixi/canvas-renderer';
 import type { IDestroyOptions } from '@pixi/display';
 import type { TilemapGeometry } from './TilemapShader';
 
-export const POINT_STRUCT_SIZE = 12;
+enum PointStruct {
+    U = 0,
+    V,
+    X,
+    Y,
+    TileWidth,
+    TileHeight,
+    Rotate,
+    AnimX,
+    AnimY,
+    TextureIndex,
+    AnimCountX,
+    AnimCountY,
+    Alpha,
+};
+
+export const POINT_STRUCT_SIZE = (Object.keys(PointStruct).length / 2);
 
 /**
  * A rectangular tilemap implementation that renders a predefined set of tile textures.
@@ -161,6 +177,7 @@ export class Tilemap extends Container
      *      per row.
      * @param [options.animCountY=1024] - For animated tiles, this is the number of animation frame textures
      *      per column.
+     * @param [options.alpha=1] - Tile alpha
      * @return This tilemap, good for chaining.
      */
     tile(
@@ -176,7 +193,8 @@ export class Tilemap extends Container
             animY?: number,
             rotate?: number,
             animCountX?: number,
-            animCountY?: number
+            animCountY?: number,
+            alpha?: number,
         } = {}
     ): this
     {
@@ -240,6 +258,7 @@ export class Tilemap extends Container
             rotate = 0,
             animCountX = 1024,
             animCountY = 1024,
+            alpha = 1,
         } = options;
 
         const pb = this.pointsBuf;
@@ -258,6 +277,7 @@ export class Tilemap extends Container
         pb.push(textureIndex);
         pb.push(animCountX);
         pb.push(animCountY);
+        pb.push(alpha);
 
         this.tilemapBounds.addFramePad(x, y, x + tileWidth, y + tileHeight, 0, 0);
 
@@ -269,8 +289,7 @@ export class Tilemap extends Container
     {
         const pb = this.pointsBuf;
 
-        // This seems off. Should be -6?
-        pb[pb.length - 3] = rotate;
+        pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.TextureIndex)] = rotate;
     }
 
     /** Changes the `animX`, `animCountX` of the last tile. */
@@ -278,8 +297,8 @@ export class Tilemap extends Container
     {
         const pb = this.pointsBuf;
 
-        pb[pb.length - 5] = offset;
-        pb[pb.length - 2] = count;
+        pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.AnimX)] = offset;
+        pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.AnimCountX)] = count;
     }
 
     /** Changes the `animY`, `animCountY` of the last tile. */
@@ -287,8 +306,15 @@ export class Tilemap extends Container
     {
         const pb = this.pointsBuf;
 
-        pb[pb.length - 4] = offset;
-        pb[pb.length - 1] = count;
+        pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.AnimY)] = offset;
+        pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.AnimCountY)] = count;
+    }
+
+    tileAlpha(alpha: number): void
+    {
+        const pb = this.pointsBuf;
+
+        pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.Alpha)] = alpha;
     }
 
     renderCanvas(renderer: CanvasRenderer): void
@@ -321,21 +347,22 @@ export class Tilemap extends Container
         renderer.context.fillStyle = '#000000';
         for (let i = 0, n = points.length; i < n; i += POINT_STRUCT_SIZE)
         {
-            let x1 = points[i]; let
-                y1 = points[i + 1];
-            const x2 = points[i + 2]; const
-                y2 = points[i + 3];
-            const w = points[i + 4];
-            const h = points[i + 5];
-            // const rotate = points[i + 6];
+            let x1 = points[i + PointStruct.U] * tileAnim[0];
+            let y1 = points[i + PointStruct.V] * tileAnim[1];
+            const x2 = points[i + PointStruct.X];
+            const y2 = points[i + PointStruct.Y];
+            const w = points[i + PointStruct.TileWidth];
+            const h = points[i + PointStruct.TileHeight];
+            x1 += points[i + PointStruct.AnimX] * renderer.plugins.tilemap.tileAnim[0];
+            y1 += points[i + PointStruct.AnimY] * renderer.plugins.tilemap.tileAnim[1];
+            const textureIndex = points[i + PointStruct.TextureIndex];
+            const alpha = points[i + PointStruct.Alpha];
 
-            x1 += points[i + 7] * tileAnim[0];
-            y1 += points[i + 8] * tileAnim[1];
-            const textureIndex = points[i + 9];
             // canvas does not work with rotate yet
 
             if (textureIndex >= 0 && this.tileset[textureIndex])
             {
+                renderer.context.globalAlpha = alpha;
                 renderer.context.drawImage(
                     (this.tileset[textureIndex] as any).getDrawableSource(),
                     x1, y1, w, h, x2, y2, w, h
@@ -345,8 +372,8 @@ export class Tilemap extends Container
             {
                 renderer.context.globalAlpha = 0.5;
                 renderer.context.fillRect(x2, y2, w, h);
-                renderer.context.globalAlpha = 1;
             }
+            renderer.context.globalAlpha = 1;
         }
     }
 
@@ -458,35 +485,37 @@ export class Tilemap extends Container
 
                 if (this.compositeParent)
                 {
+                    const textureIndex = points[i + PointStruct.TextureIndex];
                     if (boundCountPerBuffer > 1)
                     {
                         // TODO: what if its more than 4?
-                        textureId = (points[i + 9] >> 2);
-                        shiftU = this.offsetX * (points[i + 9] & 1);
-                        shiftV = this.offsetY * ((points[i + 9] >> 1) & 1);
+                        textureId = (textureIndex >> 2);
+                        shiftU = this.offsetX * (textureIndex & 1);
+                        shiftV = this.offsetY * ((textureIndex >> 1) & 1);
                     }
                     else
                     {
-                        textureId = points[i + 9];
+                        textureId = textureIndex;
                         shiftU = 0;
                         shiftV = 0;
                     }
                 }
-                const x = points[i + 2];
-                const y = points[i + 3];
-                const w = points[i + 4];
-                const h = points[i + 5];
-                const u = points[i] + shiftU;
-                const v = points[i + 1] + shiftV;
-                let rotate = points[i + 6];
+                const x = points[i + PointStruct.X];
+                const y = points[i + PointStruct.Y];
+                const w = points[i + PointStruct.TileWidth];
+                const h = points[i + PointStruct.TileHeight];
+                const u = points[i + PointStruct.U] + shiftU;
+                const v = points[i + PointStruct.V] + shiftV;
+                let rotate = points[i + PointStruct.Rotate];
 
-                const animX = points[i + 7];
-                const animY = points[i + 8];
-                const animWidth = points[i + 10] || 1024;
-                const animHeight = points[i + 11] || 1024;
+                const animX = points[i + PointStruct.AnimX];
+                const animY = points[i + PointStruct.AnimY];
+                const animWidth = points[i + PointStruct.AnimCountX] || 1024;
+                const animHeight = points[i + PointStruct.AnimCountY] || 1024;
+
                 const animXEncoded = animX + (animWidth * 2048);
                 const animYEncoded = animY + (animHeight * 2048);
-
+                const alpha = points[i + PointStruct.Alpha];
                 let u0: number;
                 let v0: number; let u1: number;
                 let v1: number; let u2: number;
@@ -545,6 +574,8 @@ export class Tilemap extends Container
                 arr[sz++] = animXEncoded;
                 arr[sz++] = animYEncoded;
                 arr[sz++] = textureId;
+                arr[sz++] = alpha;
+
                 arr[sz++] = x + w;
                 arr[sz++] = y;
                 arr[sz++] = u1;
@@ -556,6 +587,8 @@ export class Tilemap extends Container
                 arr[sz++] = animXEncoded;
                 arr[sz++] = animYEncoded;
                 arr[sz++] = textureId;
+                arr[sz++] = alpha;
+
                 arr[sz++] = x + w;
                 arr[sz++] = y + h;
                 arr[sz++] = u2;
@@ -567,6 +600,8 @@ export class Tilemap extends Container
                 arr[sz++] = animXEncoded;
                 arr[sz++] = animYEncoded;
                 arr[sz++] = textureId;
+                arr[sz++] = alpha;
+
                 arr[sz++] = x;
                 arr[sz++] = y + h;
                 arr[sz++] = u3;
@@ -578,6 +613,7 @@ export class Tilemap extends Container
                 arr[sz++] = animXEncoded;
                 arr[sz++] = animYEncoded;
                 arr[sz++] = textureId;
+                arr[sz++] = alpha;
             }
 
             vertexBuf.update(arr);
@@ -678,14 +714,15 @@ export class Tilemap extends Container
         animY = 0,
         rotate = 0,
         animCountX = 1024,
-        animCountY = 1024
+        animCountY = 1024,
+        alpha = 1,
     ): this
     {
         return this.tile(
             textureIndex,
             x, y,
             {
-                u, v, tileWidth, tileHeight, animX, animY, rotate, animCountX, animCountY
+                u, v, tileWidth, tileHeight, animX, animY, rotate, animCountX, animCountY, alpha
             }
         );
     }

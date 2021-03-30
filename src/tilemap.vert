@@ -3,6 +3,7 @@ attribute vec2 aTextureCoord;
 attribute vec4 aFrame;
 attribute vec2 aAnim;
 attribute float aTextureId;
+attribute float aAlpha;
 
 uniform mat3 projTransMatrix;
 uniform vec2 animationFrame;
@@ -10,6 +11,7 @@ uniform vec2 animationFrame;
 varying vec2 vTextureCoord;
 varying float vTextureId;
 varying vec4 vFrame;
+varying float vAlpha;
 
 void main(void)
 {
@@ -21,4 +23,5 @@ void main(void)
    vTextureCoord = aTextureCoord + animOffset;
    vFrame = aFrame + vec4(animOffset, animOffset);
    vTextureId = aTextureId;
+   vAlpha = aAlpha;
 }

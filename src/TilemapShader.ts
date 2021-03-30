@@ -37,7 +37,7 @@ export class TilemapShader extends Shader
 
 export class TilemapGeometry extends Geometry
 {
-	vertSize = 11;
+	vertSize = 12;
 	vertPerQuad = 4;
 	stride = this.vertSize * 4;
 	lastTimeAccess = 0;
@@ -52,7 +52,8 @@ export class TilemapGeometry extends Geometry
 	        .addAttribute('aTextureCoord', buf, 0, false, 0, this.stride, 2 * 4)
 	        .addAttribute('aFrame', buf, 0, false, 0, this.stride, 4 * 4)
 	        .addAttribute('aAnim', buf, 0, false, 0, this.stride, 8 * 4)
-	        .addAttribute('aTextureId', buf, 0, false, 0, this.stride, 10 * 4);
+	        .addAttribute('aTextureId', buf, 0, false, 0, this.stride, 10 * 4)
+            .addAttribute('aAlpha', buf, 0, false, 0, this.stride, 11 * 4);
 	}
 
 	buf: Buffer;

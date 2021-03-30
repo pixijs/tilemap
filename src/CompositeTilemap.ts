@@ -207,6 +207,7 @@ export class CompositeTilemap extends Container
      *      per row.
      * @param [options.animCountY=1024] - For animated tiles, this is the number of animation frame textures
      *      per column.
+     * @param [options.alpha=1] - Tile alpha
      * @return This tilemap, good for chaining.
      */
     tile(
@@ -222,7 +223,8 @@ export class CompositeTilemap extends Container
             animY?: number,
             rotate?: number,
             animCountX?: number,
-            animCountY?: number
+            animCountY?: number,
+            alpha?: number,
         } = {}
     ): this
     {
@@ -439,7 +441,8 @@ export class CompositeTilemap extends Container
         animX?: number,
         animY?: number,
         animWidth?: number,
-        animHeight?: number
+        animHeight?: number,
+        alpha?: number
     ): this
     {
         return this.tile(
@@ -450,6 +453,7 @@ export class CompositeTilemap extends Container
                 animY,
                 animCountX: animWidth,
                 animCountY: animHeight,
+                alpha
             }
         );
     }
