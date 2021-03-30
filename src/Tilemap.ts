@@ -353,8 +353,10 @@ export class Tilemap extends Container
             const y2 = points[i + PointStruct.Y];
             const w = points[i + PointStruct.TileWidth];
             const h = points[i + PointStruct.TileHeight];
+
             x1 += points[i + PointStruct.AnimX] * renderer.plugins.tilemap.tileAnim[0];
             y1 += points[i + PointStruct.AnimY] * renderer.plugins.tilemap.tileAnim[1];
+
             const textureIndex = points[i + PointStruct.TextureIndex];
             const alpha = points[i + PointStruct.Alpha];
 
@@ -486,6 +488,7 @@ export class Tilemap extends Container
                 if (this.compositeParent)
                 {
                     const textureIndex = points[i + PointStruct.TextureIndex];
+
                     if (boundCountPerBuffer > 1)
                     {
                         // TODO: what if its more than 4?
