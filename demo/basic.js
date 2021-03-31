@@ -81,13 +81,16 @@ function buildTilemap()
     // tilemap.addFrame(textures[frame % 2 == 0 ? "chest.png" : "red_chest.png"], 4 * size, 4 * size);
 
     // new way: animate on shader: 2 frames , X offset is 32 , "red_chest" is exactly 34 pixels right in the atlas
+    // Frame changes every 100ms because of `setInterval(animShader, 100)`, so the first animation
+    // will change to the next frame every 100ms
     tilemap.tile(textures['chest.png'], 4 * size, 4 * size).tileAnimX(34, 2);
 
-    // You can also set independent time for each animation.
-    // Time is the last param and it is measured in frames.
-    // Frame changes every 100ms because of `setInterval(animShader, 100)`, so the first animation
-    // will change to the next frame every 100ms and the second one every 400ms.
-    tilemap.tile(textures['chest.png'], 5 * size, 4 * size, {animDuration: 4}).tileAnimX(34, 2);
+    // You can also set independent time for each tile.
+    // In this second chest, we pass 4 as the third "duration" parameter in tileAnimX
+    // 4 multiplies the 100ms we have in setInterval by 4, making the duration 400ms
+    tilemap.tile(textures['chest.png'], 5 * size, 4 * size).tileAnimX(34, 2, 4);
+    // You can alternatively set it by passing animDuration option when creating the tile. Below a frame duration is 600ms
+    tilemap.tile(textures['chest.png'], 8 * size, 4 * size, {animX: 34, animCountX: 2, animDuration: 6});
 
     // button does not appear in the atlas, but tilemap wont surrender, it will create second layer for special for buttons
     // buttons will appear above everything
