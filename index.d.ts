@@ -35,8 +35,8 @@ declare class CompositeTilemap extends Container {
     tileset(tileTextures: Array<BaseTexture>): this;
     clear(): this;
     tileRotate(rotate: number): this;
-    tileAnimX(offset: number, count: number): this;
-    tileAnimY(offset: number, count: number): this;
+    tileAnimX(offset: number, count: number, duration: number): this;
+    tileAnimY(offset: number, count: number, duration: number): this;
     tile(tileTexture: Texture | string | number, x: number, y: number, options?: {
         u?: number;
         v?: number;
@@ -166,9 +166,8 @@ declare class Tilemap extends Container {
         alpha?: number;
     }): this;
     tileRotate(rotate: number): void;
-    tileAnimX(offset: number, count: number): void;
-    tileAnimY(offset: number, count: number): void;
-    tileAnimDuration(animDuration: number): void;
+    tileAnimX(offset: number, count: number, duration?: number): void;
+    tileAnimY(offset: number, count: number, duration?: number): void;
     tileAlpha(alpha: number): void;
     renderCanvas(renderer: CanvasRenderer): void;
     renderCanvasCore(renderer: CanvasRenderer): void;

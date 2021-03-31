@@ -298,28 +298,23 @@ export class Tilemap extends Container
     }
 
     /** Changes the `animX`, `animCountX` of the last tile. */
-    tileAnimX(offset: number, count: number): void
+    tileAnimX(offset: number, count: number, duration = 1): void
     {
         const pb = this.pointsBuf;
 
         pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_X)] = offset;
         pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_COUNT_X)] = count;
+        pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_DURATION)] = duration;
     }
 
     /** Changes the `animY`, `animCountY` of the last tile. */
-    tileAnimY(offset: number, count: number): void
+    tileAnimY(offset: number, count: number, duration = 1): void
     {
         const pb = this.pointsBuf;
 
         pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_Y)] = offset;
         pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_COUNT_Y)] = count;
-    }
-
-    tileAnimDuration(animDuration: number): void
-    {
-        const pb = this.pointsBuf;
-
-        pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_DURATION)] = animDuration;
+        pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_DURATION)] = duration;
     }
 
     tileAlpha(alpha: number): void
@@ -371,7 +366,6 @@ export class Tilemap extends Container
 
             const textureIndex = points[i + POINT_STRUCT.TEXTURE_INDEX];
             const alpha = points[i + POINT_STRUCT.ALPHA];
-            const animDuration = points[i + POINT_STRUCT.ANIM_DURATION];
 
             // canvas does not work with rotate yet
 

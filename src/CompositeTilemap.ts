@@ -166,22 +166,22 @@ export class CompositeTilemap extends Container
     }
 
     /** Changes `animX`, `animCountX` of the last added tile. */
-    tileAnimX(offset: number, count: number): this
+    tileAnimX(offset: number, count: number, duration: number): this
     {
         if (this.lastModifiedTilemap)
         {
-            this.lastModifiedTilemap.tileAnimX(offset, count);
+            this.lastModifiedTilemap.tileAnimX(offset, count, duration);
         }
 
         return this;
     }
 
     /** Changes `animY`, `animCountY` of the last added tile. */
-    tileAnimY(offset: number, count: number): this
+    tileAnimY(offset: number, count: number, duration: number): this
     {
         if (this.lastModifiedTilemap)
         {
-            this.lastModifiedTilemap.tileAnimY(offset, count);
+            this.lastModifiedTilemap.tileAnimY(offset, count, duration);
         }
 
         return this;
