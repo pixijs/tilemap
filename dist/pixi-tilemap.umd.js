@@ -2,7 +2,7 @@
  
 /*!
  * @pixi/tilemap - v2.1.4
- * Compiled Tue, 30 Mar 2021 18:13:25 UTC
+ * Compiled Wed, 31 Mar 2021 16:57:49 UTC
  *
  * @pixi/tilemap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -107,23 +107,23 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
 
 
 
-    var PointStruct; (function (PointStruct) {
-        const U = 0; PointStruct[PointStruct["U"] = U] = "U";
-        const V = U + 1; PointStruct[PointStruct["V"] = V] = "V";
-        const X = V + 1; PointStruct[PointStruct["X"] = X] = "X";
-        const Y = X + 1; PointStruct[PointStruct["Y"] = Y] = "Y";
-        const TileWidth = Y + 1; PointStruct[PointStruct["TileWidth"] = TileWidth] = "TileWidth";
-        const TileHeight = TileWidth + 1; PointStruct[PointStruct["TileHeight"] = TileHeight] = "TileHeight";
-        const Rotate = TileHeight + 1; PointStruct[PointStruct["Rotate"] = Rotate] = "Rotate";
-        const AnimX = Rotate + 1; PointStruct[PointStruct["AnimX"] = AnimX] = "AnimX";
-        const AnimY = AnimX + 1; PointStruct[PointStruct["AnimY"] = AnimY] = "AnimY";
-        const TextureIndex = AnimY + 1; PointStruct[PointStruct["TextureIndex"] = TextureIndex] = "TextureIndex";
-        const AnimCountX = TextureIndex + 1; PointStruct[PointStruct["AnimCountX"] = AnimCountX] = "AnimCountX";
-        const AnimCountY = AnimCountX + 1; PointStruct[PointStruct["AnimCountY"] = AnimCountY] = "AnimCountY";
-        const Alpha = AnimCountY + 1; PointStruct[PointStruct["Alpha"] = Alpha] = "Alpha";
-    })(PointStruct || (PointStruct = {}));;
+    var POINT_STRUCT; (function (POINT_STRUCT) {
+        const U = 0; POINT_STRUCT[POINT_STRUCT["U"] = U] = "U";
+        const V = U + 1; POINT_STRUCT[POINT_STRUCT["V"] = V] = "V";
+        const X = V + 1; POINT_STRUCT[POINT_STRUCT["X"] = X] = "X";
+        const Y = X + 1; POINT_STRUCT[POINT_STRUCT["Y"] = Y] = "Y";
+        const TILE_WIDTH = Y + 1; POINT_STRUCT[POINT_STRUCT["TILE_WIDTH"] = TILE_WIDTH] = "TILE_WIDTH";
+        const TILE_HEIGHT = TILE_WIDTH + 1; POINT_STRUCT[POINT_STRUCT["TILE_HEIGHT"] = TILE_HEIGHT] = "TILE_HEIGHT";
+        const ROTATE = TILE_HEIGHT + 1; POINT_STRUCT[POINT_STRUCT["ROTATE"] = ROTATE] = "ROTATE";
+        const ANIM_X = ROTATE + 1; POINT_STRUCT[POINT_STRUCT["ANIM_X"] = ANIM_X] = "ANIM_X";
+        const ANIM_Y = ANIM_X + 1; POINT_STRUCT[POINT_STRUCT["ANIM_Y"] = ANIM_Y] = "ANIM_Y";
+        const TEXTURE_INDEX = ANIM_Y + 1; POINT_STRUCT[POINT_STRUCT["TEXTURE_INDEX"] = TEXTURE_INDEX] = "TEXTURE_INDEX";
+        const ANIM_COUNT_X = TEXTURE_INDEX + 1; POINT_STRUCT[POINT_STRUCT["ANIM_COUNT_X"] = ANIM_COUNT_X] = "ANIM_COUNT_X";
+        const ANIM_COUNT_Y = ANIM_COUNT_X + 1; POINT_STRUCT[POINT_STRUCT["ANIM_COUNT_Y"] = ANIM_COUNT_Y] = "ANIM_COUNT_Y";
+        const ALPHA = ANIM_COUNT_Y + 1; POINT_STRUCT[POINT_STRUCT["ALPHA"] = ALPHA] = "ALPHA";
+    })(POINT_STRUCT || (POINT_STRUCT = {}));
 
-    const POINT_STRUCT_SIZE = (Object.keys(PointStruct).length / 2);
+    const POINT_STRUCT_SIZE = (Object.keys(POINT_STRUCT).length / 2);
 
     /**
      * A rectangular tilemap implementation that renders a predefined set of tile textures.
@@ -386,7 +386,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
         {
             const pb = this.pointsBuf;
 
-            pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.TextureIndex)] = rotate;
+            pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.TEXTURE_INDEX)] = rotate;
         }
 
         /** Changes the `animX`, `animCountX` of the last tile. */
@@ -394,8 +394,8 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
         {
             const pb = this.pointsBuf;
 
-            pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.AnimX)] = offset;
-            pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.AnimCountX)] = count;
+            pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_X)] = offset;
+            pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_COUNT_X)] = count;
         }
 
         /** Changes the `animY`, `animCountY` of the last tile. */
@@ -403,15 +403,15 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
         {
             const pb = this.pointsBuf;
 
-            pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.AnimY)] = offset;
-            pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.AnimCountY)] = count;
+            pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_Y)] = offset;
+            pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_COUNT_Y)] = count;
         }
 
         tileAlpha(alpha)
         {
             const pb = this.pointsBuf;
 
-            pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.Alpha)] = alpha;
+            pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ALPHA)] = alpha;
         }
 
         renderCanvas(renderer)
@@ -444,16 +444,18 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             renderer.context.fillStyle = '#000000';
             for (let i = 0, n = points.length; i < n; i += POINT_STRUCT_SIZE)
             {
-                let x1 = points[i + PointStruct.U] * tileAnim[0];
-                let y1 = points[i + PointStruct.V] * tileAnim[1];
-                const x2 = points[i + PointStruct.X];
-                const y2 = points[i + PointStruct.Y];
-                const w = points[i + PointStruct.TileWidth];
-                const h = points[i + PointStruct.TileHeight];
-                x1 += points[i + PointStruct.AnimX] * renderer.plugins.tilemap.tileAnim[0];
-                y1 += points[i + PointStruct.AnimY] * renderer.plugins.tilemap.tileAnim[1];
-                const textureIndex = points[i + PointStruct.TextureIndex];
-                const alpha = points[i + PointStruct.Alpha];
+                let x1 = points[i + POINT_STRUCT.U] * tileAnim[0];
+                let y1 = points[i + POINT_STRUCT.V] * tileAnim[1];
+                const x2 = points[i + POINT_STRUCT.X];
+                const y2 = points[i + POINT_STRUCT.Y];
+                const w = points[i + POINT_STRUCT.TILE_WIDTH];
+                const h = points[i + POINT_STRUCT.TILE_HEIGHT];
+
+                x1 += points[i + POINT_STRUCT.ANIM_X] * renderer.plugins.tilemap.tileAnim[0];
+                y1 += points[i + POINT_STRUCT.ANIM_Y] * renderer.plugins.tilemap.tileAnim[1];
+
+                const textureIndex = points[i + POINT_STRUCT.TEXTURE_INDEX];
+                const alpha = points[i + POINT_STRUCT.ALPHA];
 
                 // canvas does not work with rotate yet
 
@@ -582,7 +584,8 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
 
                     if (this.compositeParent)
                     {
-                        const textureIndex = points[i + PointStruct.TextureIndex];
+                        const textureIndex = points[i + POINT_STRUCT.TEXTURE_INDEX];
+
                         if (boundCountPerBuffer > 1)
                         {
                             // TODO: what if its more than 4?
@@ -597,22 +600,22 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
                             shiftV = 0;
                         }
                     }
-                    const x = points[i + PointStruct.X];
-                    const y = points[i + PointStruct.Y];
-                    const w = points[i + PointStruct.TileWidth];
-                    const h = points[i + PointStruct.TileHeight];
-                    const u = points[i + PointStruct.U] + shiftU;
-                    const v = points[i + PointStruct.V] + shiftV;
-                    let rotate = points[i + PointStruct.Rotate];
+                    const x = points[i + POINT_STRUCT.X];
+                    const y = points[i + POINT_STRUCT.Y];
+                    const w = points[i + POINT_STRUCT.TILE_WIDTH];
+                    const h = points[i + POINT_STRUCT.TILE_HEIGHT];
+                    const u = points[i + POINT_STRUCT.U] + shiftU;
+                    const v = points[i + POINT_STRUCT.V] + shiftV;
+                    let rotate = points[i + POINT_STRUCT.ROTATE];
 
-                    const animX = points[i + PointStruct.AnimX];
-                    const animY = points[i + PointStruct.AnimY];
-                    const animWidth = points[i + PointStruct.AnimCountX] || 1024;
-                    const animHeight = points[i + PointStruct.AnimCountY] || 1024;
+                    const animX = points[i + POINT_STRUCT.ANIM_X];
+                    const animY = points[i + POINT_STRUCT.ANIM_Y];
+                    const animWidth = points[i + POINT_STRUCT.ANIM_COUNT_X] || 1024;
+                    const animHeight = points[i + POINT_STRUCT.ANIM_COUNT_Y] || 1024;
 
                     const animXEncoded = animX + (animWidth * 2048);
                     const animYEncoded = animY + (animHeight * 2048);
-                    const alpha = points[i + PointStruct.Alpha];
+                    const alpha = points[i + POINT_STRUCT.ALPHA];
                     let u0;
                     let v0; let u1;
                     let v1; let u2;
@@ -1570,7 +1573,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
 
     var tilemapVertexTemplateSrc = "attribute vec2 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec4 aFrame;\nattribute vec2 aAnim;\nattribute float aTextureId;\nattribute float aAlpha;\n\nuniform mat3 projTransMatrix;\nuniform vec2 animationFrame;\n\nvarying vec2 vTextureCoord;\nvarying float vTextureId;\nvarying vec4 vFrame;\nvarying float vAlpha;\n\nvoid main(void)\n{\n   gl_Position = vec4((projTransMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);\n   vec2 animCount = floor((aAnim + 0.5) / 2048.0);\n   vec2 animFrameOffset = aAnim - animCount * 2048.0;\n   vec2 animOffset = animFrameOffset * floor(mod(animationFrame + 0.5, animCount));\n\n   vTextureCoord = aTextureCoord + animOffset;\n   vFrame = aFrame + vec4(animOffset, animOffset);\n   vTextureId = aTextureId;\n   vAlpha = aAlpha;\n}\n";
 
-    var tilemapFragmentTemplateSrc = "varying vec2 vTextureCoord;\nvarying vec4 vFrame;\nvarying float vTextureId;\nvarying float vAlpha;\nuniform vec4 shadowColor;\nuniform sampler2D uSamplers[%count%];\nuniform vec2 uSamplerSize[%count%];\n\nvoid main(void)\n{\n   vec2 textureCoord = clamp(vTextureCoord, vFrame.xy, vFrame.zw);\n   float textureId = floor(vTextureId + 0.5);\n\n   vec4 color;\n   %forloop%\n   gl_FragColor = (color * vAlpha) + (gl_FragColor * (1.0 - vAlpha));\n}\n";
+    var tilemapFragmentTemplateSrc = "varying vec2 vTextureCoord;\nvarying vec4 vFrame;\nvarying float vTextureId;\nvarying float vAlpha;\nuniform vec4 shadowColor;\nuniform sampler2D uSamplers[%count%];\nuniform vec2 uSamplerSize[%count%];\n\nvoid main(void)\n{\n   vec2 textureCoord = clamp(vTextureCoord, vFrame.xy, vFrame.zw);\n   float textureId = floor(vTextureId + 0.5);\n\n   vec4 color;\n   %forloop%\n   gl_FragColor = color * vAlpha;\n}\n";
 
     // eslint-disable-next-line @typescript-eslint/triple-slash-reference, spaced-comment
 
