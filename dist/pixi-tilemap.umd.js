@@ -2,7 +2,7 @@
  
 /*!
  * @pixi/tilemap - v2.1.4
- * Compiled Wed, 31 Mar 2021 17:50:27 UTC
+ * Compiled Wed, 31 Mar 2021 18:13:46 UTC
  *
  * @pixi/tilemap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -395,28 +395,23 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
         }
 
         /** Changes the `animX`, `animCountX` of the last tile. */
-        tileAnimX(offset, count)
+        tileAnimX(offset, count, duration = 1)
         {
             const pb = this.pointsBuf;
 
             pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_X)] = offset;
             pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_COUNT_X)] = count;
+            pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_DURATION)] = duration;
         }
 
         /** Changes the `animY`, `animCountY` of the last tile. */
-        tileAnimY(offset, count)
+        tileAnimY(offset, count, duration = 1)
         {
             const pb = this.pointsBuf;
 
             pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_Y)] = offset;
             pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_COUNT_Y)] = count;
-        }
-
-        tileAnimDuration(animDuration)
-        {
-            const pb = this.pointsBuf;
-
-            pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_DURATION)] = animDuration;
+            pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_DURATION)] = duration;
         }
 
         tileAlpha(alpha)
@@ -468,7 +463,6 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
 
                 const textureIndex = points[i + POINT_STRUCT.TEXTURE_INDEX];
                 const alpha = points[i + POINT_STRUCT.ALPHA];
-                const animDuration = points[i + POINT_STRUCT.ANIM_DURATION];
 
                 // canvas does not work with rotate yet
 
@@ -1007,22 +1001,22 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
         }
 
         /** Changes `animX`, `animCountX` of the last added tile. */
-        tileAnimX(offset, count)
+        tileAnimX(offset, count, duration)
         {
             if (this.lastModifiedTilemap)
             {
-                this.lastModifiedTilemap.tileAnimX(offset, count);
+                this.lastModifiedTilemap.tileAnimX(offset, count, duration);
             }
 
             return this;
         }
 
         /** Changes `animY`, `animCountY` of the last added tile. */
-        tileAnimY(offset, count)
+        tileAnimY(offset, count, duration)
         {
             if (this.lastModifiedTilemap)
             {
-                this.lastModifiedTilemap.tileAnimY(offset, count);
+                this.lastModifiedTilemap.tileAnimY(offset, count, duration);
             }
 
             return this;
