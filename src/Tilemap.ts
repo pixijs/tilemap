@@ -10,23 +10,23 @@ import type { CanvasRenderer } from '@pixi/canvas-renderer';
 import type { IDestroyOptions } from '@pixi/display';
 import type { TilemapGeometry } from './TilemapShader';
 
-enum PointStruct {
+enum POINT_STRUCT {
     U = 0,
     V,
     X,
     Y,
-    TileWidth,
-    TileHeight,
-    Rotate,
-    AnimX,
-    AnimY,
-    TextureIndex,
-    AnimCountX,
-    AnimCountY,
-    Alpha,
+    TILE_WIDTH,
+    TILE_HEIGHT,
+    ROTATE,
+    ANIM_X,
+    ANIM_Y,
+    TEXTURE_INDEX,
+    ANIM_COUNT_X,
+    ANIM_COUNT_Y,
+    ALPHA,
 }
 
-export const POINT_STRUCT_SIZE = (Object.keys(PointStruct).length / 2);
+export const POINT_STRUCT_SIZE = (Object.keys(POINT_STRUCT).length / 2);
 
 /**
  * A rectangular tilemap implementation that renders a predefined set of tile textures.
@@ -289,7 +289,7 @@ export class Tilemap extends Container
     {
         const pb = this.pointsBuf;
 
-        pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.TextureIndex)] = rotate;
+        pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.TEXTURE_INDEX)] = rotate;
     }
 
     /** Changes the `animX`, `animCountX` of the last tile. */
@@ -297,8 +297,8 @@ export class Tilemap extends Container
     {
         const pb = this.pointsBuf;
 
-        pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.AnimX)] = offset;
-        pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.AnimCountX)] = count;
+        pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_X)] = offset;
+        pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_COUNT_X)] = count;
     }
 
     /** Changes the `animY`, `animCountY` of the last tile. */
@@ -306,15 +306,15 @@ export class Tilemap extends Container
     {
         const pb = this.pointsBuf;
 
-        pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.AnimY)] = offset;
-        pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.AnimCountY)] = count;
+        pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_Y)] = offset;
+        pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_COUNT_Y)] = count;
     }
 
     tileAlpha(alpha: number): void
     {
         const pb = this.pointsBuf;
 
-        pb[pb.length - (POINT_STRUCT_SIZE - PointStruct.Alpha)] = alpha;
+        pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ALPHA)] = alpha;
     }
 
     renderCanvas(renderer: CanvasRenderer): void
@@ -347,18 +347,18 @@ export class Tilemap extends Container
         renderer.context.fillStyle = '#000000';
         for (let i = 0, n = points.length; i < n; i += POINT_STRUCT_SIZE)
         {
-            let x1 = points[i + PointStruct.U] * tileAnim[0];
-            let y1 = points[i + PointStruct.V] * tileAnim[1];
-            const x2 = points[i + PointStruct.X];
-            const y2 = points[i + PointStruct.Y];
-            const w = points[i + PointStruct.TileWidth];
-            const h = points[i + PointStruct.TileHeight];
+            let x1 = points[i + POINT_STRUCT.U] * tileAnim[0];
+            let y1 = points[i + POINT_STRUCT.V] * tileAnim[1];
+            const x2 = points[i + POINT_STRUCT.X];
+            const y2 = points[i + POINT_STRUCT.Y];
+            const w = points[i + POINT_STRUCT.TILE_WIDTH];
+            const h = points[i + POINT_STRUCT.TILE_HEIGHT];
 
-            x1 += points[i + PointStruct.AnimX] * renderer.plugins.tilemap.tileAnim[0];
-            y1 += points[i + PointStruct.AnimY] * renderer.plugins.tilemap.tileAnim[1];
+            x1 += points[i + POINT_STRUCT.ANIM_X] * renderer.plugins.tilemap.tileAnim[0];
+            y1 += points[i + POINT_STRUCT.ANIM_Y] * renderer.plugins.tilemap.tileAnim[1];
 
-            const textureIndex = points[i + PointStruct.TextureIndex];
-            const alpha = points[i + PointStruct.Alpha];
+            const textureIndex = points[i + POINT_STRUCT.TEXTURE_INDEX];
+            const alpha = points[i + POINT_STRUCT.ALPHA];
 
             // canvas does not work with rotate yet
 
@@ -487,7 +487,7 @@ export class Tilemap extends Container
 
                 if (this.compositeParent)
                 {
-                    const textureIndex = points[i + PointStruct.TextureIndex];
+                    const textureIndex = points[i + POINT_STRUCT.TEXTURE_INDEX];
 
                     if (boundCountPerBuffer > 1)
                     {
@@ -503,22 +503,22 @@ export class Tilemap extends Container
                         shiftV = 0;
                     }
                 }
-                const x = points[i + PointStruct.X];
-                const y = points[i + PointStruct.Y];
-                const w = points[i + PointStruct.TileWidth];
-                const h = points[i + PointStruct.TileHeight];
-                const u = points[i + PointStruct.U] + shiftU;
-                const v = points[i + PointStruct.V] + shiftV;
-                let rotate = points[i + PointStruct.Rotate];
+                const x = points[i + POINT_STRUCT.X];
+                const y = points[i + POINT_STRUCT.Y];
+                const w = points[i + POINT_STRUCT.TILE_WIDTH];
+                const h = points[i + POINT_STRUCT.TILE_HEIGHT];
+                const u = points[i + POINT_STRUCT.U] + shiftU;
+                const v = points[i + POINT_STRUCT.V] + shiftV;
+                let rotate = points[i + POINT_STRUCT.ROTATE];
 
-                const animX = points[i + PointStruct.AnimX];
-                const animY = points[i + PointStruct.AnimY];
-                const animWidth = points[i + PointStruct.AnimCountX] || 1024;
-                const animHeight = points[i + PointStruct.AnimCountY] || 1024;
+                const animX = points[i + POINT_STRUCT.ANIM_X];
+                const animY = points[i + POINT_STRUCT.ANIM_Y];
+                const animWidth = points[i + POINT_STRUCT.ANIM_COUNT_X] || 1024;
+                const animHeight = points[i + POINT_STRUCT.ANIM_COUNT_Y] || 1024;
 
                 const animXEncoded = animX + (animWidth * 2048);
                 const animYEncoded = animY + (animHeight * 2048);
-                const alpha = points[i + PointStruct.Alpha];
+                const alpha = points[i + POINT_STRUCT.ALPHA];
                 let u0: number;
                 let v0: number; let u1: number;
                 let v1: number; let u2: number;
