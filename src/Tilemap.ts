@@ -23,6 +23,7 @@ enum POINT_STRUCT {
     TEXTURE_INDEX,
     ANIM_COUNT_X,
     ANIM_COUNT_Y,
+    ANIM_DURATION,
     ALPHA,
 }
 
@@ -177,6 +178,7 @@ export class Tilemap extends Container
      *      per row.
      * @param [options.animCountY=1024] - For animated tiles, this is the number of animation frame textures
      *      per column.
+     * @param [options.animDuration=1] - For animated tiles, this is the animation duration of the animated tile
      * @param [options.alpha=1] - Tile alpha
      * @return This tilemap, good for chaining.
      */
@@ -194,6 +196,7 @@ export class Tilemap extends Container
             rotate?: number,
             animCountX?: number,
             animCountY?: number,
+            animDuration?: number,
             alpha?: number,
         } = {}
     ): this
@@ -258,6 +261,7 @@ export class Tilemap extends Container
             rotate = 0,
             animCountX = 1024,
             animCountY = 1024,
+            animDuration = 1,
             alpha = 1,
         } = options;
 
@@ -277,6 +281,7 @@ export class Tilemap extends Container
         pb.push(textureIndex);
         pb.push(animCountX);
         pb.push(animCountY);
+        pb.push(animDuration);
         pb.push(alpha);
 
         this.tilemapBounds.addFramePad(x, y, x + tileWidth, y + tileHeight, 0, 0);
@@ -308,6 +313,13 @@ export class Tilemap extends Container
 
         pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_Y)] = offset;
         pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_COUNT_Y)] = count;
+    }
+
+    tileAnimDuration(animDuration: number): void
+    {
+        const pb = this.pointsBuf;
+
+        pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_DURATION)] = animDuration;
     }
 
     tileAlpha(alpha: number): void
@@ -359,6 +371,7 @@ export class Tilemap extends Container
 
             const textureIndex = points[i + POINT_STRUCT.TEXTURE_INDEX];
             const alpha = points[i + POINT_STRUCT.ALPHA];
+            const animDuration = points[i + POINT_STRUCT.ANIM_DURATION];
 
             // canvas does not work with rotate yet
 
@@ -518,7 +531,9 @@ export class Tilemap extends Container
 
                 const animXEncoded = animX + (animWidth * 2048);
                 const animYEncoded = animY + (animHeight * 2048);
+                const animDuration = points[i + POINT_STRUCT.ANIM_DURATION];
                 const alpha = points[i + POINT_STRUCT.ALPHA];
+
                 let u0: number;
                 let v0: number; let u1: number;
                 let v1: number; let u2: number;
@@ -577,6 +592,7 @@ export class Tilemap extends Container
                 arr[sz++] = animXEncoded;
                 arr[sz++] = animYEncoded;
                 arr[sz++] = textureId;
+                arr[sz++] = animDuration;
                 arr[sz++] = alpha;
 
                 arr[sz++] = x + w;
@@ -590,6 +606,7 @@ export class Tilemap extends Container
                 arr[sz++] = animXEncoded;
                 arr[sz++] = animYEncoded;
                 arr[sz++] = textureId;
+                arr[sz++] = animDuration;
                 arr[sz++] = alpha;
 
                 arr[sz++] = x + w;
@@ -603,6 +620,7 @@ export class Tilemap extends Container
                 arr[sz++] = animXEncoded;
                 arr[sz++] = animYEncoded;
                 arr[sz++] = textureId;
+                arr[sz++] = animDuration;
                 arr[sz++] = alpha;
 
                 arr[sz++] = x;
@@ -616,6 +634,7 @@ export class Tilemap extends Container
                 arr[sz++] = animXEncoded;
                 arr[sz++] = animYEncoded;
                 arr[sz++] = textureId;
+                arr[sz++] = animDuration;
                 arr[sz++] = alpha;
             }
 
@@ -718,6 +737,7 @@ export class Tilemap extends Container
         rotate = 0,
         animCountX = 1024,
         animCountY = 1024,
+        animDuration = 1,
         alpha = 1,
     ): this
     {
@@ -725,7 +745,7 @@ export class Tilemap extends Container
             textureIndex,
             x, y,
             {
-                u, v, tileWidth, tileHeight, animX, animY, rotate, animCountX, animCountY, alpha
+                u, v, tileWidth, tileHeight, animX, animY, rotate, animCountX, animCountY, animDuration, alpha
             }
         );
     }

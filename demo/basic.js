@@ -45,7 +45,7 @@ loader.load(function onAssetsLoaded(loader, resources)
         frame++;
     }
 
-    setInterval(animShader, 400);
+    setInterval(animShader, 100);
 });
 
 function buildTilemap()
@@ -82,6 +82,12 @@ function buildTilemap()
 
     // new way: animate on shader: 2 frames , X offset is 32 , "red_chest" is exactly 34 pixels right in the atlas
     tilemap.tile(textures['chest.png'], 4 * size, 4 * size).tileAnimX(34, 2);
+
+    // You can also set independent time for each animation.
+    // Time is the last param and it is measured in frames.
+    // Frame changes every 100ms because of `setInterval(animShader, 100)`, so the first animation
+    // will change to the next frame every 100ms and the second one every 400ms.
+    tilemap.tile(textures['chest.png'], 5 * size, 4 * size, {animDuration: 4}).tileAnimX(34, 2);
 
     // button does not appear in the atlas, but tilemap wont surrender, it will create second layer for special for buttons
     // buttons will appear above everything
