@@ -33,6 +33,7 @@ jobs:
               run: >
                 jq '.scripts.prepare="relative-deps"' ./tilemap/package.json > ./tilemap/package2.json && mv ./tilemap/package2.json ./tilemap/package.json
             - name: Checkout PixiJS
+              uses: actions/checkout@v2
               with:
                 repository: pixijs/pixi.js
                 path: pixi.js
