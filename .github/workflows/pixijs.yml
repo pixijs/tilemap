@@ -33,7 +33,13 @@ jobs:
               run: >
                 jq '.scripts.prepare="relative-deps"' ./tilemap/package.json > ./tilemap/package2.json && mv ./tilemap/package2.json ./tilemap/package.json
             - name: Checkout PixiJS
-              uses: SukantPal/checkout@master
+              with:
+                repository: pixijs/pixi.js
+                path: pixi.js
+            - name: Install npm
+              run: npm install -g npm@7
+            - name: Build PixiJS
+              uses: SukantPal/build@master
             - name: List dir
               run: ls
             - name: Install dependencies
