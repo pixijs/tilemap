@@ -37,8 +37,10 @@ jobs:
               with:
                 repository: pixijs/pixi.js
                 path: pixi.js
+            - name: Install npm
+              run: npm install -g npm@7
             - name: Build PixiJS
-              run: cd pixi.js && npm i && npm run build && npm run build:types
+              run: cd pixi.js && npm ci && npm run build && npm run build:types
             - name: List dir
               run: ls
             - name: Install dependencies
