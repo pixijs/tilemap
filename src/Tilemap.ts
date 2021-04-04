@@ -291,7 +291,7 @@ export class Tilemap extends Container
         pb[pb.length - 1] = count;
     }
 
-    renderCanvas(renderer: CanvasRenderer): void
+    renderCanvas = (renderer: CanvasRenderer): void =>
     {
         const plugin = renderer.plugins.tilemap;
 

@@ -48,7 +48,7 @@ declare class CompositeTilemap extends Container {
         animCountX?: number;
         animCountY?: number;
     }): this;
-    renderCanvas(renderer: CanvasRenderer): void;
+    renderCanvas: (renderer: CanvasRenderer) => void;
     render(renderer: Renderer): void;
     isModified(anim: boolean): boolean;
     clearModify(): void;
