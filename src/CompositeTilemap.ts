@@ -330,7 +330,7 @@ export class CompositeTilemap extends Container
         return this;
     }
 
-    renderCanvas(renderer: CanvasRenderer): void
+    renderCanvas = (renderer: CanvasRenderer): void =>
     {
         if (!this.visible || this.worldAlpha <= 0 || !this.renderable)
         {
