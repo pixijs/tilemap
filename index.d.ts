@@ -167,7 +167,7 @@ declare class Tilemap extends Container {
     tileAnimX(offset: number, count: number): void;
     tileAnimY(offset: number, count: number): void;
     tileAlpha(alpha: number): void;
-    renderCanvas(renderer: CanvasRenderer): void;
+    renderCanvas: (renderer: CanvasRenderer) => void;
     renderCanvasCore(renderer: CanvasRenderer): void;
     private vbId;
     private vb;

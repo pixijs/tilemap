@@ -1,8 +1,8 @@
 /* eslint-disable */
  
 /*!
- * @pixi/tilemap - v2.2.0
- * Compiled Thu, 01 Apr 2021 01:53:50 UTC
+ * @pixi/tilemap - v3.1.0
+ * Compiled Tue, 06 Apr 2021 14:12:07 UTC
  *
  * @pixi/tilemap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -206,7 +206,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
          */
         constructor(tileset)
         {
-            super();Tilemap.prototype.__init.call(this);Tilemap.prototype.__init2.call(this);Tilemap.prototype.__init3.call(this);Tilemap.prototype.__init4.call(this);Tilemap.prototype.__init5.call(this);Tilemap.prototype.__init6.call(this);Tilemap.prototype.__init7.call(this);Tilemap.prototype.__init8.call(this);Tilemap.prototype.__init9.call(this);Tilemap.prototype.__init10.call(this);Tilemap.prototype.__init11.call(this);Tilemap.prototype.__init12.call(this);Tilemap.prototype.__init13.call(this);Tilemap.prototype.__init14.call(this);Tilemap.prototype.__init15.call(this);;
+            super();Tilemap.prototype.__init.call(this);Tilemap.prototype.__init2.call(this);Tilemap.prototype.__init3.call(this);Tilemap.prototype.__init4.call(this);Tilemap.prototype.__init5.call(this);Tilemap.prototype.__init6.call(this);Tilemap.prototype.__init7.call(this);Tilemap.prototype.__init8.call(this);Tilemap.prototype.__init9.call(this);Tilemap.prototype.__init10.call(this);Tilemap.prototype.__init11.call(this);Tilemap.prototype.__init12.call(this);Tilemap.prototype.__init13.call(this);Tilemap.prototype.__init14.call(this);Tilemap.prototype.__init15.call(this);Tilemap.prototype.__init16.call(this);;
             this.setTileset(tileset);
         }
 
@@ -414,7 +414,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ALPHA)] = alpha;
         }
 
-        renderCanvas(renderer)
+        __init11() {this.renderCanvas = (renderer) =>
         {
             const plugin = renderer.plugins.tilemap;
 
@@ -433,7 +433,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             }
 
             this.renderCanvasCore(renderer);
-        }
+        };}
 
         renderCanvasCore(renderer)
         {
@@ -476,11 +476,11 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             }
         }
 
-         __init11() {this.vbId = 0;}
-         __init12() {this.vb = null;}
-         __init13() {this.vbBuffer = null;}
-         __init14() {this.vbArray = null;}
-         __init15() {this.vbInts = null;}
+         __init12() {this.vbId = 0;}
+         __init13() {this.vb = null;}
+         __init14() {this.vbBuffer = null;}
+         __init15() {this.vbArray = null;}
+         __init16() {this.vbInts = null;}
 
          destroyVb()
         {
@@ -916,7 +916,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
          */
         constructor(tileset)
         {
-            super();CompositeTilemap.prototype.__init.call(this);CompositeTilemap.prototype.__init2.call(this);CompositeTilemap.prototype.__init3.call(this);CompositeTilemap.prototype.__init4.call(this);CompositeTilemap.prototype.__init5.call(this);CompositeTilemap.prototype.__init6.call(this);;
+            super();CompositeTilemap.prototype.__init.call(this);CompositeTilemap.prototype.__init2.call(this);CompositeTilemap.prototype.__init3.call(this);CompositeTilemap.prototype.__init4.call(this);CompositeTilemap.prototype.__init5.call(this);CompositeTilemap.prototype.__init6.call(this);CompositeTilemap.prototype.__init7.call(this);;
 
             this.tileset(tileset);
             this.texturesPerTilemap = settings.TEXTURES_PER_TILEMAP;
@@ -1151,7 +1151,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             return this;
         }
 
-        renderCanvas(renderer)
+        __init6() {this.renderCanvas = (renderer) =>
         {
             if (!this.visible || this.worldAlpha <= 0 || !this.renderable)
             {
@@ -1183,7 +1183,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
                 layer.tileAnim = this.tileAnim;
                 layer.renderCanvasCore(renderer);
             }
-        }
+        };}
 
         render(renderer)
         {
@@ -1322,7 +1322,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
          *
          * @deprecated Since @pixi/tilemap 3.
          */
-        __init6() {this.setBitmaps = this.tileset;}
+        __init7() {this.setBitmaps = this.tileset;}
 
         /**
          * @deprecated Since @pixi/tilemap 3.
