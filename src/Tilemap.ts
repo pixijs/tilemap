@@ -331,7 +331,7 @@ export class Tilemap extends Container
         pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ALPHA)] = alpha;
     }
 
-    renderCanvas(renderer: CanvasRenderer): void
+    renderCanvas = (renderer: CanvasRenderer): void =>
     {
         const plugin = renderer.plugins.tilemap;
 

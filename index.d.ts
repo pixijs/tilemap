@@ -51,7 +51,7 @@ declare class CompositeTilemap extends Container {
         animDivisor?: number;
         alpha?: number;
     }): this;
-    renderCanvas(renderer: CanvasRenderer): void;
+    renderCanvas: (renderer: CanvasRenderer) => void;
     render(renderer: Renderer): void;
     isModified(anim: boolean): boolean;
     clearModify(): void;
@@ -171,7 +171,7 @@ declare class Tilemap extends Container {
     tileAnimY(offset: number, count: number): void;
     tileAnimDivisor(divisor?: number): void;
     tileAlpha(alpha: number): void;
-    renderCanvas(renderer: CanvasRenderer): void;
+    renderCanvas: (renderer: CanvasRenderer) => void;
     renderCanvasCore(renderer: CanvasRenderer): void;
     private vbId;
     private vb;

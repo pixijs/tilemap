@@ -37,6 +37,10 @@ jobs:
               with:
                 repository: pixijs/pixi.js
                 path: pixi.js
+            - name: Install npm
+              run: npm install -g npm@7
+            - name: Build PixiJS
+              uses: SukantPal/build@master
             - name: List dir
               run: ls
             - name: Install dependencies

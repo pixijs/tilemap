@@ -40,3 +40,6 @@ dist/pixi-tilemap.js.map
 yarn-error.log
 # ESM
 lib
+
+# Intellij
+*.iml
