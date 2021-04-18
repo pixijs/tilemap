@@ -2,7 +2,7 @@
  
 /*!
  * @pixi/tilemap - v3.1.0
- * Compiled Tue, 06 Apr 2021 14:12:07 UTC
+ * Compiled Sun, 18 Apr 2021 15:23:47 UTC
  *
  * @pixi/tilemap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -120,7 +120,8 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
         const TEXTURE_INDEX = ANIM_Y + 1; POINT_STRUCT[POINT_STRUCT["TEXTURE_INDEX"] = TEXTURE_INDEX] = "TEXTURE_INDEX";
         const ANIM_COUNT_X = TEXTURE_INDEX + 1; POINT_STRUCT[POINT_STRUCT["ANIM_COUNT_X"] = ANIM_COUNT_X] = "ANIM_COUNT_X";
         const ANIM_COUNT_Y = ANIM_COUNT_X + 1; POINT_STRUCT[POINT_STRUCT["ANIM_COUNT_Y"] = ANIM_COUNT_Y] = "ANIM_COUNT_Y";
-        const ALPHA = ANIM_COUNT_Y + 1; POINT_STRUCT[POINT_STRUCT["ALPHA"] = ALPHA] = "ALPHA";
+        const ANIM_DIVISOR = ANIM_COUNT_Y + 1; POINT_STRUCT[POINT_STRUCT["ANIM_DIVISOR"] = ANIM_DIVISOR] = "ANIM_DIVISOR";
+        const ALPHA = ANIM_DIVISOR + 1; POINT_STRUCT[POINT_STRUCT["ALPHA"] = ALPHA] = "ALPHA";
     })(POINT_STRUCT || (POINT_STRUCT = {}));
 
     const POINT_STRUCT_SIZE = (Object.keys(POINT_STRUCT).length / 2);
@@ -274,6 +275,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
          *      per row.
          * @param [options.animCountY=1024] - For animated tiles, this is the number of animation frame textures
          *      per column.
+         * @param [options.animDivisor=1] - For animated tiles, this is the animation duration of each frame
          * @param [options.alpha=1] - Tile alpha
          * @return This tilemap, good for chaining.
          */
@@ -282,6 +284,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             x,
             y,
             options
+
 
 
 
@@ -355,6 +358,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
                 rotate = 0,
                 animCountX = 1024,
                 animCountY = 1024,
+                animDivisor = 1,
                 alpha = 1,
             } = options;
 
@@ -374,6 +378,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             pb.push(textureIndex);
             pb.push(animCountX);
             pb.push(animCountY);
+            pb.push(animDivisor);
             pb.push(alpha);
 
             this.tilemapBounds.addFramePad(x, y, x + tileWidth, y + tileHeight, 0, 0);
@@ -396,6 +401,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
 
             pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_X)] = offset;
             pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_COUNT_X)] = count;
+            // pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_DIVISOR)] = duration;
         }
 
         /** Changes the `animY`, `animCountY` of the last tile. */
@@ -405,6 +411,14 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
 
             pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_Y)] = offset;
             pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_COUNT_Y)] = count;
+        }
+
+        /** Changes the `animDivisor` value of the last tile. */
+        tileAnimDivisor(divisor)
+        {
+            const pb = this.pointsBuf;
+
+            pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_DIVISOR)] = divisor;
         }
 
         tileAlpha(alpha)
@@ -615,7 +629,9 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
 
                     const animXEncoded = animX + (animWidth * 2048);
                     const animYEncoded = animY + (animHeight * 2048);
+                    const animDivisor = points[i + POINT_STRUCT.ANIM_DIVISOR];
                     const alpha = points[i + POINT_STRUCT.ALPHA];
+
                     let u0;
                     let v0; let u1;
                     let v1; let u2;
@@ -674,6 +690,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
                     arr[sz++] = animXEncoded;
                     arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
+                    arr[sz++] = animDivisor;
                     arr[sz++] = alpha;
 
                     arr[sz++] = x + w;
@@ -687,6 +704,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
                     arr[sz++] = animXEncoded;
                     arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
+                    arr[sz++] = animDivisor;
                     arr[sz++] = alpha;
 
                     arr[sz++] = x + w;
@@ -700,6 +718,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
                     arr[sz++] = animXEncoded;
                     arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
+                    arr[sz++] = animDivisor;
                     arr[sz++] = alpha;
 
                     arr[sz++] = x;
@@ -713,6 +732,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
                     arr[sz++] = animXEncoded;
                     arr[sz++] = animYEncoded;
                     arr[sz++] = textureId;
+                    arr[sz++] = animDivisor;
                     arr[sz++] = alpha;
                 }
 
@@ -815,6 +835,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             rotate = 0,
             animCountX = 1024,
             animCountY = 1024,
+            animDivisor = 1,
             alpha = 1,
         )
         {
@@ -822,7 +843,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
                 textureIndex,
                 x, y,
                 {
-                    u, v, tileWidth, tileHeight, animX, animY, rotate, animCountX, animCountY, alpha
+                    u, v, tileWidth, tileHeight, animX, animY, rotate, animCountX, animCountY, animDivisor, alpha
                 }
             );
         }
@@ -1008,6 +1029,17 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             return this;
         }
 
+        /** Changes `tileAnimDivisor` value of the last added tile. */
+        tileAnimDivisor(divisor)
+        {
+            if (this.lastModifiedTilemap)
+            {
+                this.lastModifiedTilemap.tileAnimDivisor(divisor);
+            }
+
+            return this;
+        }
+
         /**
          * Adds a tile that paints the given tile texture at (x, y).
          *
@@ -1028,6 +1060,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
          *      per row.
          * @param [options.animCountY=1024] - For animated tiles, this is the number of animation frame textures
          *      per column.
+         * @param [options.animDivisor=1] - For animated tiles, this is the animation duration each frame
          * @param [options.alpha=1] - Tile alpha
          * @return This tilemap, good for chaining.
          */
@@ -1036,6 +1069,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             x,
             y,
             options
+
 
 
 
@@ -1263,6 +1297,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             animY,
             animWidth,
             animHeight,
+            animDivisor,
             alpha
         )
         {
@@ -1274,6 +1309,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
                     animY,
                     animCountX: animWidth,
                     animCountY: animHeight,
+                    animDivisor,
                     alpha
                 }
             );
@@ -1571,7 +1607,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
             .replace(/%forloop%/gi, generateSampleSrc(maxTextures));
     }
 
-    var tilemapVertexTemplateSrc = "attribute vec2 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec4 aFrame;\nattribute vec2 aAnim;\nattribute float aTextureId;\nattribute float aAlpha;\n\nuniform mat3 projTransMatrix;\nuniform vec2 animationFrame;\n\nvarying vec2 vTextureCoord;\nvarying float vTextureId;\nvarying vec4 vFrame;\nvarying float vAlpha;\n\nvoid main(void)\n{\n   gl_Position = vec4((projTransMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);\n   vec2 animCount = floor((aAnim + 0.5) / 2048.0);\n   vec2 animFrameOffset = aAnim - animCount * 2048.0;\n   vec2 animOffset = animFrameOffset * floor(mod(animationFrame + 0.5, animCount));\n\n   vTextureCoord = aTextureCoord + animOffset;\n   vFrame = aFrame + vec4(animOffset, animOffset);\n   vTextureId = aTextureId;\n   vAlpha = aAlpha;\n}\n";
+    var tilemapVertexTemplateSrc = "attribute vec2 aVertexPosition;\nattribute vec2 aTextureCoord;\nattribute vec4 aFrame;\nattribute vec2 aAnim;\nattribute float aAnimDivisor;\nattribute float aTextureId;\nattribute float aAlpha;\n\nuniform mat3 projTransMatrix;\nuniform vec2 animationFrame;\n\nvarying vec2 vTextureCoord;\nvarying float vTextureId;\nvarying vec4 vFrame;\nvarying float vAlpha;\n\nvoid main(void)\n{\n   gl_Position = vec4((projTransMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);\n   vec2 animCount = floor((aAnim + 0.5) / 2048.0);\n   vec2 animFrameOffset = aAnim - animCount * 2048.0;\n   vec2 currentFrame = floor(animationFrame / aAnimDivisor);\n   vec2 animOffset = animFrameOffset * floor(mod(currentFrame + 0.5, animCount));\n\n   vTextureCoord = aTextureCoord + animOffset;\n   vFrame = aFrame + vec4(animOffset, animOffset);\n   vTextureId = aTextureId;\n   vAlpha = aAlpha;\n}\n";
 
     var tilemapFragmentTemplateSrc = "varying vec2 vTextureCoord;\nvarying vec4 vFrame;\nvarying float vTextureId;\nvarying float vAlpha;\nuniform vec4 shadowColor;\nuniform sampler2D uSamplers[%count%];\nuniform vec2 uSamplerSize[%count%];\n\nvoid main(void)\n{\n   vec2 textureCoord = clamp(vTextureCoord, vFrame.xy, vFrame.zw);\n   float textureId = floor(vTextureId + 0.5);\n\n   vec4 color;\n   %forloop%\n   gl_FragColor = color * vAlpha;\n}\n";
 
@@ -1606,7 +1642,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
 
     class TilemapGeometry extends core.Geometry
     {
-    	__init2() {this.vertSize = 12;}
+    	__init2() {this.vertSize = 13;}
     	__init3() {this.vertPerQuad = 4;}
     	__init4() {this.stride = this.vertSize * 4;}
     	__init5() {this.lastTimeAccess = 0;}
@@ -1622,7 +1658,8 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
     	        .addAttribute('aFrame', buf, 0, false, 0, this.stride, 4 * 4)
     	        .addAttribute('aAnim', buf, 0, false, 0, this.stride, 8 * 4)
     	        .addAttribute('aTextureId', buf, 0, false, 0, this.stride, 10 * 4)
-                .addAttribute('aAlpha', buf, 0, false, 0, this.stride, 11 * 4);
+                .addAttribute('aAnimDivisor', buf, 0, false, 0, this.stride, 11 * 4)
+                .addAttribute('aAlpha', buf, 0, false, 0, this.stride, 12 * 4);
     	}
 
     	

@@ -11,7 +11,7 @@ import type { IDestroyOptions } from '@pixi/display';
 import type { TilemapGeometry } from './TilemapShader';
 
 enum POINT_STRUCT {
-    U = 0,
+    U,
     V,
     X,
     Y,
@@ -23,6 +23,7 @@ enum POINT_STRUCT {
     TEXTURE_INDEX,
     ANIM_COUNT_X,
     ANIM_COUNT_Y,
+    ANIM_DIVISOR,
     ALPHA,
 }
 
@@ -177,6 +178,7 @@ export class Tilemap extends Container
      *      per row.
      * @param [options.animCountY=1024] - For animated tiles, this is the number of animation frame textures
      *      per column.
+     * @param [options.animDivisor=1] - For animated tiles, this is the animation duration of each frame
      * @param [options.alpha=1] - Tile alpha
      * @return This tilemap, good for chaining.
      */
@@ -194,6 +196,7 @@ export class Tilemap extends Container
             rotate?: number,
             animCountX?: number,
             animCountY?: number,
+            animDivisor?: number,
             alpha?: number,
         } = {}
     ): this
@@ -258,6 +261,7 @@ export class Tilemap extends Container
             rotate = 0,
             animCountX = 1024,
             animCountY = 1024,
+            animDivisor = 1,
             alpha = 1,
         } = options;
 
@@ -277,6 +281,7 @@ export class Tilemap extends Container
         pb.push(textureIndex);
         pb.push(animCountX);
         pb.push(animCountY);
+        pb.push(animDivisor);
         pb.push(alpha);
 
         this.tilemapBounds.addFramePad(x, y, x + tileWidth, y + tileHeight, 0, 0);
@@ -299,6 +304,7 @@ export class Tilemap extends Container
 
         pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_X)] = offset;
         pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_COUNT_X)] = count;
+        // pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_DIVISOR)] = duration;
     }
 
     /** Changes the `animY`, `animCountY` of the last tile. */
@@ -308,6 +314,14 @@ export class Tilemap extends Container
 
         pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_Y)] = offset;
         pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_COUNT_Y)] = count;
+    }
+
+    /** Changes the `animDivisor` value of the last tile. */
+    tileAnimDivisor(divisor: number): void
+    {
+        const pb = this.pointsBuf;
+
+        pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ANIM_DIVISOR)] = divisor;
     }
 
     tileAlpha(alpha: number): void
@@ -518,7 +532,9 @@ export class Tilemap extends Container
 
                 const animXEncoded = animX + (animWidth * 2048);
                 const animYEncoded = animY + (animHeight * 2048);
+                const animDivisor = points[i + POINT_STRUCT.ANIM_DIVISOR];
                 const alpha = points[i + POINT_STRUCT.ALPHA];
+
                 let u0: number;
                 let v0: number; let u1: number;
                 let v1: number; let u2: number;
@@ -577,6 +593,7 @@ export class Tilemap extends Container
                 arr[sz++] = animXEncoded;
                 arr[sz++] = animYEncoded;
                 arr[sz++] = textureId;
+                arr[sz++] = animDivisor;
                 arr[sz++] = alpha;
 
                 arr[sz++] = x + w;
@@ -590,6 +607,7 @@ export class Tilemap extends Container
                 arr[sz++] = animXEncoded;
                 arr[sz++] = animYEncoded;
                 arr[sz++] = textureId;
+                arr[sz++] = animDivisor;
                 arr[sz++] = alpha;
 
                 arr[sz++] = x + w;
@@ -603,6 +621,7 @@ export class Tilemap extends Container
                 arr[sz++] = animXEncoded;
                 arr[sz++] = animYEncoded;
                 arr[sz++] = textureId;
+                arr[sz++] = animDivisor;
                 arr[sz++] = alpha;
 
                 arr[sz++] = x;
@@ -616,6 +635,7 @@ export class Tilemap extends Container
                 arr[sz++] = animXEncoded;
                 arr[sz++] = animYEncoded;
                 arr[sz++] = textureId;
+                arr[sz++] = animDivisor;
                 arr[sz++] = alpha;
             }
 
@@ -718,6 +738,7 @@ export class Tilemap extends Container
         rotate = 0,
         animCountX = 1024,
         animCountY = 1024,
+        animDivisor = 1,
         alpha = 1,
     ): this
     {
@@ -725,7 +746,7 @@ export class Tilemap extends Container
             textureIndex,
             x, y,
             {
-                u, v, tileWidth, tileHeight, animX, animY, rotate, animCountX, animCountY, alpha
+                u, v, tileWidth, tileHeight, animX, animY, rotate, animCountX, animCountY, animDivisor, alpha
             }
         );
     }
