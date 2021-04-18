@@ -317,7 +317,7 @@ export class Tilemap extends Container
     }
 
     /** Changes the `animDivisor` value of the last tile. */
-    tileAnimDivisor(divisor = 1): void
+    tileAnimDivisor(divisor: number): void
     {
         const pb = this.pointsBuf;
 

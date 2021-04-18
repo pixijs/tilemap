@@ -2,7 +2,7 @@
  
 /*!
  * @pixi/tilemap - v3.1.0
- * Compiled Sun, 18 Apr 2021 15:16:22 UTC
+ * Compiled Sun, 18 Apr 2021 15:23:47 UTC
  *
  * @pixi/tilemap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -414,7 +414,7 @@ this.PIXI.tilemap = this.PIXI.tilemap || {};
         }
 
         /** Changes the `animDivisor` value of the last tile. */
-        tileAnimDivisor(divisor = 1)
+        tileAnimDivisor(divisor)
         {
             const pb = this.pointsBuf;
 
