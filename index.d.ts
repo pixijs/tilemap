@@ -35,8 +35,9 @@ declare class CompositeTilemap extends Container {
     tileset(tileTextures: Array<BaseTexture>): this;
     clear(): this;
     tileRotate(rotate: number): this;
-    tileAnimX(offset: number, count: number, duration: number): this;
-    tileAnimY(offset: number, count: number, duration: number): this;
+    tileAnimX(offset: number, count: number): this;
+    tileAnimY(offset: number, count: number): this;
+    tileAnimDivisor(divisor: number): this;
     tile(tileTexture: Texture | string | number, x: number, y: number, options?: {
         u?: number;
         v?: number;
@@ -47,14 +48,14 @@ declare class CompositeTilemap extends Container {
         rotate?: number;
         animCountX?: number;
         animCountY?: number;
-        animDuration?: number;
+        animDivisor?: number;
         alpha?: number;
     }): this;
     renderCanvas(renderer: CanvasRenderer): void;
     render(renderer: Renderer): void;
     isModified(anim: boolean): boolean;
     clearModify(): void;
-    addFrame(texture: Texture | string | number, x: number, y: number, animX?: number, animY?: number, animWidth?: number, animHeight?: number, animDuration?: number, alpha?: number): this;
+    addFrame(texture: Texture | string | number, x: number, y: number, animX?: number, animY?: number, animWidth?: number, animHeight?: number, animDivisor?: number, alpha?: number): this;
     addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number, rotate?: number, animWidth?: number, animHeight?: number): this;
     setBitmaps: (tileTextures: Array<BaseTexture>) => this;
     get texPerChild(): number;
@@ -162,12 +163,13 @@ declare class Tilemap extends Container {
         rotate?: number;
         animCountX?: number;
         animCountY?: number;
-        animDuration?: number;
+        animDivisor?: number;
         alpha?: number;
     }): this;
     tileRotate(rotate: number): void;
-    tileAnimX(offset: number, count: number, duration?: number): void;
-    tileAnimY(offset: number, count: number, duration?: number): void;
+    tileAnimX(offset: number, count: number): void;
+    tileAnimY(offset: number, count: number): void;
+    tileAnimDivisor(divisor?: number): void;
     tileAlpha(alpha: number): void;
     renderCanvas(renderer: CanvasRenderer): void;
     renderCanvasCore(renderer: CanvasRenderer): void;
@@ -185,7 +187,7 @@ declare class Tilemap extends Container {
     getLocalBounds(rect?: Rectangle): Rectangle;
     destroy(options?: IDestroyOptions): void;
     addFrame(texture: Texture | string | number, x: number, y: number, animX: number, animY: number): boolean;
-    addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number, rotate?: number, animCountX?: number, animCountY?: number, animDuration?: number, alpha?: number): this;
+    addRect(textureIndex: number, u: number, v: number, x: number, y: number, tileWidth: number, tileHeight: number, animX?: number, animY?: number, rotate?: number, animCountX?: number, animCountY?: number, animDivisor?: number, alpha?: number): this;
 }
 export { Tilemap as RectTileLayer }
 export { Tilemap }

@@ -166,22 +166,33 @@ export class CompositeTilemap extends Container
     }
 
     /** Changes `animX`, `animCountX` of the last added tile. */
-    tileAnimX(offset: number, count: number, duration: number): this
+    tileAnimX(offset: number, count: number): this
     {
         if (this.lastModifiedTilemap)
         {
-            this.lastModifiedTilemap.tileAnimX(offset, count, duration);
+            this.lastModifiedTilemap.tileAnimX(offset, count);
         }
 
         return this;
     }
 
     /** Changes `animY`, `animCountY` of the last added tile. */
-    tileAnimY(offset: number, count: number, duration: number): this
+    tileAnimY(offset: number, count: number): this
     {
         if (this.lastModifiedTilemap)
         {
-            this.lastModifiedTilemap.tileAnimY(offset, count, duration);
+            this.lastModifiedTilemap.tileAnimY(offset, count);
+        }
+
+        return this;
+    }
+
+    /** Changes `tileAnimDivisor` value of the last added tile. */
+    tileAnimDivisor(divisor: number): this
+    {
+        if (this.lastModifiedTilemap)
+        {
+            this.lastModifiedTilemap.tileAnimDivisor(divisor);
         }
 
         return this;
@@ -207,7 +218,7 @@ export class CompositeTilemap extends Container
      *      per row.
      * @param [options.animCountY=1024] - For animated tiles, this is the number of animation frame textures
      *      per column.
-     * @param [options.animDuration=1] - For animated tiles, this is the animation duration of the animated tile
+     * @param [options.animDivisor=1] - For animated tiles, this is the animation duration each frame
      * @param [options.alpha=1] - Tile alpha
      * @return This tilemap, good for chaining.
      */
@@ -225,7 +236,7 @@ export class CompositeTilemap extends Container
             rotate?: number,
             animCountX?: number,
             animCountY?: number,
-            animDuration?: number,
+            animDivisor?: number,
             alpha?: number,
         } = {}
     ): this
@@ -444,7 +455,7 @@ export class CompositeTilemap extends Container
         animY?: number,
         animWidth?: number,
         animHeight?: number,
-        animDuration?: number,
+        animDivisor?: number,
         alpha?: number
     ): this
     {
@@ -456,7 +467,7 @@ export class CompositeTilemap extends Container
                 animY,
                 animCountX: animWidth,
                 animCountY: animHeight,
-                animDuration,
+                animDivisor,
                 alpha
             }
         );
