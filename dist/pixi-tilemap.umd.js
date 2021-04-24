@@ -1,8 +1,8 @@
 /* eslint-disable */
  
 /*!
- * @pixi/tilemap - v3.1.0
- * Compiled Sun, 18 Apr 2021 15:23:47 UTC
+ * @pixi/tilemap - v3.2.0
+ * Compiled Sat, 24 Apr 2021 21:20:23 UTC
  *
  * @pixi/tilemap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
