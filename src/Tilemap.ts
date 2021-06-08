@@ -361,15 +361,15 @@ export class Tilemap extends Container
         renderer.context.fillStyle = '#000000';
         for (let i = 0, n = points.length; i < n; i += POINT_STRUCT_SIZE)
         {
-            let x1 = points[i + POINT_STRUCT.U] * tileAnim[0];
-            let y1 = points[i + POINT_STRUCT.V] * tileAnim[1];
+            let x1 = points[i + POINT_STRUCT.U];
+            let y1 = points[i + POINT_STRUCT.V];
             const x2 = points[i + POINT_STRUCT.X];
             const y2 = points[i + POINT_STRUCT.Y];
             const w = points[i + POINT_STRUCT.TILE_WIDTH];
             const h = points[i + POINT_STRUCT.TILE_HEIGHT];
 
-            x1 += points[i + POINT_STRUCT.ANIM_X] * renderer.plugins.tilemap.tileAnim[0];
-            y1 += points[i + POINT_STRUCT.ANIM_Y] * renderer.plugins.tilemap.tileAnim[1];
+            x1 += points[i + POINT_STRUCT.ANIM_X] * tileAnim[0];
+            y1 += points[i + POINT_STRUCT.ANIM_Y] * tileAnim[1];
 
             const textureIndex = points[i + POINT_STRUCT.TEXTURE_INDEX];
             const alpha = points[i + POINT_STRUCT.ALPHA];
