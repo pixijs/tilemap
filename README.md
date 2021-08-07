@@ -37,7 +37,7 @@ Loader.shared.onLoad(function onTilesetLoaded()
     const tilemap = new CompositeTilemap();
 
     // Render your first tile at (0, 0)!
-    tilemap.add('grass.png', 0, 0);
+    tilemap.tile('grass.png', 0, 0);
 });
 ```
 
