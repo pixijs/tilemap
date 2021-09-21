@@ -4,9 +4,9 @@ import { Texture, Renderer } from '@pixi/core';
 import { TileRenderer } from './TileRenderer';
 import { Matrix, Rectangle, groupD8 } from '@pixi/math';
 import { settings } from './settings';
+import { CanvasTileRenderer } from "./CanvasTileRenderer";
 
 import type { BaseTexture } from '@pixi/core';
-import type { CanvasRenderer } from '@pixi/canvas-renderer';
 import type { IDestroyOptions } from '@pixi/display';
 import type { TilemapGeometry } from './TilemapShader';
 
@@ -291,7 +291,7 @@ export class Tilemap extends Container
         pb[pb.length - 1] = count;
     }
 
-    renderCanvas(renderer: CanvasRenderer): void
+    renderCanvas(renderer: any): void
     {
         const plugin = renderer.plugins.tilemap;
 
@@ -312,11 +312,11 @@ export class Tilemap extends Container
         this.renderCanvasCore(renderer);
     }
 
-    renderCanvasCore(renderer: CanvasRenderer): void
+    renderCanvasCore(renderer: any): void
     {
         if (this.tileset.length === 0) return;
         const points = this.pointsBuf;
-        const tileAnim = this.tileAnim || (renderer.plugins.tilemap && renderer.plugins.tilemap.tileAnim);
+        const tileAnim = this.tileAnim || CanvasTileRenderer.getInstance(renderer).tileAnim
 
         renderer.context.fillStyle = '#000000';
         for (let i = 0, n = points.length; i < n; i += POINT_STRUCT_SIZE)

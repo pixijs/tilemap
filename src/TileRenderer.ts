@@ -197,5 +197,3 @@ export class TileRenderer extends ObjectRenderer
 	    }
 	}
 }
-
-Renderer.registerPlugin('tilemap', TileRenderer as any);

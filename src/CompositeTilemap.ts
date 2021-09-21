@@ -3,8 +3,8 @@ import { Texture, Renderer, BaseTexture } from '@pixi/core';
 import { Matrix } from '@pixi/math';
 import { Tilemap } from './Tilemap';
 import { settings } from './settings';
+import { CanvasTileRenderer } from "./CanvasTileRenderer";
 
-import type { CanvasRenderer } from '@pixi/canvas-renderer';
 import type { TileRenderer } from './TileRenderer';
 
 /**
@@ -328,14 +328,14 @@ export class CompositeTilemap extends Container
         return this;
     }
 
-    renderCanvas(renderer: CanvasRenderer): void
+    renderCanvas(renderer: any): void
     {
         if (!this.visible || this.worldAlpha <= 0 || !this.renderable)
         {
             return;
         }
 
-        const tilemapPlugin = renderer.plugins.tilemap;
+        const tilemapPlugin = CanvasTileRenderer.getInstance(renderer)
 
         if (tilemapPlugin && !tilemapPlugin.dontUseTransform)
         {

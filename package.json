@@ -40,7 +40,6 @@
     "README.md"
   ],
   "peerDependencies": {
-    "@pixi/canvas-renderer": "^6.0.0-rc.3",
     "@pixi/constants": "^6.0.0-rc.3",
     "@pixi/core": "^6.0.0-rc.3",
     "@pixi/display": "^6.0.0-rc.3",
@@ -51,7 +50,6 @@
   "devDependencies": {
     "@microsoft/api-extractor": "^7.9.4",
     "@pixi-build-tools/rollup-configurator": "~1.0.11",
-    "@pixi/canvas-renderer": "^6.0.0-rc.3",
     "@pixi/constants": "^6.0.0-rc.3",
     "@pixi/core": "^6.0.0-rc.3",
     "@pixi/display": "^6.0.0-rc.3",

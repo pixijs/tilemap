@@ -30,4 +30,11 @@ export class CanvasTileRenderer
         this.renderer = renderer;
         this.tileAnim = [0, 0];
     }
+
+    static getInstance(renderer: any) {
+        if (!renderer.plugins.tilemap) {
+            renderer.plugins.tilemap = new CanvasTileRenderer(renderer);
+        }
+        return renderer.plugins.tilemap;
+    }
 }
