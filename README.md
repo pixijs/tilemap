@@ -1,13 +1,13 @@
 # @pixi/tilemap - PixiJS Tilemap Kit
 
 [![Node.js CI](https://github.com/pixijs/tilemap/actions/workflows/node.js.yml/badge.svg)](https://github.com/pixijs/tilemap/actions/workflows/node.js.yml)
+[![Latest PixiJS Node.js CI](https://github.com/pixijs/tilemap/actions/workflows/pixijs.yml/badge.svg)](https://github.com/pixijs/tilemap/actions/workflows/pixijs.yml)
 <p align="center">
 <img src="https://i.imgur.com/hfoiBRk.png" width="1280px" />
 <p/>
 
 This package provides a low-level rectangular tilemap implementation, optimized for high performance rendering and a
-out-of-the-box canvas fallback. It's designed to work with PixiJS 6. @pixi/tilemap 3 **has not been published yet. We
-are migrating from the pixi-tilemap name**
+out-of-the-box canvas fallback. It's designed to work with PixiJS 6. **We've migrated from pixi-tilemap to @pixi/tilemap on npm!**
 
 ## Installation :package:
 
@@ -37,7 +37,7 @@ Loader.shared.onLoad(function onTilesetLoaded()
     const tilemap = new CompositeTilemap();
 
     // Render your first tile at (0, 0)!
-    tilemap.add('grass.png', 0, 0);
+    tilemap.tile('grass.png', 0, 0);
 });
 ```
 

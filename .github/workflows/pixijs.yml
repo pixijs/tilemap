@@ -1,0 +1,57 @@
+name: Latest PixiJS Node.js CI
+
+on:
+    push:
+        branches: [ master ]
+    pull_request:
+        branches: [ master ]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        strategy:
+            matrix:
+                node-version: [12.x]
+
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                path: tilemap
+            - name: Go into tilemap directory
+              run: cd tilemap && ls && cat package.json
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v1
+              with:
+                  node-version: ${{ matrix.node-version }}
+            - name: Install jq
+              run: sudo apt-get install jq
+            - name: Setup relativeDependencies
+              run: >
+                jq '.relativeDependencies = { "@pixi/canvas-renderer": "../pixi.js/packages/canvas/canvas-renderer", "@pixi/constants": "../pixi.js/packages/constants", "@pixi/core": "../pixi.js/packages/core", "@pixi/display": "../pixi.js/packages/display", "@pixi/graphics": "../pixi.js/packages/graphics", "@pixi/math": "../pixi.js/packages/math", "@pixi/utils": "../pixi.js/packages/utils" }' ./tilemap/package.json > ./tilemap/package2.json && mv ./tilemap/package2.json ./tilemap/package.json
+            - name: Setup prepare script
+              run: >
+                jq '.scripts.prepare="relative-deps"' ./tilemap/package.json > ./tilemap/package2.json && mv ./tilemap/package2.json ./tilemap/package.json
+            - name: Checkout PixiJS
+              uses: actions/checkout@v2
+              with:
+                repository: pixijs/pixi.js
+                path: pixi.js
+            - name: Install npm
+              run: npm install -g npm@7
+            - name: Build PixiJS
+              uses: SukantPal/build@master
+            - name: List dir
+              run: ls
+            - name: Install dependencies
+              run: cd tilemap && yarn
+            - name: Build & type-checking
+              run: cd tilemap && yarn build
+            - name: Lint
+              run: cd tilemap && yarn lint
+            - uses: GabrielBB/xvfb-action@v1.0
+              with:
+                name: Unit testing
+                run: cd tilemap && yarn unit-test
+
+

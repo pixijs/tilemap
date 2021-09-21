@@ -7,6 +7,7 @@ precision mediump float;
 varying vec2 vTextureCoord;
 varying vec4 vFrame;
 varying float vTextureId;
+varying float vAlpha;
 uniform vec4 shadowColor;
 uniform sampler2D uSamplers[%count%];
 uniform vec2 uSamplerSize[%count%];
@@ -18,5 +19,5 @@ void main(void)
 
    vec4 color;
    %forloop%
-   gl_FragColor = color;
+   gl_FragColor = color * vAlpha;
 }

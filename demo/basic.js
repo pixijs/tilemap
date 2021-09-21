@@ -45,7 +45,7 @@ loader.load(function onAssetsLoaded(loader, resources)
         frame++;
     }
 
-    setInterval(animShader, 400);
+    setInterval(animShader, 100);
 });
 
 function buildTilemap()
@@ -74,14 +74,23 @@ function buildTilemap()
     const textures = resources.atlas.textures;
 
     tilemap.tile(textures['brick.png'], 2 * size, 2 * size);
-    tilemap.tile(textures['brick_wall.png'], 2 * size, 3 * size);
+    tilemap.tile(textures['brick_wall.png'], 2 * size, 3 * size, { alpha: 0.6 });
 
     // chest will be animated!
     // old way: animate on rebuild
     // tilemap.addFrame(textures[frame % 2 == 0 ? "chest.png" : "red_chest.png"], 4 * size, 4 * size);
 
     // new way: animate on shader: 2 frames , X offset is 32 , "red_chest" is exactly 34 pixels right in the atlas
+    // Frame changes every 100ms because of `setInterval(animShader, 100)`, so the first animation
+    // will change to the next frame every 100ms
     tilemap.tile(textures['chest.png'], 4 * size, 4 * size).tileAnimX(34, 2);
+
+    // You can also set independent time for each tile.
+    // In this second chest, we pass 3 to tileAnimDivisor
+    // 3 multiplies the 100ms we have in setInterval by 3, making the duration 300ms
+    tilemap.tile(textures['chest.png'], 5 * size, 4 * size).tileAnimX(34, 2).tileAnimDivisor(3);
+    // You can alternatively set it by passing animDivisor option when creating the tile. Below a frame duration is 600ms
+    tilemap.tile(textures['chest.png'], 8 * size, 4 * size, {animX: 34, animCountX: 2, animDivisor: 6});
 
     // button does not appear in the atlas, but tilemap wont surrender, it will create second layer for special for buttons
     // buttons will appear above everything

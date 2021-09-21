@@ -187,6 +187,17 @@ export class CompositeTilemap extends Container
         return this;
     }
 
+    /** Changes `tileAnimDivisor` value of the last added tile. */
+    tileAnimDivisor(divisor: number): this
+    {
+        if (this.lastModifiedTilemap)
+        {
+            this.lastModifiedTilemap.tileAnimDivisor(divisor);
+        }
+
+        return this;
+    }
+
     /**
      * Adds a tile that paints the given tile texture at (x, y).
      *
@@ -207,6 +218,8 @@ export class CompositeTilemap extends Container
      *      per row.
      * @param [options.animCountY=1024] - For animated tiles, this is the number of animation frame textures
      *      per column.
+     * @param [options.animDivisor=1] - For animated tiles, this is the animation duration each frame
+     * @param [options.alpha=1] - Tile alpha
      * @return This tilemap, good for chaining.
      */
     tile(
@@ -222,7 +235,9 @@ export class CompositeTilemap extends Container
             animY?: number,
             rotate?: number,
             animCountX?: number,
-            animCountY?: number
+            animCountY?: number,
+            animDivisor?: number,
+            alpha?: number,
         } = {}
     ): this
     {
@@ -439,7 +454,9 @@ export class CompositeTilemap extends Container
         animX?: number,
         animY?: number,
         animWidth?: number,
-        animHeight?: number
+        animHeight?: number,
+        animDivisor?: number,
+        alpha?: number
     ): this
     {
         return this.tile(
@@ -450,6 +467,8 @@ export class CompositeTilemap extends Container
                 animY,
                 animCountX: animWidth,
                 animCountY: animHeight,
+                animDivisor,
+                alpha
             }
         );
     }
