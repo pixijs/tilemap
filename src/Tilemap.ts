@@ -4,7 +4,7 @@ import { Texture, Renderer } from '@pixi/core';
 import { TileRenderer } from './TileRenderer';
 import { Matrix, Rectangle, groupD8 } from '@pixi/math';
 import { settings } from './settings';
-import { CanvasTileRenderer } from "./CanvasTileRenderer";
+import { CanvasTileRenderer } from './CanvasTileRenderer';
 
 import type { BaseTexture } from '@pixi/core';
 import type { IDestroyOptions } from '@pixi/display';

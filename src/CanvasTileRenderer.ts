@@ -31,10 +31,14 @@ export class CanvasTileRenderer
         this.tileAnim = [0, 0];
     }
 
-    static getInstance(renderer: any) {
-        if (!renderer.plugins.tilemap) {
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+    static getInstance(renderer: any): CanvasTileRenderer
+    {
+        if (!renderer.plugins.tilemap)
+        {
             renderer.plugins.tilemap = new CanvasTileRenderer(renderer);
         }
+
         return renderer.plugins.tilemap;
     }
 }
