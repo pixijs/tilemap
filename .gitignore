@@ -36,6 +36,7 @@ yarn.lock
 # CommonJS
 dist/pixi-tilemap.js
 dist/pixi-tilemap.js.map
+index.d.ts
 # yarn
 yarn-error.log
 # ESM
