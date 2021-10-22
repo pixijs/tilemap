@@ -34,8 +34,7 @@ compile
 yarn.lock
 
 # CommonJS
-dist/pixi-tilemap.js
-dist/pixi-tilemap.js.map
+dist
 index.d.ts
 # yarn
 yarn-error.log

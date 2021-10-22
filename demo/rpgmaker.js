@@ -28,7 +28,7 @@ function requireRpgMaker() {
             if (!buf) {
                 buf = this.canvasBuffer = document.createElement('canvas');
 
-                (canvasRenderer.constructor ).registerPlugin('tilemap', CanvasTileRenderer);
+                (canvasRenderer.constructor ).registerPlugin('tilemap', PIXI.tilemap.CanvasTileRenderer);
                 tempRender = this._tempRender = new (canvasRenderer.constructor )({width: 100, height: 100, view: buf});
                 tempRender.context = tempRender.rootContext;
                 tempRender.plugins.tilemap.dontUseTransform = true;

@@ -19,11 +19,11 @@ npm i --save @pixi/tilemap
 You can also use the UMD flavor:
 
 ```
-<script src="dist/pixi-tilemap.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@pixi/tilemap@latest/dist/pixi-tilemap.umd.js"></script>
 ```
 
 ## Usage
-
+````
 In short, the tilemap you create will render each tile texture at the provided position and dimensions. Generally, a
 spritesheet is used to load the tileset assets:
 

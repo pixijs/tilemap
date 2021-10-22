@@ -1,6 +1,6 @@
 {
   "name": "@pixi/tilemap",
-  "version": "3.2.0",
+  "version": "3.2.2",
   "description": "A low-level, optimized rectangular tilemap implementation for PixiJS.",
   "author": "Ivan Popelyshev",
   "contributors": [
