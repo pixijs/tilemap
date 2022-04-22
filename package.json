@@ -76,7 +76,7 @@
     "@typescript-eslint/parser": "^4.16.1",
     "chai": "^4.3.3",
     "del": "^2.2.0",
-    "electron": "^9.4.0",
+    "electron": "^13.6.6",
     "eslint": "^7.21.0",
     "floss": "^3.0.0",
     "mkdirp": "^0.5.1",
