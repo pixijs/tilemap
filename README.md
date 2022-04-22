@@ -23,7 +23,7 @@ You can also use the UMD flavor:
 ```
 
 ## Usage
-````
+
 In short, the tilemap you create will render each tile texture at the provided position and dimensions. Generally, a
 spritesheet is used to load the tileset assets:
 
