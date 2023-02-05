@@ -24,19 +24,6 @@ jobs:
               uses: actions/setup-node@v1
               with:
                   node-version: ${{ matrix.node-version }}
-            - name: Install jq
-              run: sudo apt-get install jq
-            - name: Setup relativeDependencies
-              run: >
-                jq '.relativeDependencies = { "@pixi/canvas-renderer": "../pixi.js/packages/canvas/canvas-renderer", "@pixi/constants": "../pixi.js/packages/constants", "@pixi/core": "../pixi.js/packages/core", "@pixi/display": "../pixi.js/packages/display", "@pixi/graphics": "../pixi.js/packages/graphics", "@pixi/math": "../pixi.js/packages/math", "@pixi/utils": "../pixi.js/packages/utils" }' ./tilemap/package.json > ./tilemap/package2.json && mv ./tilemap/package2.json ./tilemap/package.json
-            - name: Setup prepare script
-              run: >
-                jq '.scripts.prepare="relative-deps"' ./tilemap/package.json > ./tilemap/package2.json && mv ./tilemap/package2.json ./tilemap/package.json
-            - name: Checkout PixiJS
-              uses: actions/checkout@v2
-              with:
-                repository: pixijs/pixi.js
-                path: pixi.js
             - name: Install npm
               run: npm install -g npm@9
             - name: Install dependencies
