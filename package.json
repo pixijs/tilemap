@@ -29,7 +29,8 @@
     "build:types": "rimraf ./compile && tsc -p ./tsconfig.compile.json && api-extractor run",
     "docs": "typedoc --out ./docs/ --readme README.md ./src/",
     "lint": "eslint ./src",
-    "unit-test": "floss --path test --"
+    "unit-test": "floss --path test --",
+    "prepare": "rollup -c node_modules/@pixi-build-tools/rollup-configurator/index.js && yarn build:types"
   },
   "eslintConfig": {
     "extends": [
