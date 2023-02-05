@@ -2,7 +2,7 @@ name: Latest PixiJS Node.js CI
 
 on:
     push:
-        branches: [ master ]
+        branches: [ master, v7_dev ]
     pull_request:
         branches: [ master ]
 
@@ -12,7 +12,7 @@ jobs:
 
         strategy:
             matrix:
-                node-version: [12.x]
+                node-version: [14.x]
 
         steps:
             - uses: actions/checkout@v2
@@ -38,7 +38,7 @@ jobs:
                 repository: pixijs/pixi.js
                 path: pixi.js
             - name: Install npm
-              run: npm install -g npm@7
+              run: npm install -g npm@9
             - name: Build PixiJS
               uses: SukantPal/build@master
             - name: List dir
