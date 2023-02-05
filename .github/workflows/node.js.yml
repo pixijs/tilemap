@@ -4,35 +4,37 @@
 name: Node.js CI
 
 on:
-  push:
-    branches: [ master, v7_dev ]
-  pull_request:
-    branches: [ master ]
+    push:
+        branches: [ master, v7_dev ]
+    pull_request:
+        branches: [ master ]
 
 jobs:
-  build:
+    build:
+        runs-on: ubuntu-latest
 
-    runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                node-version: [14.x]
 
-    strategy:
-      matrix:
-        node-version: [14.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: Install dependencies
-      run: yarn
-    - name: Build & type-checking
-      run: yarn build
-    - name: Lint
-      run: yarn lint
-    - uses: GabrielBB/xvfb-action@v1.6
-      with:
-        name: Unit testing
-        run: yarn unit-test
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                path: tilemap
+            - name: Go into tilemap directory
+              run: cd tilemap
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v1
+              with:
+                  node-version: ${{ matrix.node-version }}
+            - name: Install dependencies
+              run: cd tilemap && yarn
+            - name: Build & type-checking
+              run: cd tilemap && yarn build
+            - name: Lint
+              run: cd tilemap && yarn lint
+            - uses: GabrielBB/xvfb-action@v1.6
+              with:
+                name: Unit testing
+                run: cd tilemap && yarn unit-test
       
