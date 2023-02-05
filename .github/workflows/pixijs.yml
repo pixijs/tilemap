@@ -39,10 +39,6 @@ jobs:
                 path: pixi.js
             - name: Install npm
               run: npm install -g npm@9
-            - name: Build PixiJS
-              uses: SukantPal/build@master
-            - name: List dir
-              run: ls
             - name: Install dependencies
               run: cd tilemap && yarn
             - name: Build & type-checking
