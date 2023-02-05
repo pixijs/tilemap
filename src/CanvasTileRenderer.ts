@@ -1,4 +1,4 @@
-import type { AbstractRenderer } from '@pixi/core';
+import { extensions, ExtensionType, IRenderer } from '@pixi/core';
 
 /**
  * The renderer plugin for canvas. It isn't registered by default.
@@ -13,10 +13,9 @@ import type { AbstractRenderer } from '@pixi/core';
  * ```
  */
 // TODO: Move to @pixi/tilemap-canvas
-export class CanvasTileRenderer
-{
+export class CanvasTileRenderer {
     /** The renderer */
-    renderer: AbstractRenderer;
+    renderer: IRenderer;
 
     /** The global tile animation state */
     tileAnim = [0, 0];
@@ -25,18 +24,19 @@ export class CanvasTileRenderer
     dontUseTransform = false;
 
     /** @param renderer */
-    constructor(renderer: AbstractRenderer)
-    {
+    constructor(renderer: IRenderer) {
         this.renderer = renderer;
         this.tileAnim = [0, 0];
     }
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    static getInstance(renderer: any): CanvasTileRenderer
-    {
-        if (!renderer.plugins.tilemap)
-        {
-            renderer.plugins.tilemap = new CanvasTileRenderer(renderer);
+    static getInstance(renderer: any): CanvasTileRenderer {
+        if (!renderer.plugins.tilemap) {
+            extensions.add({
+                name: 'tilemap',
+                type: ExtensionType.CanvasRendererPlugin,
+                ref: CanvasTileRenderer as any
+            });
         }
 
         return renderer.plugins.tilemap;

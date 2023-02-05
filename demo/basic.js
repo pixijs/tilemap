@@ -4,16 +4,15 @@ const renderer = PIXI.autoDetectRenderer({ width: 800, height: 600 });
 let stage;
 let tilemap;
 
+let atlas;
+let button;
+
 document.body.appendChild(renderer.view);
 
-const loader = new PIXI.Loader();
+const loadAssets = async () => {
+    atlas = await PIXI.Assets.load('assets/atlas.json');
+    button = await PIXI.Assets.load('assets/button.png');
 
-loader.add('atlas', 'assets/atlas.json');
-loader.add('button', 'assets/button.png');
-loader.load(function onAssetsLoaded(loader, resources)
-{
-    // first parameter means z-layer, which is not used yet
-    // second parameter is list of textures for layers
     stage = new PIXI.Container();
     tilemap = new PIXI.tilemap.CompositeTilemap();
     stage.addChild(tilemap);
@@ -24,20 +23,18 @@ loader.load(function onAssetsLoaded(loader, resources)
 
     buildTilemap(frame++);
 
-    const pic = new PIXI.Sprite(resources.button.texture);
+    const pic = new PIXI.Sprite(button);
 
     pic.position.set(200, 100);
     stage.addChild(pic);
 
     // ==== Old way to build animations: Rebuild tilemap every frame
-    function animRebuild()
-    {
+    function animRebuild() {
         buildTilemap(frame++);
     }
 
     // ==== New way: animate shader
-    function animShader()
-    {
+    function animShader() {
         // animate X frames
         renderer.plugins.tilemap.tileAnim[0] = frame;
         // animate Y frames
@@ -46,32 +43,27 @@ loader.load(function onAssetsLoaded(loader, resources)
     }
 
     setInterval(animShader, 100);
-});
+}
 
-function buildTilemap()
-{
+function buildTilemap() {
     // Clear everything, like a PIXI.Graphics
     tilemap.clear();
 
-    const resources = loader.resources;
     const size = 32;
 
     // if you are too lazy, just specify filename and pixi will find it in cache
-    for (let i = 0; i < 7; i++)
-    {
-        for (let j = 0; j < 5; j++)
-        {
+    for (let i = 0; i < 7; i++) {
+        for (let j = 0; j < 5; j++) {
             tilemap.tile('grass.png', i * size, j * size);
 
-            if (i % 2 === 1 && j % 2 === 1)
-            {
+            if (i % 2 === 1 && j % 2 === 1) {
                 tilemap.tile('tough.png', i * size, j * size);
             }
         }
     }
 
     // if you are lawful citizen, please use textures from
-    const textures = resources.atlas.textures;
+    const textures = atlas.textures;
 
     tilemap.tile(textures['brick.png'], 2 * size, 2 * size);
     tilemap.tile(textures['brick_wall.png'], 2 * size, 3 * size, { alpha: 0.6 });
@@ -90,11 +82,11 @@ function buildTilemap()
     // 3 multiplies the 100ms we have in setInterval by 3, making the duration 300ms
     tilemap.tile(textures['chest.png'], 5 * size, 4 * size).tileAnimX(34, 2).tileAnimDivisor(3);
     // You can alternatively set it by passing animDivisor option when creating the tile. Below a frame duration is 600ms
-    tilemap.tile(textures['chest.png'], 8 * size, 4 * size, {animX: 34, animCountX: 2, animDivisor: 6});
+    tilemap.tile(textures['chest.png'], 8 * size, 4 * size, { animX: 34, animCountX: 2, animDivisor: 6 });
 
     // button does not appear in the atlas, but tilemap wont surrender, it will create second layer for special for buttons
     // buttons will appear above everything
-    tilemap.tile(resources.button.texture, 6 * size, 2 * size);
+    tilemap.tile(button, 6 * size, 2 * size);
 
     // if you want rotations:
     // https://pixijs.io/examples-v4/#/textures/texture-rotate.js
@@ -102,15 +94,13 @@ function buildTilemap()
     // canvas in pixi-tilemap does not work with rotate!!!!
     const origTex = textures['chest.png'];
 
-    for (let i = 0; i < 8; i++)
-    {
+    for (let i = 0; i < 8; i++) {
         const frame = origTex.frame.clone();
         const orig = origTex.orig.clone();
         const trim = origTex.orig.clone();
         const rotate = i * 2;
 
-        if (rotate % 4 === 2)
-        {
+        if (rotate % 4 === 2) {
             orig.width = frame.height;
             orig.height = frame.width;
         }
@@ -122,3 +112,5 @@ function buildTilemap()
         // rotate is also last parameter in addFrame
     }
 }
+
+loadAssets();
