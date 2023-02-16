@@ -53,26 +53,18 @@
     "README.md"
   ],
   "peerDependencies": {
-    "@pixi/constants": "^7.0.4",
     "@pixi/core": "^7.0.4",
     "@pixi/display": "^7.0.4",
-    "@pixi/graphics": "^7.0.4",
-    "@pixi/math": "^7.0.4",
-    "@pixi/utils": "^7.0.4"
+    "@pixi/graphics": "^7.0.4"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "^7.34.3",
     "@pixi-build-tools/rollup-configurator": "~1.0.14",
-    "@pixi/constants": "^7.0.4",
     "@pixi/core": "^7.0.4",
     "@pixi/display": "^7.0.4",
     "@pixi/eslint-config": "^4.0.1",
     "@pixi/extract": "^7.0.4",
     "@pixi/graphics": "^7.0.4",
-    "@pixi/math": "^7.0.4",
-    "@pixi/utils": "^7.0.4",
-    "@pixi/settings": "^7.0.4",
-    "@pixi/runner": "^7.0.4",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@types/eventemitter3": "^2.0.2",
     "@typescript-eslint/eslint-plugin": "^5.50.0",

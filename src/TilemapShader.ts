@@ -61,8 +61,7 @@ void main(void)
 }
 `;
 
-import { Buffer, Geometry, Shader, Program } from '@pixi/core';
-import { Matrix } from '@pixi/math';
+import { Buffer, Geometry, Shader, Program, Matrix } from '@pixi/core';
 
 // For some reason ESLint goes mad with indendation in this file ^&^
 /* eslint-disable no-mixed-spaces-and-tabs, indent */

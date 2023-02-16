@@ -1,4 +1,4 @@
-import { SCALE_MODES } from '@pixi/constants';
+import { SCALE_MODES } from '@pixi/core';
 
 /**
  * These are additional @pixi/tilemap options.

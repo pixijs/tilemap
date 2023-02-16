@@ -208,7 +208,7 @@
     rollup-plugin-string "~3.0.0"
     rollup-plugin-terser "~7.0.0"
 
-"@pixi/constants@7.1.2", "@pixi/constants@^7.0.4":
+"@pixi/constants@7.1.2":
   version "7.1.2"
   resolved "https://registry.yarnpkg.com/@pixi/constants/-/constants-7.1.2.tgz#6dc24db2777ba7c316a3a884c21813486b5ca138"
   integrity sha512-fJflBZJm7fkLmHE5jwl2sc4oekburtM881MmAexYnZVfLNj76mNquElwOd4xAf5iQY43J0g05tSObXtin8a4Fg==
@@ -255,17 +255,17 @@
   resolved "https://registry.yarnpkg.com/@pixi/graphics/-/graphics-7.1.2.tgz#65b88820943ed7c1b45e119ebbfacd22563681d9"
   integrity sha512-R32KfpIfBABDvVzX9Rh59oyP2p7TXKcakEi/eOBF+paGmDpIYXK2Ola4VfoalqZIXFMhsFST36iiJv/cRaKRdQ==
 
-"@pixi/math@7.1.2", "@pixi/math@^7.0.4":
+"@pixi/math@7.1.2":
   version "7.1.2"
   resolved "https://registry.yarnpkg.com/@pixi/math/-/math-7.1.2.tgz#f4fdd94050629b99674d758b231bd7087fd60f6c"
   integrity sha512-mLfbdo/Al78YLTstTfnqzxuZy/L0ef9oaL4Wc58Jm+9VjqXkCbI2zIioERdb/KPYWFIABMC0ZIjE5vTCYdyphw==
 
-"@pixi/runner@7.1.2", "@pixi/runner@^7.0.4":
+"@pixi/runner@7.1.2":
   version "7.1.2"
   resolved "https://registry.yarnpkg.com/@pixi/runner/-/runner-7.1.2.tgz#68d4d88470689840c0a06cf1ec4d3b1a60a9166c"
   integrity sha512-mtkNlABmQGD208nYsnUjZlMzsJ2+pug7wmLBcDJC8jtD3PFbPorI+CsqdT1ivPYKXSMZq5/rcoWTk1G9PUeRog==
 
-"@pixi/settings@7.1.2", "@pixi/settings@^7.0.4":
+"@pixi/settings@7.1.2":
   version "7.1.2"
   resolved "https://registry.yarnpkg.com/@pixi/settings/-/settings-7.1.2.tgz#e79884a757458b31df2fb2edf4414e4434c6e8a4"
   integrity sha512-5dg4+WvqA1OLVvDjw49664Mc6x26O0WPzpCHTxt9WrzKqE6g6S2A+Sxn8E6Eq+/86excpYf0JCR8F2d+ObpL1Q==
@@ -282,7 +282,7 @@
     "@pixi/settings" "7.1.2"
     "@pixi/utils" "7.1.2"
 
-"@pixi/utils@7.1.2", "@pixi/utils@^7.0.4":
+"@pixi/utils@7.1.2":
   version "7.1.2"
   resolved "https://registry.yarnpkg.com/@pixi/utils/-/utils-7.1.2.tgz#d73d8e32f6eb129bd1fb0db9ac3055c4d8f21058"
   integrity sha512-UsEQn8Oz9RFJMmi8GzPJWHH6h2+Ftcfvt3JgirqvyFH7i5it7uAScA0CRCtQkc72Ot25lGfRDSbwI+f3RqdLMw==

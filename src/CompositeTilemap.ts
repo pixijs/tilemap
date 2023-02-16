@@ -1,9 +1,8 @@
 import { Container } from '@pixi/display';
-import { Texture, Renderer, BaseTexture } from '@pixi/core';
-import { Matrix } from '@pixi/math';
+import { Texture, Renderer, BaseTexture, Matrix } from '@pixi/core';
 import { Tilemap } from './Tilemap';
 import { settings } from './settings';
-import { CanvasTileRenderer } from "./CanvasTileRenderer";
+import { CanvasTileRenderer } from './CanvasTileRenderer';
 
 import type { TileRenderer } from './TileRenderer';
 
@@ -249,7 +248,7 @@ export class CompositeTilemap extends Container
         if (typeof tileTexture === 'number')
         {
             const childIndex = tileTexture / this.texturesPerTilemap >> 0;
-            let tileIndex  = 0;
+            let tileIndex = 0;
 
             tilemap = children[childIndex] as Tilemap;
 
@@ -350,7 +349,7 @@ export class CompositeTilemap extends Container
             return;
         }
 
-        const tilemapPlugin = CanvasTileRenderer.getInstance(renderer)
+        const tilemapPlugin = CanvasTileRenderer.getInstance(renderer);
 
         if (tilemapPlugin && !tilemapPlugin.dontUseTransform)
         {
