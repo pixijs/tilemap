@@ -1,51 +1,18 @@
 /* global PIXI */
 
-const renderer = PIXI.autoDetectRenderer({ width: 800, height: 600 });
-let stage;
-let tilemap;
+const app = new PIXI.Application({ width: 800, height: 600 });
+const tilemap = new PIXI.tilemap.CompositeTilemap();
 
-let atlas;
-let button;
-
-document.body.appendChild(renderer.view);
+document.body.appendChild(app.view);
+app.stage.addChild(tilemap);
 
 const loadAssets = async () => {
-    atlas = await PIXI.Assets.load('assets/atlas.json');
-    button = await PIXI.Assets.load('assets/button.png');
+    PIXI.Assets.add('atlas', 'assets/atlas.json');
+    PIXI.Assets.add('button', 'assets/button.png');
+    await PIXI.Assets.load(['atlas', 'button']);
+};
 
-    stage = new PIXI.Container();
-    tilemap = new PIXI.tilemap.CompositeTilemap();
-    stage.addChild(tilemap);
-
-    PIXI.Ticker.shared.add(() => renderer.render(stage));
-
-    let frame = 0;
-
-    buildTilemap(frame++);
-
-    const pic = new PIXI.Sprite(button);
-
-    pic.position.set(200, 100);
-    stage.addChild(pic);
-
-    // ==== Old way to build animations: Rebuild tilemap every frame
-    function animRebuild() {
-        buildTilemap(frame++);
-    }
-
-    // ==== New way: animate shader
-    function animShader() {
-        // animate X frames
-        renderer.plugins.tilemap.tileAnim[0] = frame;
-        // animate Y frames
-        renderer.plugins.tilemap.tileAnim[1] = frame;
-        frame++;
-    }
-
-    setInterval(animShader, 100);
-}
-
-function buildTilemap() {
+const buildTilemap = () => {
     // Clear everything, like a PIXI.Graphics
     tilemap.clear();
 
@@ -63,7 +30,7 @@ function buildTilemap() {
     }
 
     // if you are lawful citizen, please use textures from
-    const textures = atlas.textures;
+    const textures = PIXI.Assets.get('atlas').textures;
 
     tilemap.tile(textures['brick.png'], 2 * size, 2 * size);
     tilemap.tile(textures['brick_wall.png'], 2 * size, 3 * size, { alpha: 0.6 });
@@ -86,7 +53,7 @@ function buildTilemap() {
 
     // button does not appear in the atlas, but tilemap wont surrender, it will create second layer for special for buttons
     // buttons will appear above everything
-    tilemap.tile(button, 6 * size, 2 * size);
+    tilemap.tile(PIXI.Assets.get('button'), 6 * size, 2 * size);
 
     // if you want rotations:
     // https://pixijs.io/examples-v4/#/textures/texture-rotate.js
@@ -111,6 +78,29 @@ function buildTilemap() {
         tilemap.tile(tmpTex, i % 4 * size, ((i >> 2) * size) + (5 * size));
         // rotate is also last parameter in addFrame
     }
-}
+};
 
-loadAssets();
+const initialize = () => {
+    buildTilemap();
+
+    const pic = new PIXI.Sprite(PIXI.Assets.get('button'));
+
+    pic.position.set(200, 100);
+    app.stage.addChild(pic);
+
+    let frame = 0;
+    const animShader = () => {
+        // animate X and Y frames
+        tilemap.tileAnim = [frame, frame];
+        frame++;
+    };
+
+    setInterval(animShader, 100);
+};
+
+const runApp = async () => {
+    await loadAssets();
+    initialize();
+};
+
+runApp();
