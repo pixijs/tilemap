@@ -9,7 +9,7 @@ import { extensions, ExtensionType, IRenderer } from '@pixi/core';
  *
  * // You must register this yourself (optional). @pixi/tilemap doesn't do it to
  * // prevent a hard dependency on @pixi/canvas-core.
- * CanvasRenderer.registerPlugin('tilemap', CanvasTileRenderer);
+ * CanvasTileRenderer.registerExtension();
  * ```
  */
 // TODO: Move to @pixi/tilemap-canvas
@@ -29,14 +29,18 @@ export class CanvasTileRenderer {
         this.tileAnim = [0, 0];
     }
 
+    static registerExtension() {
+        extensions.add({
+            name: 'tilemap',
+            type: ExtensionType.CanvasRendererPlugin,
+            ref: CanvasTileRenderer as any
+        });
+    }
+
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     static getInstance(renderer: any): CanvasTileRenderer {
         if (!renderer.plugins.tilemap) {
-            extensions.add({
-                name: 'tilemap',
-                type: ExtensionType.CanvasRendererPlugin,
-                ref: CanvasTileRenderer as any
-            });
+            throw new Error('Extension not registered!');
         }
 
         return renderer.plugins.tilemap;

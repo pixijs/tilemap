@@ -355,7 +355,7 @@ export class CompositeTilemap extends Container
         {
             const wt = this.worldTransform;
 
-            renderer.context.setTransform(
+            renderer.canvasContext.activeContext.setTransform(
                 wt.a,
                 wt.b,
                 wt.c,

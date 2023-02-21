@@ -1,6 +1,12 @@
 /* global PIXI */
+const useCanvas = false;
 
-const app = new PIXI.Application({ width: 800, height: 600 });
+if (useCanvas) {
+    PIXI.tilemap.CanvasTileRenderer.registerExtension();
+}
+
+const canvRenderer = new PIXI.CanvasRenderer();
+const app = new PIXI.Application({ width: 800, height: 600, forceCanvas: useCanvas, hello: true });
 const tilemap = new PIXI.tilemap.CompositeTilemap();
 
 document.body.appendChild(app.view);
