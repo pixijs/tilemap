@@ -1,11 +1,10 @@
 /* global PIXI */
-const useCanvas = false;
+const useCanvas = true;
 
 if (useCanvas) {
     PIXI.tilemap.CanvasTileRenderer.registerExtension();
 }
 
-const canvRenderer = new PIXI.CanvasRenderer();
 const app = new PIXI.Application({ width: 800, height: 600, forceCanvas: useCanvas, hello: true });
 const tilemap = new PIXI.tilemap.CompositeTilemap();
 
@@ -99,6 +98,9 @@ const initialize = () => {
         // animate X and Y frames
         tilemap.tileAnim = [frame, frame];
         frame++;
+        if (useCanvas) {
+            frame = frame > 1 ? 0 : 1;
+        }
     };
 
     setInterval(animShader, 100);
