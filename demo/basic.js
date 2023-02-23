@@ -1,5 +1,5 @@
 /* global PIXI */
-const useCanvas = true;
+const useCanvas = new URLSearchParams(window.location.search).get('canvas') !== null;
 
 if (useCanvas) {
     PIXI.tilemap.CanvasTileRenderer.registerExtension();
