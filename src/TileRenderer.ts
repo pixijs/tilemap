@@ -1,9 +1,8 @@
 import { WRAP_MODES } from '@pixi/constants';
-import { BaseTexture, Buffer, ObjectRenderer, Renderer } from '@pixi/core';
+import { BaseTexture, Buffer, ObjectRenderer, Renderer, utils } from '@pixi/core';
 import { settings } from './settings';
 import { TilemapGeometry, TilemapShader } from './TilemapShader';
 import { TextileResource } from './TextileResource';
-import * as utils from '@pixi/utils';
 
 // For some reason ESLint goes mad with indendation in this file ^&^
 /* eslint-disable no-mixed-spaces-and-tabs, indent */

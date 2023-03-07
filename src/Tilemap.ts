@@ -1,8 +1,7 @@
 import { Container, Bounds } from '@pixi/display';
 import { DRAW_MODES } from '@pixi/constants';
-import { Texture, Renderer } from '@pixi/core';
+import { Texture, Renderer, Matrix, Rectangle, groupD8 } from '@pixi/core';
 import { TileRenderer } from './TileRenderer';
-import { Matrix, Rectangle, groupD8 } from '@pixi/math';
 import { settings } from './settings';
 import { CanvasTileRenderer } from './CanvasTileRenderer';
 
@@ -339,7 +338,7 @@ export class Tilemap extends Container
         {
             const wt = this.worldTransform;
 
-            renderer.context.setTransform(
+            renderer.canvasContext.activeContext.setTransform(
                 wt.a,
                 wt.b,
                 wt.c,
@@ -358,7 +357,7 @@ export class Tilemap extends Container
         const points = this.pointsBuf;
         const tileAnim = this.tileAnim || (renderer.plugins.tilemap && renderer.plugins.tilemap.tileAnim);
 
-        renderer.context.fillStyle = '#000000';
+        renderer.canvasContext.activeContext.fillStyle = '#000000';
         for (let i = 0, n = points.length; i < n; i += POINT_STRUCT_SIZE)
         {
             let x1 = points[i + POINT_STRUCT.U];
@@ -378,18 +377,18 @@ export class Tilemap extends Container
 
             if (textureIndex >= 0 && this.tileset[textureIndex])
             {
-                renderer.context.globalAlpha = alpha;
-                renderer.context.drawImage(
+                renderer.canvasContext.activeContext.globalAlpha = alpha;
+                renderer.canvasContext.activeContext.drawImage(
                     (this.tileset[textureIndex] as any).getDrawableSource(),
                     x1, y1, w, h, x2, y2, w, h
                 );
             }
             else
             {
-                renderer.context.globalAlpha = 0.5;
-                renderer.context.fillRect(x2, y2, w, h);
+                renderer.canvasContext.activeContext.globalAlpha = 0.5;
+                renderer.canvasContext.activeContext.fillRect(x2, y2, w, h);
             }
-            renderer.context.globalAlpha = 1;
+            renderer.canvasContext.activeContext.globalAlpha = 1;
         }
     }
 
