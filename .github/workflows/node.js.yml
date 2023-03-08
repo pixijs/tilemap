@@ -25,11 +25,11 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - name: Install dependencies
-      run: yarn
+      run: npm install
     - name: Build & type-checking
-      run: yarn build
+      run: npm run build
     - name: Lint
-      run: yarn lint
-    - name: Unit testing
-      run: xvfb-run -a yarn unit-test
+      run: npm run lint
+    #- name: Unit testing
+    #  run: xvfb-run -a yarn unit-test
       

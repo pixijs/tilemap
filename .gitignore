@@ -33,6 +33,9 @@ compile
 # yarn
 yarn.lock
 
+# npm
+package-lock.json
+
 # CommonJS
 dist
 index.d.ts
