@@ -28,7 +28,7 @@
     "watch": "vite build --watch",
     "build": "vite build",
     "docs": "typedoc --out ./docs/ --readme README.md ./src/",
-    "lint": "eslint ./src --ignore-path .gitignore",
+    "lint": "eslint . --ignore-path .gitignore",
     "test": "vitest --run --reporter verbose",
     "prepare": "npm run build"
   },
