@@ -15,8 +15,10 @@ export default defineConfig({
             formats: ['es', 'cjs', 'umd'],
             entry: resolve(__dirname, 'src/index.ts'),
             name: 'PIXI.tilemap',
-            fileName: (format, _) => {
-                switch (format) {
+            fileName: (format) =>
+            {
+                switch (format)
+                {
                     case 'cjs':
                         return 'pixi-tilemap.js';
                     case 'es':
@@ -39,9 +41,6 @@ export default defineConfig({
         },
     },
     plugins: [dts({
-        rollupTypes: true,
-        compilerOptions: {
-            removeComments: false
-        }
+        rollupTypes: true
     })]
 });

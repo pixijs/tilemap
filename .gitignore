@@ -27,6 +27,9 @@ docs/
 # jetBrains IDE ignores
 .idea
 
+# vscode IDE ignores
+.vscode
+
 # tsc compile
 compile
 

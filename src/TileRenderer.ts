@@ -12,38 +12,38 @@ import { TextileResource } from './TextileResource';
  */
 export class TileRenderer extends ObjectRenderer
 {
-	/** The managing renderer */
-	public readonly renderer: Renderer;
+    /** The managing renderer */
+    public readonly renderer: Renderer;
 
-	/** The tile animation frame */
-	public tileAnim = [0, 0];
+    /** The tile animation frame */
+    public tileAnim = [0, 0];
 
-	private ibLen = 0;// index buffer length
+    private ibLen = 0;// index buffer length
 
-	/** The index buffer for the tilemaps to share. */
-	private indexBuffer: Buffer = null;
+    /** The index buffer for the tilemaps to share. */
+    private indexBuffer: Buffer = null;
 
-	/** The shader used to render tilemaps. */
-	private shader: TilemapShader;
+    /** The shader used to render tilemaps. */
+    private shader: TilemapShader;
 
-	/**
+    /**
 	 * {@link TextileResource} instances used to upload textures batched in tiled groups. This is
 	 * used only if {@link settings.TEXTURES_PER_TILEMAP} is greater than 1.
 	 */
-	private textiles: Array<TextileResource> = [];
+    private textiles: Array<TextileResource> = [];
 
-	/** @param renderer - The managing renderer */
-	constructor(renderer: Renderer)
-	{
+    /** @param renderer - The managing renderer */
+    constructor(renderer: Renderer)
+    {
 	    super(renderer);
 
 	    this.shader = new TilemapShader(settings.TEXTURES_PER_TILEMAP);
 	    this.indexBuffer = new Buffer(undefined, true, true);
 	    this.checkIndexBuffer(2000);
 	    this.makeTextiles();
-	}
+    }
 
-	/**
+    /**
 	 * Binds the tile textures to the renderer, and updates the tilemap shader's `uSamplerSize` uniform.
 	 *
 	 * If {@link settings.TEXTILE_UNITS}
@@ -51,102 +51,103 @@ export class TileRenderer extends ObjectRenderer
 	 * @param renderer - The renderer to which the textures are to be bound.
 	 * @param textures - The tile textures being bound.
 	 */
-	bindTileTextures(renderer: Renderer, textures: Array<BaseTexture>): void
-	{
+    bindTileTextures(renderer: Renderer, textures: Array<BaseTexture>): void
+    {
 	    const len = textures.length;
-		const shader = this.shader;
+        const shader = this.shader;
 	    const maxTextures = settings.TEXTURES_PER_TILEMAP;
-		const samplerSize: Array<number> = shader.uniforms.uSamplerSize;
+        const samplerSize: Array<number> = shader.uniforms.uSamplerSize;
 
 	    if (len > settings.TEXTILE_UNITS * maxTextures)
 	    {
-			// TODO: Show error message instead of silently failing!
+            // TODO: Show error message instead of silently failing!
 	        return;
 	    }
 
-		if (settings.TEXTILE_UNITS <= 1)
+        if (settings.TEXTILE_UNITS <= 1)
 	    {
-			// Bind each texture directly & update samplerSize.
-			for (let i = 0; i < textures.length; i++)
-			{
-				const texture = textures[i];
+            // Bind each texture directly & update samplerSize.
+            for (let i = 0; i < textures.length; i++)
+            {
+                const texture = textures[i];
 
-				if (!texture || !texture.valid)
-				{
-					return;
-				}
+                if (!texture || !texture.valid)
+                {
+                    return;
+                }
 
-				renderer.texture.bind(textures[i], i);
+                renderer.texture.bind(textures[i], i);
 
-				samplerSize[i * 2] = 1.0 / textures[i].realWidth;
-				samplerSize[(i * 2) + 1] = 1.0 / textures[i].realHeight;
-			}
+                samplerSize[i * 2] = 1.0 / textures[i].realWidth;
+                samplerSize[(i * 2) + 1] = 1.0 / textures[i].realHeight;
+            }
 	    }
-		else
-		{
-			// Ensure we have enough textiles, in case settings.TEXTILE_UNITS was modified.
-			this.makeTextiles();
+        else
+        {
+            // Ensure we have enough textiles, in case settings.TEXTILE_UNITS was modified.
+            this.makeTextiles();
 
-			const usedTextiles = Math.ceil(len / settings.TEXTILE_UNITS);
+            const usedTextiles = Math.ceil(len / settings.TEXTILE_UNITS);
 
-			// First ensure each textile has all tiles point to the right textures.
-			for (let i = 0; i < len; i++)
-			{
-				const texture = textures[i];
+            // First ensure each textile has all tiles point to the right textures.
+            for (let i = 0; i < len; i++)
+            {
+                const texture = textures[i];
 
-				if (texture && texture.valid)
-				{
-					const resourceIndex = Math.floor(i / settings.TEXTILE_UNITS);
-					const tileIndex = i % settings.TEXTILE_UNITS;
+                if (texture && texture.valid)
+                {
+                    const resourceIndex = Math.floor(i / settings.TEXTILE_UNITS);
+                    const tileIndex = i % settings.TEXTILE_UNITS;
 
-					this.textiles[resourceIndex].tile(tileIndex, texture);
-				}
-			}
+                    this.textiles[resourceIndex].tile(tileIndex, texture);
+                }
+            }
 
-			// Then bind the textiles + update samplerSize.
-			for (let i = 0; i < usedTextiles; i++)
-			{
-				renderer.texture.bind(this.textiles[i].baseTexture, i);
+            // Then bind the textiles + update samplerSize.
+            for (let i = 0; i < usedTextiles; i++)
+            {
+                renderer.texture.bind(this.textiles[i].baseTexture, i);
 
-				samplerSize[i * 2] = 1.0 / this.textiles[i].width;
-				samplerSize[(i * 2) + 1] = 1.0 / this.textiles[i].baseTexture.height;
-			}
-		}
+                samplerSize[i * 2] = 1.0 / this.textiles[i].width;
+                samplerSize[(i * 2) + 1] = 1.0 / this.textiles[i].baseTexture.height;
+            }
+        }
 
-		shader.uniforms.uSamplerSize = samplerSize;
-	}
+        shader.uniforms.uSamplerSize = samplerSize;
+    }
 
-	start(): void
-	{
+    start(): void
+    {
 	    // sorry, nothing
-	}
+    }
 
-	/**
+    /**
 	 * @internal
 	 * @ignore
 	 */
-	createVb(): TilemapGeometry
-	{
+    createVb(): TilemapGeometry
+    {
 	    const geom = new TilemapGeometry();
 
 	    geom.addIndex(this.indexBuffer);
 	    geom.lastTimeAccess = Date.now();
 
 	    return geom;
-	}
+    }
 
-	/** @return The {@link TilemapShader} shader that this rendering pipeline is using. */
-	getShader(): TilemapShader { return this.shader; }
+    /** @return The {@link TilemapShader} shader that this rendering pipeline is using. */
+    getShader(): TilemapShader { return this.shader; }
 
-	destroy(): void
-	{
+    destroy(): void
+    {
 	    super.destroy();
 	    // this.rectShader.destroy();
 	    this.shader = null;
-	}
+    }
 
-	public checkIndexBuffer(size: number, _vb: TilemapGeometry = null): void
-	{
+    // eslint-disable-next-line no-unused-vars
+    public checkIndexBuffer(size: number, _vb: TilemapGeometry = null): void
+    {
 	    const totalIndices = size * 6;
 
 	    if (totalIndices <= this.ibLen)
@@ -172,11 +173,11 @@ export class TileRenderer extends ObjectRenderer
 	    // 		this.swapIndex(vb, this.indexBuffer);
 	    // 	}
 	    // }
-	}
+    }
 
-	/** Makes textile resources and initializes {@link TileRenderer.textiles}. */
-	private makeTextiles(): void
-	{
+    /** Makes textile resources and initializes {@link TileRenderer.textiles}. */
+    private makeTextiles(): void
+    {
 	    if (settings.TEXTILE_UNITS <= 1)
 	    {
 	        return;
@@ -184,15 +185,15 @@ export class TileRenderer extends ObjectRenderer
 
 	    for (let i = 0; i < settings.TEXTILE_UNITS; i++)
 	    {
-			if (this.textiles[i]) continue;
+            if (this.textiles[i]) continue;
 
-			const resource = new TextileResource();
+            const resource = new TextileResource();
 	        const baseTex = new BaseTexture(resource);
 
 	        baseTex.scaleMode = settings.TEXTILE_SCALE_MODE;
 	        baseTex.wrapMode = WRAP_MODES.CLAMP;
 
-			this.textiles[i] = resource;
+            this.textiles[i] = resource;
 	    }
-	}
+    }
 }

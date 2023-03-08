@@ -13,7 +13,8 @@ import { extensions, ExtensionType, IRenderer } from '@pixi/core';
  * ```
  */
 // TODO: Move to @pixi/tilemap-canvas
-export class CanvasTileRenderer {
+export class CanvasTileRenderer
+{
     /** The renderer */
     renderer: IRenderer;
 
@@ -24,12 +25,14 @@ export class CanvasTileRenderer {
     dontUseTransform = false;
 
     /** @param renderer */
-    constructor(renderer: IRenderer) {
+    constructor(renderer: IRenderer)
+    {
         this.renderer = renderer;
         this.tileAnim = [0, 0];
     }
 
-    static registerExtension() {
+    static registerExtension()
+    {
         extensions.add({
             name: 'tilemap',
             type: ExtensionType.CanvasRendererPlugin,
@@ -38,8 +41,10 @@ export class CanvasTileRenderer {
     }
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    static getInstance(renderer: any): CanvasTileRenderer {
-        if (!renderer.plugins.tilemap) {
+    static getInstance(renderer: any): CanvasTileRenderer
+    {
+        if (!renderer.plugins.tilemap)
+        {
             throw new Error('Extension not registered!');
         }
 

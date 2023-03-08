@@ -28,20 +28,9 @@
     "watch": "vite build --watch",
     "build": "vite build",
     "docs": "typedoc --out ./docs/ --readme README.md ./src/",
-    "lint": "eslint ./src",
+    "lint": "eslint ./src --ignore-path .gitignore",
     "test": "vitest --run --reporter verbose",
     "prepare": "npm run build"
-  },
-  "eslintConfig": {
-    "extends": [
-      "@pixi/eslint-config"
-    ],
-    "rules": {
-      "linebreak-style": "off"
-    },
-    "ignorePatterns": [
-      "dist"
-    ]
   },
   "files": [
     "dist/",
