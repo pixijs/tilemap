@@ -38,6 +38,10 @@ export default defineConfig({
             },
         },
     },
-    test: {},
-    plugins: [dts()]
+    plugins: [dts({
+        rollupTypes: true,
+        compilerOptions: {
+            removeComments: false
+        }
+    })]
 });
