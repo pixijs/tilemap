@@ -29,7 +29,7 @@
     "build": "vite build",
     "docs": "typedoc --out ./docs/ --readme README.md ./src/",
     "lint": "eslint ./src",
-    "unit-test": "vitest --run --reporter verbose",
+    "test": "vitest --run --reporter verbose",
     "prepare": "npm run build"
   },
   "eslintConfig": {
