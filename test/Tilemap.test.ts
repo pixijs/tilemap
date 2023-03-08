@@ -18,6 +18,6 @@ describe('Tilemap', () => {
         expect(bounds.x).to.equal(0);
         expect(bounds.y).to.equal(0);
         expect(bounds.width).to.equal(200);
-        expect(bounds.height).to.equal(102);
+        expect(bounds.height).to.equal(100);
     });
 });
