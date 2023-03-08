@@ -38,5 +38,6 @@ export default defineConfig({
             },
         },
     },
+    test: {},
     plugins: [dts()]
 });

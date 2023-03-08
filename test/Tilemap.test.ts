@@ -1,11 +1,9 @@
-const { BaseTexture, Texture } = require('@pixi/core');
-const { Tilemap } = require('../');
-const expect = require('chai').expect;
+import { describe, it, expect } from 'vitest';
+import { BaseTexture, Texture } from '@pixi/core';
+import { Tilemap } from '../';
 
-describe('Tilemap', () =>
-{
-    it('should calculate local bounds', () =>
-    {
+describe('Tilemap', () => {
+    it('should calculate local bounds', () => {
         const texture = new Texture(new BaseTexture(null, {
             width: 100,
             height: 100,

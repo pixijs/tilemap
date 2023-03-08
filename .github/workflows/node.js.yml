@@ -30,6 +30,6 @@ jobs:
       run: npm run build
     - name: Lint
       run: npm run lint
-    #- name: Unit testing
-    #  run: xvfb-run -a yarn unit-test
+    - name: Unit testing
+      run: npm run unit-test
       
