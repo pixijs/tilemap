@@ -4,8 +4,7 @@ import dts from 'vite-plugin-dts';
 
 const globals = {
     '@pixi/core': 'PIXI',
-    '@pixi/display': 'PIXI',
-    '@pixi/graphics': 'PIXI'
+    '@pixi/display': 'PIXI'
 };
 
 export default defineConfig({
