@@ -2,10 +2,7 @@
 
 module.exports = {
     root: true,
-    extends: [
-        '@pixi/eslint-config',
-        'eslint:recommended'
-    ],
+    extends: ['@pixi/eslint-config'],
     rules: {
         'linebreak-style': 'off'
     },

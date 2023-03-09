@@ -27,7 +27,7 @@ export default defineConfig({
                         return 'pixi-tilemap.umd.js';
                 }
 
-                return 'pixi-tilemap';
+                return `pixi-tilemap.${format}.js`;
             },
         },
         rollupOptions: {
