@@ -1,5 +1,4 @@
-import { WRAP_MODES } from '@pixi/constants';
-import { BaseTexture, Buffer, ObjectRenderer, Renderer, utils } from '@pixi/core';
+import { BaseTexture, Buffer, ObjectRenderer, Renderer, utils, WRAP_MODES } from '@pixi/core';
 import { settings } from './settings';
 import { TilemapGeometry, TilemapShader } from './TilemapShader';
 import { TextileResource } from './TextileResource';

@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { Container, Bounds } from '@pixi/display';
-import { DRAW_MODES } from '@pixi/constants';
-import { Texture, Renderer, Matrix, Rectangle, groupD8 } from '@pixi/core';
+import { Texture, Renderer, Matrix, Rectangle, groupD8, DRAW_MODES } from '@pixi/core';
 import { TileRenderer } from './TileRenderer';
 import { settings } from './settings';
 import { CanvasTileRenderer } from './CanvasTileRenderer';
