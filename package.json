@@ -24,7 +24,6 @@
   },
   "scripts": {
     "start": "vite build && vite",
-    "preview": "vite preview --port 4173",
     "watch": "vite build --watch",
     "build": "vite build",
     "docs": "typedoc --out ./docs/ --readme README.md ./src/",
