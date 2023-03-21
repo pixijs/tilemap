@@ -1,6 +1,6 @@
+/* eslint-disable no-unused-vars */
 import { Container, Bounds } from '@pixi/display';
-import { DRAW_MODES } from '@pixi/constants';
-import { Texture, Renderer, Matrix, Rectangle, groupD8 } from '@pixi/core';
+import { Texture, Renderer, Matrix, Rectangle, groupD8, DRAW_MODES } from '@pixi/core';
 import { TileRenderer } from './TileRenderer';
 import { settings } from './settings';
 import { CanvasTileRenderer } from './CanvasTileRenderer';
@@ -9,7 +9,8 @@ import type { BaseTexture } from '@pixi/core';
 import type { IDestroyOptions } from '@pixi/display';
 import type { TilemapGeometry } from './TilemapShader';
 
-enum POINT_STRUCT {
+enum POINT_STRUCT
+    {
     U,
     V,
     X,
@@ -349,7 +350,7 @@ export class Tilemap extends Container
         }
 
         this.renderCanvasCore(renderer);
-    }
+    };
 
     renderCanvasCore(renderer: any): void
     {

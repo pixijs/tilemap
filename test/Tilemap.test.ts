@@ -1,6 +1,6 @@
-const { BaseTexture, Texture } = require('@pixi/core');
-const { Tilemap } = require('../');
-const expect = require('chai').expect;
+import { describe, it, expect } from 'vitest';
+import { BaseTexture, Texture } from '@pixi/core';
+import { Tilemap } from '../';
 
 describe('Tilemap', () =>
 {

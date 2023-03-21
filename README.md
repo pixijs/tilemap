@@ -1,13 +1,12 @@
 # @pixi/tilemap - PixiJS Tilemap Kit
 
 [![Node.js CI](https://github.com/pixijs/tilemap/actions/workflows/node.js.yml/badge.svg)](https://github.com/pixijs/tilemap/actions/workflows/node.js.yml)
-[![Latest PixiJS Node.js CI](https://github.com/pixijs/tilemap/actions/workflows/pixijs.yml/badge.svg)](https://github.com/pixijs/tilemap/actions/workflows/pixijs.yml)
 <p align="center">
 <img src="https://i.imgur.com/hfoiBRk.png" width="1280px" />
 <p/>
 
 This package provides a low-level rectangular tilemap implementation, optimized for high performance rendering and a
-out-of-the-box canvas fallback. It's designed to work with PixiJS 6. **We've migrated from pixi-tilemap to @pixi/tilemap on npm!**
+out-of-the-box canvas fallback. It's designed to work with PixiJS 7. **We've migrated from pixi-tilemap to @pixi/tilemap on npm!**
 
 ## Installation :package:
 
@@ -28,11 +27,11 @@ In short, the tilemap you create will render each tile texture at the provided p
 spritesheet is used to load the tileset assets:
 
 ```ts
-import { Loader } from '@pixi/loaders';
+import { Assets } from 'pixi.js';
 import { CompositeTilemap } from '@pixi/tilemap';
 
-Loader.shared.add('atlas.json');
-Loader.shared.onLoad(function onTilesetLoaded()
+Assets.add('atlas', 'atlas.json');
+Assets.load(['atlas']).then(() =>
 {
     const tilemap = new CompositeTilemap();
 

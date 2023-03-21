@@ -1,7 +1,8 @@
 /* global PIXI */
 const useCanvas = new URLSearchParams(window.location.search).get('canvas') !== null;
 
-if (useCanvas) {
+if (useCanvas)
+{
     PIXI.tilemap.CanvasTileRenderer.registerExtension();
 }
 
@@ -11,24 +12,29 @@ const tilemap = new PIXI.tilemap.CompositeTilemap();
 document.body.appendChild(app.view);
 app.stage.addChild(tilemap);
 
-const loadAssets = async () => {
+const loadAssets = async () =>
+{
     PIXI.Assets.add('atlas', 'assets/atlas.json');
     PIXI.Assets.add('button', 'assets/button.png');
     await PIXI.Assets.load(['atlas', 'button']);
 };
 
-const buildTilemap = () => {
+const buildTilemap = () =>
+{
     // Clear everything, like a PIXI.Graphics
     tilemap.clear();
 
     const size = 32;
 
     // if you are too lazy, just specify filename and pixi will find it in cache
-    for (let i = 0; i < 7; i++) {
-        for (let j = 0; j < 5; j++) {
+    for (let i = 0; i < 7; i++)
+    {
+        for (let j = 0; j < 5; j++)
+        {
             tilemap.tile('grass.png', i * size, j * size);
 
-            if (i % 2 === 1 && j % 2 === 1) {
+            if (i % 2 === 1 && j % 2 === 1)
+            {
                 tilemap.tile('tough.png', i * size, j * size);
             }
         }
@@ -66,13 +72,15 @@ const buildTilemap = () => {
     // canvas in pixi-tilemap does not work with rotate!!!!
     const origTex = textures['chest.png'];
 
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 8; i++)
+    {
         const frame = origTex.frame.clone();
         const orig = origTex.orig.clone();
         const trim = origTex.orig.clone();
         const rotate = i * 2;
 
-        if (rotate % 4 === 2) {
+        if (rotate % 4 === 2)
+        {
             orig.width = frame.height;
             orig.height = frame.width;
         }
@@ -85,7 +93,8 @@ const buildTilemap = () => {
     }
 };
 
-const initialize = () => {
+const initialize = () =>
+{
     buildTilemap();
 
     const pic = new PIXI.Sprite(PIXI.Assets.get('button'));
@@ -94,11 +103,13 @@ const initialize = () => {
     app.stage.addChild(pic);
 
     let frame = 0;
-    const animShader = () => {
+    const animShader = () =>
+    {
         // animate X and Y frames
         tilemap.tileAnim = [frame, frame];
         frame++;
-        if (useCanvas) {
+        if (useCanvas)
+        {
             frame = frame > 1 ? 0 : 1;
         }
     };
@@ -106,7 +117,8 @@ const initialize = () => {
     setInterval(animShader, 100);
 };
 
-const runApp = async () => {
+const runApp = async () =>
+{
     await loadAssets();
     initialize();
 };
