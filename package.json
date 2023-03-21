@@ -13,11 +13,11 @@
   "namespace": "PIXI.tilemap",
   "types": "./index.d.ts",
   "homepage": "http://www.rpgmakerweb.com/",
-  "bugs": "https://github.com/pixijs/pixi-tilemap/issues",
+  "bugs": "https://github.com/pixijs/tilemap/issues",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/pixijs/pixi-tilemap.git"
+    "url": "https://github.com/pixijs/tilemap.git"
   },
   "scripts": {
     "cleanup": "rimraf dist && mkdirp dist && rimraf lib && mkdirp lib && rimraf compile",
