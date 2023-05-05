@@ -63,7 +63,7 @@ void main(void)
 
 import { Buffer, Geometry, Shader, Program, Matrix } from '@pixi/core';
 
-// For some reason ESLint goes mad with indendation in this file ^&^
+// For some reason, ESLint goes mad with indentation in this file ^&^
 /* eslint-disable no-mixed-spaces-and-tabs, indent */
 
 export class TilemapShader extends Shader

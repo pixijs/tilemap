@@ -3,7 +3,7 @@ import { settings } from './settings';
 import { TilemapGeometry, TilemapShader } from './TilemapShader';
 import { TextileResource } from './TextileResource';
 
-// For some reason ESLint goes mad with indendation in this file ^&^
+// For some reason, ESLint goes mad with indentation in this file ^&^
 /* eslint-disable no-mixed-spaces-and-tabs, indent */
 
 /**

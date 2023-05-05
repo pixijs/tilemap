@@ -15,7 +15,7 @@ type TextureTile = {
     baseTexture: BaseTexture;
 };
 
-// For some reason ESLint goes mad with indendation in this file ^&^
+// For some reason, ESLint goes mad with indentation in this file ^&^
 /* eslint-disable indent */
 
 /**

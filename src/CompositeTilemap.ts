@@ -9,7 +9,7 @@ import type { TileRenderer } from './TileRenderer';
 /**
  * A tilemap composite that lazily builds tilesets layered into multiple tilemaps.
  *
- * The composite tileset is the concatenatation of the individual tilesets used in the tilemaps. You can
+ * The composite tileset is the concatenation of the individual tilesets used in the tilemaps. You can
  * preinitialized it by passing a list of tile textures to the constructor. Otherwise, the composite tilemap
  * is lazily built as you add more tiles with newer tile textures. A new tilemap is created once the last
  * tilemap has reached its limit (as set by {@link CompositeTilemap.texturesPerTilemap texturesPerTilemap}).
