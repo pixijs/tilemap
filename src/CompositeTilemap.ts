@@ -96,8 +96,8 @@ export class CompositeTilemap extends Container
     {
         super();
 
-        this.tileset(tileset);
         this.texturesPerTilemap = settings.TEXTURES_PER_TILEMAP;
+        this.tileset(tileset);
     }
 
     /**
