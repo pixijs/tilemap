@@ -21,7 +21,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/pixijs/tilemap.git"
+    "url": "git+https://github.com/pixijs/tilemap.git"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "start": "vite build && vite",
