@@ -1,5 +1,5 @@
 import { Container } from '@pixi/display';
-import { Texture, Renderer, BaseTexture, Matrix } from '@pixi/core';
+import { Texture, Renderer, TextureSource, Matrix } from '@pixi/core';
 import { Tilemap } from './Tilemap';
 import { settings } from './settings';
 import { CanvasTileRenderer } from './CanvasTileRenderer';
@@ -92,7 +92,7 @@ export class CompositeTilemap extends Container
      *  tilemaps. This is only an performance optimization, and using {@link CompositeTilemap.tile tile}
      *  will work equivalently.
      */
-    constructor(tileset?: Array<BaseTexture>)
+    constructor(tileset?: Array<TextureSource>)
     {
         super();
 
@@ -108,7 +108,7 @@ export class CompositeTilemap extends Container
      *
      * @param tileTextures - The list of tile textures that make up the tileset.
      */
-    tileset(tileTextures: Array<BaseTexture>): this
+    tileset(tileTextures: Array<TextureSource>): this
     {
         if (!tileTextures)
         {

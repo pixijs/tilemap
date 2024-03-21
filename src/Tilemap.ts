@@ -1,12 +1,11 @@
 /* eslint-disable no-unused-vars */
-import { Container, Bounds } from '@pixi/display';
-import { Texture, Renderer, Matrix, Rectangle, groupD8, DRAW_MODES } from '@pixi/core';
+import { Container, Bounds } from 'pixi.js';
+import { Texture, Renderer, Matrix, Rectangle, groupD8, DRAW_MODES } from 'pixi.js';
 import { TileRenderer } from './TileRenderer';
 import { settings } from './settings';
 import { CanvasTileRenderer } from './CanvasTileRenderer';
 
-import type { BaseTexture } from '@pixi/core';
-import type { IDestroyOptions } from '@pixi/display';
+import type { TextureSource, DestroyOptions } from 'pixi.js';
 import type { TilemapGeometry } from './TilemapShader';
 
 enum POINT_STRUCT
@@ -91,7 +90,7 @@ export class Tilemap extends Container
      * This should not be shuffled after tiles have been added into this tilemap. Usually, only tile textures
      * should be added after tiles have been added into the map.
      */
-    protected tileset: Array<BaseTexture>;
+    protected tileset: Array<TextureSource>;
 
     /**
      * The local bounds of the tilemap itself. This does not include DisplayObject children.
@@ -108,7 +107,7 @@ export class Tilemap extends Container
      * @param tileset - The tileset to use for the tilemap. This can be reset later with {@link Tilemap.setTileset}. The
      *      base-textures in this array must not be duplicated.
      */
-    constructor(tileset: BaseTexture | Array<BaseTexture>)
+    constructor(tileset: TextureSource | Array<TextureSource>)
     {
         super();
         this.setTileset(tileset);
@@ -117,7 +116,7 @@ export class Tilemap extends Container
     /**
      * @returns The tileset of this tilemap.
      */
-    getTileset(): Array<BaseTexture>
+    getTileset(): Array<TextureSource>
     {
         return this.tileset;
     }
@@ -128,7 +127,7 @@ export class Tilemap extends Container
      * @param tileset - The list of textures to use in the tilemap. If a base-texture (not array) is passed, it will
      *  be wrapped into an array. This should not contain any duplicates.
      */
-    setTileset(tileset: BaseTexture | Array<BaseTexture> = []): this
+    setTileset(tileset: TextureSource | Array<TextureSource> = []): this
     {
         if (!Array.isArray(tileset))
         {
@@ -136,9 +135,9 @@ export class Tilemap extends Container
         }
         for (let i = 0; i < tileset.length; i++)
         {
-            if ((tileset[i] as unknown as Texture).baseTexture)
+            if ((tileset[i] as unknown as Texture).source)
             {
-                tileset[i] = (tileset[i] as unknown as Texture).baseTexture;
+                tileset[i] = (tileset[i] as unknown as Texture).source;
             }
         }
 
@@ -183,7 +182,7 @@ export class Tilemap extends Container
      * @return This tilemap, good for chaining.
      */
     tile(
-        tileTexture: number | string | Texture | BaseTexture,
+        tileTexture: number | string | Texture | TextureSource,
         x: number,
         y: number,
         options: {
@@ -201,7 +200,7 @@ export class Tilemap extends Container
         } = {}
     ): this
     {
-        let baseTexture: BaseTexture;
+        let baseTexture: TextureSource;
         let textureIndex = -1;
 
         if (typeof tileTexture === 'number')
@@ -211,7 +210,7 @@ export class Tilemap extends Container
         }
         else
         {
-            let texture: Texture | BaseTexture;
+            let texture: Texture | TextureSource;
 
             if (typeof tileTexture === 'string')
             {
@@ -226,7 +225,7 @@ export class Tilemap extends Container
 
             for (let i = 0; i < textureList.length; i++)
             {
-                if (textureList[i] === texture.castToBaseTexture())
+                if (textureList[i] === texture.source)
                 {
                     textureIndex = i;
                     break;
@@ -241,7 +240,7 @@ export class Tilemap extends Container
                 options.tileHeight = options.tileHeight ?? texture.orig.height;
             }
 
-            baseTexture = texture.castToBaseTexture();
+            baseTexture = texture.source;
         }
 
         if (!baseTexture || textureIndex < 0)
@@ -254,8 +253,8 @@ export class Tilemap extends Container
         const {
             u = 0,
             v = 0,
-            tileWidth = baseTexture.realWidth,
-            tileHeight = baseTexture.realHeight,
+            tileWidth = baseTexture.width,
+            tileHeight = baseTexture.height,
             animX = 0,
             animY = 0,
             rotate = 0,
@@ -284,7 +283,7 @@ export class Tilemap extends Container
         pb.push(animDivisor);
         pb.push(alpha);
 
-        this.tilemapBounds.addFramePad(x, y, x + tileWidth, y + tileHeight, 0, 0);
+        this.tilemapBounds.addFrame(x, y, x + tileWidth, y + tileHeight);
 
         return this;
     }
@@ -331,68 +330,6 @@ export class Tilemap extends Container
         pb[pb.length - (POINT_STRUCT_SIZE - POINT_STRUCT.ALPHA)] = alpha;
     }
 
-    renderCanvas = (renderer: any): void =>
-    {
-        const plugin = CanvasTileRenderer.getInstance(renderer);
-
-        if (plugin && !plugin.dontUseTransform)
-        {
-            const wt = this.worldTransform;
-
-            renderer.canvasContext.activeContext.setTransform(
-                wt.a,
-                wt.b,
-                wt.c,
-                wt.d,
-                wt.tx * renderer.resolution,
-                wt.ty * renderer.resolution
-            );
-        }
-
-        this.renderCanvasCore(renderer);
-    };
-
-    renderCanvasCore(renderer: any): void
-    {
-        if (this.tileset.length === 0) return;
-        const points = this.pointsBuf;
-        const tileAnim = this.tileAnim || (renderer.plugins.tilemap && renderer.plugins.tilemap.tileAnim);
-
-        renderer.canvasContext.activeContext.fillStyle = '#000000';
-        for (let i = 0, n = points.length; i < n; i += POINT_STRUCT_SIZE)
-        {
-            let x1 = points[i + POINT_STRUCT.U];
-            let y1 = points[i + POINT_STRUCT.V];
-            const x2 = points[i + POINT_STRUCT.X];
-            const y2 = points[i + POINT_STRUCT.Y];
-            const w = points[i + POINT_STRUCT.TILE_WIDTH];
-            const h = points[i + POINT_STRUCT.TILE_HEIGHT];
-
-            x1 += points[i + POINT_STRUCT.ANIM_X] * tileAnim[0];
-            y1 += points[i + POINT_STRUCT.ANIM_Y] * tileAnim[1];
-
-            const textureIndex = points[i + POINT_STRUCT.TEXTURE_INDEX];
-            const alpha = points[i + POINT_STRUCT.ALPHA];
-
-            // canvas does not work with rotate yet
-
-            if (textureIndex >= 0 && this.tileset[textureIndex])
-            {
-                renderer.canvasContext.activeContext.globalAlpha = alpha;
-                renderer.canvasContext.activeContext.drawImage(
-                    (this.tileset[textureIndex] as any).getDrawableSource(),
-                    x1, y1, w, h, x2, y2, w, h
-                );
-            }
-            else
-            {
-                renderer.canvasContext.activeContext.globalAlpha = 0.5;
-                renderer.canvasContext.activeContext.fillRect(x2, y2, w, h);
-            }
-            renderer.canvasContext.activeContext.globalAlpha = 1;
-        }
-    }
-
     private vbId = 0;
     private vb: TilemapGeometry = null;
     private vbBuffer: ArrayBuffer = null;
@@ -422,10 +359,192 @@ export class Tilemap extends Container
             .copyTo(this._globalMat)
             .append(this.worldTransform);
 
-        shader.uniforms.shadowColor = this.shadowColor;
+        shader.uniforms.u_shadow_color = this.shadowColor;
         shader.uniforms.animationFrame = this.tileAnim || plugin.tileAnim;
 
         this.renderWebGLCore(renderer, plugin);
+    }
+
+    updateBuffer(plugin: TileRenderer)
+    {
+        const { points } = this;
+        const rectsCount = points.length / POINT_STRUCT_SIZE;
+        const textures = this.tileset;
+
+        if (textures.length === 0) return;
+
+        // lost context! recover!
+        let vb = this.vb;
+
+        if (!vb)
+        {
+            vb = plugin.createVb();
+            this.vb = vb;
+            this.vbId = (vb as any).id;
+            this.vbBuffer = null;
+            this.modificationMarker = 0;
+        }
+
+        plugin.checkIndexBuffer(rectsCount, vb);
+
+        const vertexBuf = vb.getBuffer('aVertexPosition');
+        // if layer was changed, re-upload vertices
+        const vertices = rectsCount * vb.vertPerQuad;
+
+        if (vertices === 0) return;
+
+        this.modificationMarker = vertices;
+        const vs = vb.stride * vertices;
+
+        if (!this.vbBuffer || this.vbBuffer.byteLength < vs)
+        {
+            // !@#$ happens, need resize
+            let bk = vb.stride;
+
+            while (bk < vs)
+            {
+                bk *= 2;
+            }
+            this.vbBuffer = new ArrayBuffer(bk);
+            this.vbArray = new Float32Array(this.vbBuffer);
+            this.vbInts = new Uint32Array(this.vbBuffer);
+        }
+
+        const arr = this.vbArray;
+        let sz = 0;
+        let textureId = 0;
+
+        for (let i = 0; i < points.length; i += POINT_STRUCT_SIZE)
+        {
+            const eps = 0.5;
+
+            if (this.compositeParent)
+            {
+                textureId = points[i + POINT_STRUCT.TEXTURE_INDEX];
+            }
+            const x = points[i + POINT_STRUCT.X];
+            const y = points[i + POINT_STRUCT.Y];
+            const w = points[i + POINT_STRUCT.TILE_WIDTH];
+            const h = points[i + POINT_STRUCT.TILE_HEIGHT];
+            const u = points[i + POINT_STRUCT.U];
+            const v = points[i + POINT_STRUCT.V];
+            let rotate = points[i + POINT_STRUCT.ROTATE];
+
+            const animX = points[i + POINT_STRUCT.ANIM_X];
+            const animY = points[i + POINT_STRUCT.ANIM_Y];
+            const animWidth = points[i + POINT_STRUCT.ANIM_COUNT_X] || 1024;
+            const animHeight = points[i + POINT_STRUCT.ANIM_COUNT_Y] || 1024;
+
+            const animXEncoded = animX + (animWidth * 2048);
+            const animYEncoded = animY + (animHeight * 2048);
+            const animDivisor = points[i + POINT_STRUCT.ANIM_DIVISOR];
+            const alpha = points[i + POINT_STRUCT.ALPHA];
+
+            let u0: number;
+            let v0: number; let u1: number;
+            let v1: number; let u2: number;
+            let v2: number; let u3: number;
+            let v3: number;
+
+            if (rotate === 0)
+            {
+                u0 = u;
+                v0 = v;
+                u1 = u + w;
+                v1 = v;
+                u2 = u + w;
+                v2 = v + h;
+                u3 = u;
+                v3 = v + h;
+            }
+            else
+            {
+                let w2 = w / 2;
+                let h2 = h / 2;
+
+                if (rotate % 4 !== 0)
+                {
+                    w2 = h / 2;
+                    h2 = w / 2;
+                }
+                const cX = u + w2;
+                const cY = v + h2;
+
+                rotate = groupD8.add(rotate, groupD8.NW);
+                u0 = cX + (w2 * groupD8.uX(rotate));
+                v0 = cY + (h2 * groupD8.uY(rotate));
+
+                rotate = groupD8.add(rotate, 2); // rotate 90 degrees clockwise
+                u1 = cX + (w2 * groupD8.uX(rotate));
+                v1 = cY + (h2 * groupD8.uY(rotate));
+
+                rotate = groupD8.add(rotate, 2);
+                u2 = cX + (w2 * groupD8.uX(rotate));
+                v2 = cY + (h2 * groupD8.uY(rotate));
+
+                rotate = groupD8.add(rotate, 2);
+                u3 = cX + (w2 * groupD8.uX(rotate));
+                v3 = cY + (h2 * groupD8.uY(rotate));
+            }
+
+            arr[sz++] = x;
+            arr[sz++] = y;
+            arr[sz++] = u0;
+            arr[sz++] = v0;
+            arr[sz++] = u + eps;
+            arr[sz++] = v + eps;
+            arr[sz++] = u + w - eps;
+            arr[sz++] = v + h - eps;
+            arr[sz++] = animXEncoded;
+            arr[sz++] = animYEncoded;
+            arr[sz++] = textureId;
+            arr[sz++] = animDivisor;
+            arr[sz++] = alpha;
+
+            arr[sz++] = x + w;
+            arr[sz++] = y;
+            arr[sz++] = u1;
+            arr[sz++] = v1;
+            arr[sz++] = u + eps;
+            arr[sz++] = v + eps;
+            arr[sz++] = u + w - eps;
+            arr[sz++] = v + h - eps;
+            arr[sz++] = animXEncoded;
+            arr[sz++] = animYEncoded;
+            arr[sz++] = textureId;
+            arr[sz++] = animDivisor;
+            arr[sz++] = alpha;
+
+            arr[sz++] = x + w;
+            arr[sz++] = y + h;
+            arr[sz++] = u2;
+            arr[sz++] = v2;
+            arr[sz++] = u + eps;
+            arr[sz++] = v + eps;
+            arr[sz++] = u + w - eps;
+            arr[sz++] = v + h - eps;
+            arr[sz++] = animXEncoded;
+            arr[sz++] = animYEncoded;
+            arr[sz++] = textureId;
+            arr[sz++] = animDivisor;
+            arr[sz++] = alpha;
+
+            arr[sz++] = x;
+            arr[sz++] = y + h;
+            arr[sz++] = u3;
+            arr[sz++] = v3;
+            arr[sz++] = u + eps;
+            arr[sz++] = v + eps;
+            arr[sz++] = u + w - eps;
+            arr[sz++] = v + h - eps;
+            arr[sz++] = animXEncoded;
+            arr[sz++] = animYEncoded;
+            arr[sz++] = textureId;
+            arr[sz++] = animDivisor;
+            arr[sz++] = alpha;
+        }
+
+        vertexBuf.data = arr;
     }
 
     renderWebGLCore(renderer: Renderer, plugin: TileRenderer): void
@@ -489,8 +608,6 @@ export class Tilemap extends Container
             let sz = 0;
             // let tint = 0xffffffff;
             let textureId = 0;
-            let shiftU: number = this.offsetX;
-            let shiftV: number = this.offsetY;
 
             // let tint = 0xffffffff;
             // const tint = -1;
@@ -503,26 +620,14 @@ export class Tilemap extends Container
                 {
                     const textureIndex = points[i + POINT_STRUCT.TEXTURE_INDEX];
 
-                    if (boundCountPerBuffer > 1)
-                    {
-                        // TODO: what if its more than 4?
-                        textureId = (textureIndex >> 2);
-                        shiftU = this.offsetX * (textureIndex & 1);
-                        shiftV = this.offsetY * ((textureIndex >> 1) & 1);
-                    }
-                    else
-                    {
-                        textureId = textureIndex;
-                        shiftU = 0;
-                        shiftV = 0;
-                    }
+                    textureId = textureIndex;
                 }
                 const x = points[i + POINT_STRUCT.X];
                 const y = points[i + POINT_STRUCT.Y];
                 const w = points[i + POINT_STRUCT.TILE_WIDTH];
                 const h = points[i + POINT_STRUCT.TILE_HEIGHT];
-                const u = points[i + POINT_STRUCT.U] + shiftU;
-                const v = points[i + POINT_STRUCT.V] + shiftV;
+                const u = points[i + POINT_STRUCT.U];
+                const v = points[i + POINT_STRUCT.V];
                 let rotate = points[i + POINT_STRUCT.ROTATE];
 
                 const animX = points[i + POINT_STRUCT.ANIM_X];
@@ -639,7 +744,7 @@ export class Tilemap extends Container
                 arr[sz++] = alpha;
             }
 
-            vertexBuf.update(arr);
+            vertexBuf.data = arr;
         }
 
         (renderer.geometry as any).bind(vb, shader);
@@ -693,7 +798,7 @@ export class Tilemap extends Container
     }
 
     /** @override */
-    destroy(options?: IDestroyOptions): void
+    destroy(options?: DestroyOptions): void
     {
         super.destroy(options);
         this.destroyVb();

@@ -1,6 +1,6 @@
 {
   "name": "@pixi/tilemap",
-  "version": "4.1.0",
+  "version": "5.0.0",
   "description": "A low-level, optimized rectangular tilemap implementation for PixiJS.",
   "author": "Ivan Popelyshev",
   "contributors": [
@@ -10,9 +10,9 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/pixi-tilemap.es.js",
-      "require": "./dist/pixi-tilemap.umd.js"
+      "import": "./lib/index.mjs",
+      "require": "./lib/index.js",
+      "types": "./lib/index.d.ts"
     }
   },
   "types": "./dist/index.d.ts",
@@ -27,29 +27,37 @@
     "access": "public"
   },
   "scripts": {
-    "start": "vite build && vite",
-    "watch": "vite build --watch",
-    "build": "vite build",
-    "docs": "typedoc --out ./docs/ --readme README.md ./src/",
-    "lint": "eslint . --ignore-path .gitignore",
-    "test": "vitest --run --reporter verbose",
-    "prepare": "npm run build"
+    "clean": "xs clean",
+    "start": "xs serve",
+    "watch": "xs watch",
+    "build": "xs build",
+    "lint": "xs lint",
+    "lint:fix": "xs lint --fix",
+    "types": "xs types",
+    "release": "xs release",
+    "docs": "xs docs",
+    "deploy": "xs deploy",
+    "test": "xs build,docs"
   },
   "files": [
-    "dist/",
-    "LICENSE",
-    "package.json",
+    "lib",
+    "dist",
     "README.md"
   ],
+  "peerDependencies": {
+    "pixi.js": ">=8.0.2"
+  },
   "devDependencies": {
-    "@pixi/core": "^7.0.4",
-    "@pixi/display": "^7.0.4",
     "@pixi/eslint-config": "^4.0.1",
-    "@types/node": "^18.14.6",
-    "eslint": "^8.35.0",
-    "typescript": "^4.9.5",
-    "vite": "^4.1.4",
-    "vite-plugin-dts": "^2.1.0",
-    "vitest": "^0.29.2"
+    "@pixi/extension-scripts": "^2.4.0",
+    "@pixi/webdoc-template": "^2.2.3",
+    "@webdoc/cli": "^2.2.0",
+    "copyfiles": "^2.4.1",
+    "npm-run-all": "^4.1.5",
+    "pixi.js": "^8.0.0-X",
+    "pre-commit": "^1.2.2",
+    "rimraf": "^4.1.1",
+    "tslib": "^2.6.2",
+    "typescript": "^5.3.3"
   }
 }

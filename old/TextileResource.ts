@@ -1,5 +1,5 @@
 import { BaseTexture, Renderer, Resource, Texture, GLTexture, ALPHA_MODES } from '@pixi/core';
-import { settings } from './settings';
+import { settings } from '../src/settings';
 
 export interface TextileOptions
 {

@@ -1,7 +1,7 @@
 import { CanvasTileRenderer } from './CanvasTileRenderer';
 import { CompositeTilemap } from './CompositeTilemap';
 import { Constant } from './settings';
-import { TextileResource } from './TextileResource';
+import { TextileResource } from '../old/TextileResource';
 import { Tilemap } from './Tilemap';
 import { TilemapShader, TilemapGeometry } from './TilemapShader';
 import { TileRenderer } from './TileRenderer';
@@ -31,7 +31,7 @@ export const pixi_tilemap = {
 export * from './CanvasTileRenderer';
 export * from './CompositeTilemap';
 export * from './settings';
-export * from './TextileResource';
+export * from '../old/TextileResource';
 export * from './Tilemap';
 export * from './TilemapShader';
 export * from './shaderGenerator';

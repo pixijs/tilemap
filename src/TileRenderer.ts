@@ -1,7 +1,12 @@
-import { BaseTexture, Buffer, ObjectRenderer, Renderer, utils, WRAP_MODES } from '@pixi/core';
+import {
+    Buffer,
+    Renderer,
+    BufferUsage,
+    CustomRenderPipe, RenderPipe, IndexBufferArray, InstructionSet
+} from 'pixi.js';
 import { settings } from './settings';
 import { TilemapGeometry, TilemapShader } from './TilemapShader';
-import { TextileResource } from './TextileResource';
+import type { Tilemap } from './Tilemap';
 
 // For some reason, ESLint goes mad with indentation in this file ^&^
 /* eslint-disable no-mixed-spaces-and-tabs, indent */
@@ -9,7 +14,7 @@ import { TextileResource } from './TextileResource';
 /**
  * Rendering helper pipeline for tilemaps. This plugin is registered automatically.
  */
-export class TileRenderer extends ObjectRenderer
+export class TileRenderer implements RenderPipe<Tilemap>
 {
     /** The managing renderer */
     public readonly renderer: Renderer;
@@ -25,94 +30,18 @@ export class TileRenderer extends ObjectRenderer
     /** The shader used to render tilemaps. */
     private shader: TilemapShader;
 
-    /**
-	 * {@link TextileResource} instances used to upload textures batched in tiled groups. This is
-	 * used only if {@link settings.TEXTURES_PER_TILEMAP} is greater than 1.
-	 */
-    private textiles: Array<TextileResource> = [];
-
     /** @param renderer - The managing renderer */
     constructor(renderer: Renderer)
     {
 	    super(renderer);
 
 	    this.shader = new TilemapShader(settings.TEXTURES_PER_TILEMAP);
-	    this.indexBuffer = new Buffer(undefined, true, true);
+	    this.indexBuffer = new Buffer({
+            data: null,
+            label: 'index-tilemap-buffer',
+            usage: BufferUsage.INDEX | BufferUsage.COPY_DST,
+        });
 	    this.checkIndexBuffer(2000);
-	    this.makeTextiles();
-    }
-
-    /**
-	 * Binds the tile textures to the renderer, and updates the tilemap shader's `uSamplerSize` uniform.
-	 *
-	 * If {@link settings.TEXTILE_UNITS}
-	 *
-	 * @param renderer - The renderer to which the textures are to be bound.
-	 * @param textures - The tile textures being bound.
-	 */
-    bindTileTextures(renderer: Renderer, textures: Array<BaseTexture>): void
-    {
-	    const len = textures.length;
-        const shader = this.shader;
-	    const maxTextures = settings.TEXTURES_PER_TILEMAP;
-        const samplerSize: Array<number> = shader.uniforms.uSamplerSize;
-
-	    if (len > settings.TEXTILE_UNITS * maxTextures)
-	    {
-            // TODO: Show error message instead of silently failing!
-	        return;
-	    }
-
-        if (settings.TEXTILE_UNITS <= 1)
-	    {
-            // Bind each texture directly & update samplerSize.
-            for (let i = 0; i < textures.length; i++)
-            {
-                const texture = textures[i];
-
-                if (!texture || !texture.valid)
-                {
-                    return;
-                }
-
-                renderer.texture.bind(textures[i], i);
-
-                samplerSize[i * 2] = 1.0 / textures[i].realWidth;
-                samplerSize[(i * 2) + 1] = 1.0 / textures[i].realHeight;
-            }
-	    }
-        else
-        {
-            // Ensure we have enough textiles, in case settings.TEXTILE_UNITS was modified.
-            this.makeTextiles();
-
-            const usedTextiles = Math.ceil(len / settings.TEXTILE_UNITS);
-
-            // First ensure each textile has all tiles point to the right textures.
-            for (let i = 0; i < len; i++)
-            {
-                const texture = textures[i];
-
-                if (texture && texture.valid)
-                {
-                    const resourceIndex = Math.floor(i / settings.TEXTILE_UNITS);
-                    const tileIndex = i % settings.TEXTILE_UNITS;
-
-                    this.textiles[resourceIndex].tile(tileIndex, texture);
-                }
-            }
-
-            // Then bind the textiles + update samplerSize.
-            for (let i = 0; i < usedTextiles; i++)
-            {
-                renderer.texture.bind(this.textiles[i].baseTexture, i);
-
-                samplerSize[i * 2] = 1.0 / this.textiles[i].width;
-                samplerSize[(i * 2) + 1] = 1.0 / this.textiles[i].baseTexture.height;
-            }
-        }
-
-        shader.uniforms.uSamplerSize = samplerSize;
     }
 
     start(): void
@@ -126,10 +55,9 @@ export class TileRenderer extends ObjectRenderer
 	 */
     createVb(): TilemapGeometry
     {
-	    const geom = new TilemapGeometry();
+	    const geom = new TilemapGeometry(this.indexBuffer);
 
-	    geom.addIndex(this.indexBuffer);
-	    geom.lastTimeAccess = Date.now();
+        geom.lastTimeAccess = Date.now();
 
 	    return geom;
     }
@@ -145,7 +73,7 @@ export class TileRenderer extends ObjectRenderer
     }
 
     // eslint-disable-next-line no-unused-vars
-    public checkIndexBuffer(size: number, _vb: TilemapGeometry = null): void
+    public checkIndexBuffer(size: number): void
     {
 	    const totalIndices = size * 6;
 
@@ -162,37 +90,52 @@ export class TileRenderer extends ObjectRenderer
 	    }
 
 	    this.ibLen = totalIndices;
-	    this.indexBuffer.update(utils.createIndicesForQuads(size,
-	        settings.use32bitIndex ? new Uint32Array(size * 6) : undefined));
-
-	    // 	TODO: create new index buffer instead?
-	    // if (vb) {
-	    // 	const curIndex = vb.getIndex();
-	    // 	if (curIndex !== this.indexBuffer && (curIndex.data as any).length < totalIndices) {
-	    // 		this.swapIndex(vb, this.indexBuffer);
-	    // 	}
-	    // }
+	    this.indexBuffer.data = createIndicesForQuads(size,
+	        settings.use32bitIndex ? new Uint32Array(totalIndices) : new Uint16Array(totalIndices));
     }
 
-    /** Makes textile resources and initializes {@link TileRenderer.textiles}. */
-    private makeTextiles(): void
+    destroyRenderable(renderable: Tilemap): void
     {
-	    if (settings.TEXTILE_UNITS <= 1)
-	    {
-	        return;
-	    }
 
-	    for (let i = 0; i < settings.TEXTILE_UNITS; i++)
-	    {
-            if (this.textiles[i]) continue;
-
-            const resource = new TextileResource();
-	        const baseTex = new BaseTexture(resource);
-
-	        baseTex.scaleMode = settings.TEXTILE_SCALE_MODE;
-	        baseTex.wrapMode = WRAP_MODES.CLAMP;
-
-            this.textiles[i] = resource;
-	    }
     }
+
+    addRenderable(renderable: Tilemap, instructionSet: InstructionSet | undefined): void
+    {
+    }
+
+    updateRenderable(renderable: Tilemap, instructionSet?: InstructionSet | undefined): void
+    {
+    }
+
+    validateRenderable(renderable: Tilemap): boolean
+    {
+        return false;
+    }
+}
+
+function createIndicesForQuads(
+    size: number,
+    outBuffer: IndexBufferArray
+): IndexBufferArray
+{
+    // the total number of indices in our array, there are 6 points per quad.
+    const totalIndices = size * 6;
+
+    if (outBuffer.length !== totalIndices)
+    {
+        throw new Error(`Out buffer length is incorrect, got ${outBuffer.length} and expected ${totalIndices}`);
+    }
+
+    // fill the indices with the quads to draw
+    for (let i = 0, j = 0; i < totalIndices; i += 6, j += 4)
+    {
+        outBuffer[i + 0] = j + 0;
+        outBuffer[i + 1] = j + 1;
+        outBuffer[i + 2] = j + 2;
+        outBuffer[i + 3] = j + 0;
+        outBuffer[i + 4] = j + 2;
+        outBuffer[i + 5] = j + 3;
+    }
+
+    return outBuffer;
 }
