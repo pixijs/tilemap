@@ -9,7 +9,8 @@
         "declaration": true,
         "esModuleInterop": true,
         "moduleResolution": "node",
-        "allowSyntheticDefaultImports": true
+        "allowSyntheticDefaultImports": true,
+        "skipLibCheck": true
     },
     "include": [
         "src/**/*"

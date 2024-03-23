@@ -1,10 +1,8 @@
-import { Container } from '@pixi/display';
-import { Texture, Renderer, TextureSource, Matrix } from '@pixi/core';
-import { Tilemap } from './Tilemap';
+import { Container, Matrix, Renderer, Texture, TextureSource } from 'pixi.js';
 import { settings } from './settings';
-import { CanvasTileRenderer } from './CanvasTileRenderer';
+import { Tilemap } from './Tilemap';
 
-import type { TileRenderer } from './TileRenderer';
+import type { TilemapPipe } from './TilemapPipe';
 
 /**
  * A tilemap composite that lazily builds tilesets layered into multiple tilemaps.
@@ -84,8 +82,7 @@ export class CompositeTilemap extends Container
     protected lastModifiedTilemap: Tilemap = null;
 
     private modificationMarker = 0;
-    private shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
-    private _globalMat: Matrix = null;
+    // private shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
 
     /**
      * @param tileset - A list of tile base-textures that will be used to eagerly initialized the layered
@@ -130,8 +127,6 @@ export class CompositeTilemap extends Container
             const tilemap = new Tilemap(tileTextures.slice(i * texPerChild, (i + 1) * texPerChild));
 
             tilemap.compositeParent = true;
-            tilemap.offsetX = settings.TEXTILE_DIMEN;
-            tilemap.offsetY = settings.TEXTILE_DIMEN;
 
             // TODO: Don't use children
             this.addChild(tilemap);
@@ -284,11 +279,11 @@ export class CompositeTilemap extends Container
             for (let i = 0; i < children.length; i++)
             {
                 const child = children[i] as Tilemap;
-                const tex = child.getTileset();
+                const tex = child.getTileset().arr;
 
                 for (let j = 0; j < tex.length; j++)
                 {
-                    if (tex[j] === tileTexture.baseTexture)
+                    if (tex[j] === tileTexture.source)
                     {
                         tilemap = child;
                         break;
@@ -309,10 +304,10 @@ export class CompositeTilemap extends Container
                 {
                     const child = children[i] as Tilemap;
 
-                    if (child.getTileset().length < this.texturesPerTilemap)
+                    if (child.getTileset().count < this.texturesPerTilemap)
                     {
                         tilemap = child;
-                        child.getTileset().push(tileTexture.baseTexture);
+                        child.getTileset().push(tileTexture.source);
                         break;
                     }
                 }
@@ -322,8 +317,6 @@ export class CompositeTilemap extends Container
                 {
                     tilemap = new Tilemap(tileTexture.baseTexture);
                     tilemap.compositeParent = true;
-                    tilemap.offsetX = settings.TEXTILE_DIMEN;
-                    tilemap.offsetY = settings.TEXTILE_DIMEN;
 
                     this.addChild(tilemap);
                 }
@@ -340,68 +333,6 @@ export class CompositeTilemap extends Container
         this.lastModifiedTilemap = tilemap;
 
         return this;
-    }
-
-    renderCanvas(renderer: any): void
-    {
-        if (!this.visible || this.worldAlpha <= 0 || !this.renderable)
-        {
-            return;
-        }
-
-        const tilemapPlugin = CanvasTileRenderer.getInstance(renderer);
-
-        if (tilemapPlugin && !tilemapPlugin.dontUseTransform)
-        {
-            const wt = this.worldTransform;
-
-            renderer.canvasContext.activeContext.setTransform(
-                wt.a,
-                wt.b,
-                wt.c,
-                wt.d,
-                wt.tx * renderer.resolution,
-                wt.ty * renderer.resolution
-            );
-        }
-
-        const layers = this.children;
-
-        for (let i = 0; i < layers.length; i++)
-        {
-            const layer = (layers[i] as Tilemap);
-
-            layer.tileAnim = this.tileAnim;
-            layer.renderCanvasCore(renderer);
-        }
-    }
-
-    render(renderer: Renderer): void
-    {
-        if (!this.visible || this.worldAlpha <= 0 || !this.renderable)
-        {
-            return;
-        }
-
-        const plugin = renderer.plugins.tilemap as TileRenderer;
-        const shader = plugin.getShader();
-
-        renderer.batch.setObjectRenderer(plugin);
-
-        // TODO: dont create new array, please
-        this._globalMat = shader.uniforms.projTransMatrix;
-        renderer.globalUniforms.uniforms.projectionMatrix.copyTo(this._globalMat).append(this.worldTransform);
-        shader.uniforms.shadowColor = this.shadowColor;
-        shader.uniforms.animationFrame = this.tileAnim || plugin.tileAnim;
-
-        renderer.shader.bind(shader, false);
-
-        const layers = this.children;
-
-        for (let i = 0; i < layers.length; i++)
-        {
-            (layers[i] as Tilemap).renderWebGLCore(renderer, plugin);
-        }
     }
 
     /**
@@ -495,7 +426,7 @@ export class CompositeTilemap extends Container
         const childIndex: number = textureIndex / this.texturesPerTilemap >> 0;
         const textureId: number = textureIndex % this.texturesPerTilemap;
 
-        if (this.children[childIndex] && (this.children[childIndex] as Tilemap).getTileset())
+        if (this.children[childIndex] && (this.children[childIndex] as Tilemap).getTileset().count > 0)
         {
             this.lastModifiedTilemap = (this.children[childIndex] as Tilemap);
             this.lastModifiedTilemap.addRect(

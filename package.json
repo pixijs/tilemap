@@ -59,5 +59,21 @@
     "rimraf": "^4.1.1",
     "tslib": "^2.6.2",
     "typescript": "^5.3.3"
+  },
+  "extensionConfig": {
+    "namespace": "PIXI.tilemap",
+    "docsName": "PixiJS Tilemap",
+    "docsCopyright": "PixiJS and IvanPopelyshev © 2015-2024 ",
+    "docsGoogleAnalytics": "UA-103772589-3",
+    "docsTitle": "PixiJS Tilemap API Documentation",
+    "docsDescription": "Documentation for PixiJS Tilemap library",
+    "docsKeyword": "docs, documentation, pixi, pixijs, filters, webgl, ascii, bloom, convolution, cross-hatch, dotfilter, emboss, pixelate, twist, tiltshift",
+    "lint": [
+      "src",
+      "examples",
+      "scripts"
+    ],
+    "deployFiles": "{dist,screenshots,examples,docs,demo}/**",
+    "moduleSource": "src/{,*/}index.ts"
   }
 }

@@ -1,12 +1,11 @@
 /* eslint-disable no-unused-vars */
-import { Container, Bounds } from 'pixi.js';
-import { Texture, Renderer, Matrix, Rectangle, groupD8, DRAW_MODES } from 'pixi.js';
-import { TileRenderer } from './TileRenderer';
+import { Bounds, Container, groupD8, Matrix, State, Texture, TextureSource } from 'pixi.js';
 import { settings } from './settings';
-import { CanvasTileRenderer } from './CanvasTileRenderer';
+import { TilemapPipe } from './TilemapPipe';
+import { TileTextureArray } from './TileTextureArray';
 
-import type { TextureSource, DestroyOptions } from 'pixi.js';
-import type { TilemapGeometry } from './TilemapShader';
+import type { DestroyOptions } from 'pixi.js';
+import type { TilemapGeometry } from './TilemapGeometry';
 
 enum POINT_STRUCT
     {
@@ -59,8 +58,24 @@ export const POINT_STRUCT_SIZE = (Object.keys(POINT_STRUCT).length / 2);
  */
 export class Tilemap extends Container
 {
+    // TODO: make default color work
+    /**
+     * Currently doesnt work.
+     */
     shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
-    _globalMat: Matrix = null;
+    state = State.for2d();
+
+    old_valid = false;
+
+    checkValid()
+    {
+        const v = this.tileset.count > 0 && this.pointsBuf.length > 0;
+        const res = this.old_valid !== v;
+
+        this.old_valid = v;
+
+        return res !== v;
+    }
 
     /**
      * The tile animation frame.
@@ -73,13 +88,7 @@ export class Tilemap extends Container
      * This is the last uploaded size of the tilemap geometry.
      * @ignore
      */
-    modificationMarker = 0;
-
-    /** @ignore */
-    offsetX = 0;
-
-    /** @ignore */
-    offsetY = 0;
+    rects_count = 0;
 
     /** @ignore */
     compositeParent = false;
@@ -90,7 +99,7 @@ export class Tilemap extends Container
      * This should not be shuffled after tiles have been added into this tilemap. Usually, only tile textures
      * should be added after tiles have been added into the map.
      */
-    protected tileset: Array<TextureSource>;
+    protected tileset = new TileTextureArray(settings.TEXTURES_PER_TILEMAP);
 
     /**
      * The local bounds of the tilemap itself. This does not include DisplayObject children.
@@ -116,7 +125,7 @@ export class Tilemap extends Container
     /**
      * @returns The tileset of this tilemap.
      */
-    getTileset(): Array<TextureSource>
+    getTileset(): TileTextureArray
     {
         return this.tileset;
     }
@@ -124,24 +133,58 @@ export class Tilemap extends Container
     /**
      * Define the tileset used by the tilemap.
      *
-     * @param tileset - The list of textures to use in the tilemap. If a base-texture (not array) is passed, it will
+     * @param textureOrArray - The list of textures to use in the tilemap. If a base-texture (not array) is passed, it will
      *  be wrapped into an array. This should not contain any duplicates.
      */
-    setTileset(tileset: TextureSource | Array<TextureSource> = []): this
+    setTileset(textureOrArray: TileTextureArray | TextureSource | Array<TextureSource> = []): this
     {
-        if (!Array.isArray(tileset))
-        {
-            tileset = [tileset];
-        }
-        for (let i = 0; i < tileset.length; i++)
-        {
-            if ((tileset[i] as unknown as Texture).source)
-            {
-                tileset[i] = (tileset[i] as unknown as Texture).source;
-            }
-        }
+        let ts = this.tileset;
 
-        this.tileset = tileset;
+        if (textureOrArray instanceof TileTextureArray)
+        {
+            this.tileset = textureOrArray;
+            this.didViewUpdate = true;
+        }
+        else if (textureOrArray instanceof TextureSource)
+        {
+            if (ts.count === 1 && ts.arr[0] === textureOrArray)
+            {
+                return this;
+            }
+
+            ts = this.tileset = new TileTextureArray(settings.TEXTURES_PER_TILEMAP);
+            ts.push(textureOrArray);
+            this.didViewUpdate = true;
+        }
+        else
+        {
+            if (textureOrArray.length === ts.count)
+            {
+                let flag = true;
+
+                for (let i = 0; i < textureOrArray.length; i++)
+                {
+                    if (textureOrArray[i] !== ts.arr[i])
+                    {
+                        flag = false;
+                        break;
+                    }
+                }
+
+                if (flag)
+                {
+                    return this;
+                }
+            }
+
+            ts = this.tileset = new TileTextureArray(settings.TEXTURES_PER_TILEMAP);
+
+            for (let i = 0; i < textureOrArray.length; i++)
+            {
+                ts.push(textureOrArray[i]);
+            }
+            this.didViewUpdate = true;
+        }
 
         return this;
     }
@@ -150,7 +193,7 @@ export class Tilemap extends Container
     clear(): this
     {
         this.pointsBuf.length = 0;
-        this.modificationMarker = 0;
+        this.rects_count = 0;
         this.tilemapBounds.clear();
         this.hasAnimatedTile = false;
 
@@ -200,13 +243,14 @@ export class Tilemap extends Container
         } = {}
     ): this
     {
+        this.didViewUpdate = true;
         let baseTexture: TextureSource;
         let textureIndex = -1;
 
         if (typeof tileTexture === 'number')
         {
             textureIndex = tileTexture;
-            baseTexture = this.tileset[textureIndex];
+            baseTexture = this.tileset.arr[textureIndex];
         }
         else
         {
@@ -223,9 +267,9 @@ export class Tilemap extends Container
 
             const textureList = this.tileset;
 
-            for (let i = 0; i < textureList.length; i++)
+            for (let i = 0; i < textureList.count; i++)
             {
-                if (textureList[i] === texture.source)
+                if (textureList.arr[i] === texture.source)
                 {
                     textureIndex = i;
                     break;
@@ -331,7 +375,7 @@ export class Tilemap extends Container
     }
 
     private vbId = 0;
-    private vb: TilemapGeometry = null;
+    vb: TilemapGeometry = null;
     private vbBuffer: ArrayBuffer = null;
     private vbArray: Float32Array = null;
     private vbInts: Uint32Array = null;
@@ -345,36 +389,22 @@ export class Tilemap extends Container
         }
     }
 
-    render(renderer: Renderer): void
+    public readonly renderPipeId = 'tilemap';
+    public readonly canBundle = true;
+
+    updateBuffer(plugin: TilemapPipe)
     {
-        const plugin = (renderer.plugins as any).tilemap;
-        const shader = plugin.getShader();
+        const points = this.pointsBuf;
+        const rects_count = points.length / POINT_STRUCT_SIZE;
+        let vb = this.vb;
 
-        renderer.batch.setObjectRenderer(plugin);
-        this._globalMat = shader.uniforms.projTransMatrix;
-        renderer
-            .globalUniforms
-            .uniforms
-            .projectionMatrix
-            .copyTo(this._globalMat)
-            .append(this.worldTransform);
-
-        shader.uniforms.u_shadow_color = this.shadowColor;
-        shader.uniforms.animationFrame = this.tileAnim || plugin.tileAnim;
-
-        this.renderWebGLCore(renderer, plugin);
-    }
-
-    updateBuffer(plugin: TileRenderer)
-    {
-        const { points } = this;
-        const rectsCount = points.length / POINT_STRUCT_SIZE;
-        const textures = this.tileset;
-
-        if (textures.length === 0) return;
+        if (this.tileset.count === 0 || rects_count === 0 || (this.rects_count === rects_count && vb))
+        {
+            return;
+        }
+        this.rects_count = rects_count;
 
         // lost context! recover!
-        let vb = this.vb;
 
         if (!vb)
         {
@@ -382,18 +412,17 @@ export class Tilemap extends Container
             this.vb = vb;
             this.vbId = (vb as any).id;
             this.vbBuffer = null;
-            this.modificationMarker = 0;
+            this.rects_count = 0;
         }
 
-        plugin.checkIndexBuffer(rectsCount, vb);
+        // if layer was changed, re-upload vertices
+        const vertices = rects_count * vb.vertPerQuad;
+
+        this.rects_count = vertices;
+
+        plugin.checkIndexBuffer(rects_count);
 
         const vertexBuf = vb.getBuffer('aVertexPosition');
-        // if layer was changed, re-upload vertices
-        const vertices = rectsCount * vb.vertPerQuad;
-
-        if (vertices === 0) return;
-
-        this.modificationMarker = vertices;
         const vs = vb.stride * vertices;
 
         if (!this.vbBuffer || this.vbBuffer.byteLength < vs)
@@ -547,217 +576,13 @@ export class Tilemap extends Container
         vertexBuf.data = arr;
     }
 
-    renderWebGLCore(renderer: Renderer, plugin: TileRenderer): void
-    {
-        const points = this.pointsBuf;
-
-        if (points.length === 0) return;
-        const rectsCount = points.length / POINT_STRUCT_SIZE;
-
-        const shader = plugin.getShader();
-        const textures = this.tileset;
-
-        if (textures.length === 0) return;
-
-        plugin.bindTileTextures(renderer, textures);
-        renderer.shader.bind(shader, false);
-
-        // lost context! recover!
-        let vb = this.vb;
-
-        if (!vb)
-        {
-            vb = plugin.createVb();
-            this.vb = vb;
-            this.vbId = (vb as any).id;
-            this.vbBuffer = null;
-            this.modificationMarker = 0;
-        }
-
-        plugin.checkIndexBuffer(rectsCount, vb);
-        const boundCountPerBuffer = settings.TEXTILE_UNITS;
-
-        const vertexBuf = vb.getBuffer('aVertexPosition');
-        // if layer was changed, re-upload vertices
-        const vertices = rectsCount * vb.vertPerQuad;
-
-        if (vertices === 0) return;
-        if (this.modificationMarker !== vertices)
-        {
-            this.modificationMarker = vertices;
-            const vs = vb.stride * vertices;
-
-            if (!this.vbBuffer || this.vbBuffer.byteLength < vs)
-            {
-                // !@#$ happens, need resize
-                let bk = vb.stride;
-
-                while (bk < vs)
-                {
-                    bk *= 2;
-                }
-                this.vbBuffer = new ArrayBuffer(bk);
-                this.vbArray = new Float32Array(this.vbBuffer);
-                this.vbInts = new Uint32Array(this.vbBuffer);
-                vertexBuf.update(this.vbBuffer);
-            }
-
-            const arr = this.vbArray;
-            // const ints = this.vbInts;
-            // upload vertices!
-            let sz = 0;
-            // let tint = 0xffffffff;
-            let textureId = 0;
-
-            // let tint = 0xffffffff;
-            // const tint = -1;
-
-            for (let i = 0; i < points.length; i += POINT_STRUCT_SIZE)
-            {
-                const eps = 0.5;
-
-                if (this.compositeParent)
-                {
-                    const textureIndex = points[i + POINT_STRUCT.TEXTURE_INDEX];
-
-                    textureId = textureIndex;
-                }
-                const x = points[i + POINT_STRUCT.X];
-                const y = points[i + POINT_STRUCT.Y];
-                const w = points[i + POINT_STRUCT.TILE_WIDTH];
-                const h = points[i + POINT_STRUCT.TILE_HEIGHT];
-                const u = points[i + POINT_STRUCT.U];
-                const v = points[i + POINT_STRUCT.V];
-                let rotate = points[i + POINT_STRUCT.ROTATE];
-
-                const animX = points[i + POINT_STRUCT.ANIM_X];
-                const animY = points[i + POINT_STRUCT.ANIM_Y];
-                const animWidth = points[i + POINT_STRUCT.ANIM_COUNT_X] || 1024;
-                const animHeight = points[i + POINT_STRUCT.ANIM_COUNT_Y] || 1024;
-
-                const animXEncoded = animX + (animWidth * 2048);
-                const animYEncoded = animY + (animHeight * 2048);
-                const animDivisor = points[i + POINT_STRUCT.ANIM_DIVISOR];
-                const alpha = points[i + POINT_STRUCT.ALPHA];
-
-                let u0: number;
-                let v0: number; let u1: number;
-                let v1: number; let u2: number;
-                let v2: number; let u3: number;
-                let v3: number;
-
-                if (rotate === 0)
-                {
-                    u0 = u;
-                    v0 = v;
-                    u1 = u + w;
-                    v1 = v;
-                    u2 = u + w;
-                    v2 = v + h;
-                    u3 = u;
-                    v3 = v + h;
-                }
-                else
-                {
-                    let w2 = w / 2;
-                    let h2 = h / 2;
-
-                    if (rotate % 4 !== 0)
-                    {
-                        w2 = h / 2;
-                        h2 = w / 2;
-                    }
-                    const cX = u + w2;
-                    const cY = v + h2;
-
-                    rotate = groupD8.add(rotate, groupD8.NW);
-                    u0 = cX + (w2 * groupD8.uX(rotate));
-                    v0 = cY + (h2 * groupD8.uY(rotate));
-
-                    rotate = groupD8.add(rotate, 2); // rotate 90 degrees clockwise
-                    u1 = cX + (w2 * groupD8.uX(rotate));
-                    v1 = cY + (h2 * groupD8.uY(rotate));
-
-                    rotate = groupD8.add(rotate, 2);
-                    u2 = cX + (w2 * groupD8.uX(rotate));
-                    v2 = cY + (h2 * groupD8.uY(rotate));
-
-                    rotate = groupD8.add(rotate, 2);
-                    u3 = cX + (w2 * groupD8.uX(rotate));
-                    v3 = cY + (h2 * groupD8.uY(rotate));
-                }
-
-                arr[sz++] = x;
-                arr[sz++] = y;
-                arr[sz++] = u0;
-                arr[sz++] = v0;
-                arr[sz++] = u + eps;
-                arr[sz++] = v + eps;
-                arr[sz++] = u + w - eps;
-                arr[sz++] = v + h - eps;
-                arr[sz++] = animXEncoded;
-                arr[sz++] = animYEncoded;
-                arr[sz++] = textureId;
-                arr[sz++] = animDivisor;
-                arr[sz++] = alpha;
-
-                arr[sz++] = x + w;
-                arr[sz++] = y;
-                arr[sz++] = u1;
-                arr[sz++] = v1;
-                arr[sz++] = u + eps;
-                arr[sz++] = v + eps;
-                arr[sz++] = u + w - eps;
-                arr[sz++] = v + h - eps;
-                arr[sz++] = animXEncoded;
-                arr[sz++] = animYEncoded;
-                arr[sz++] = textureId;
-                arr[sz++] = animDivisor;
-                arr[sz++] = alpha;
-
-                arr[sz++] = x + w;
-                arr[sz++] = y + h;
-                arr[sz++] = u2;
-                arr[sz++] = v2;
-                arr[sz++] = u + eps;
-                arr[sz++] = v + eps;
-                arr[sz++] = u + w - eps;
-                arr[sz++] = v + h - eps;
-                arr[sz++] = animXEncoded;
-                arr[sz++] = animYEncoded;
-                arr[sz++] = textureId;
-                arr[sz++] = animDivisor;
-                arr[sz++] = alpha;
-
-                arr[sz++] = x;
-                arr[sz++] = y + h;
-                arr[sz++] = u3;
-                arr[sz++] = v3;
-                arr[sz++] = u + eps;
-                arr[sz++] = v + eps;
-                arr[sz++] = u + w - eps;
-                arr[sz++] = v + h - eps;
-                arr[sz++] = animXEncoded;
-                arr[sz++] = animYEncoded;
-                arr[sz++] = textureId;
-                arr[sz++] = animDivisor;
-                arr[sz++] = alpha;
-            }
-
-            vertexBuf.data = arr;
-        }
-
-        (renderer.geometry as any).bind(vb, shader);
-        renderer.geometry.draw(DRAW_MODES.TRIANGLES, rectsCount * 6, 0);
-    }
-
     /**
      * @internal
      * @ignore
      */
     isModified(anim: boolean): boolean
     {
-        if (this.modificationMarker !== this.pointsBuf.length
+        if (this.rects_count !== this.pointsBuf.length
             || (anim && this.hasAnimatedTile))
         {
             return true;
@@ -774,27 +599,19 @@ export class Tilemap extends Container
      */
     clearModify(): void
     {
-        this.modificationMarker = this.pointsBuf.length;
+        this.rects_count = this.pointsBuf.length;
     }
 
-    /** @override */
-    protected _calculateBounds(): void
+    public addBounds(bounds: Bounds)
     {
-        const { minX, minY, maxX, maxY } = this.tilemapBounds;
+        const _bounds = this.tilemapBounds;
 
-        this._bounds.addFrame(this.transform, minX, minY, maxX, maxY);
+        bounds.addFrame(_bounds.minX, _bounds.minY, _bounds.maxX, _bounds.maxY);
     }
 
-    /** @override */
-    public getLocalBounds(rect?: Rectangle): Rectangle
+    get bounds()
     {
-        // we can do a fast local bounds if the sprite has no children!
-        if (this.children.length === 0)
-        {
-            return this.tilemapBounds.getRectangle(rect);
-        }
-
-        return super.getLocalBounds.call(this, rect);
+        return this.tilemapBounds;
     }
 
     /** @override */

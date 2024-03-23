@@ -46,37 +46,37 @@ ul li {
 /* window */
 @font-face {
   font-family: 'GProBold';
-  src: url('../assets/fonts/G_Pro_Bold.otf') format("opentype");
+  src: url('assets/fonts/G_Pro_Bold.otf') format("opentype");
   /* Safari, Android, iOS */
 }
 @font-face {
   font-family: 'GProExtend';
-  src: url('../assets/fonts/G_Pro_Extend.otf') format("opentype");
+  src: url('assets/fonts/G_Pro_Extend.otf') format("opentype");
   /* Safari, Android, iOS */
 }
 @font-face {
   font-family: 'GProExtendBold';
-  src: url('../assets/fonts/G_Pro_Extended_Bold.otf') format("opentype");
+  src: url('assets/fonts/G_Pro_Extended_Bold.otf') format("opentype");
   /* Safari, Android, iOS */
 }
 @font-face {
   font-family: 'GProMedium';
-  src: url('../assets/fonts/G_Pro_Medium.otf') format("opentype");
+  src: url('assets/fonts/G_Pro_Medium.otf') format("opentype");
   /* Safari, Android, iOS */
 }
 @font-face {
   font-family: 'GRegular';
-  src: url('../assets/fonts/G_Regular.otf') format("opentype");
+  src: url('assets/fonts/G_Regular.otf') format("opentype");
   /* Safari, Android, iOS */
 }
 @font-face {
   font-family: 'FSrail55';
-  src: url('../assets/fonts/FSRAIL55.ttf') format('truetype');
+  src: url('assets/fonts/FSRAIL55.ttf') format('truetype');
   /* Safari, Android, iOS */
 }
 @font-face {
   font-family: 'FSrail75';
-  src: url('../assets/fonts/FSRAIL75.ttf') format('truetype');
+  src: url('assets/fonts/FSRAIL75.ttf') format('truetype');
   /* Safari, Android, iOS */
 }
 .view-wrapper {
@@ -96,7 +96,7 @@ ul li {
   left: 0;
   width: 5.3rem;
   height: 5.3rem;
-  background-image: url('../assets/fullscreen.png');
+  background-image: url('assets/fullscreen.png');
   background-repeat: no-repeat;
   background-size: 100% 100%;
   cursor: pointer;
@@ -105,7 +105,7 @@ ul li {
 }
 .uiport {
   background: transparent;
-  background-image: url('../assets/ui/bg_back_2.jpg');
+  background-image: url('assets/ui/bg_back_2.jpg');
   background-repeat: no-repeat;
   background-size: 100% 100%;
   width: 100%;
@@ -123,7 +123,7 @@ ul li {
   left: 6.5%;
   width: 22%;
   height: 20%;
-  background-image: url('../assets/ui/game_name.png');
+  background-image: url('assets/ui/game_name.png');
   background-repeat: no-repeat;
   background-size: contain;
 }
@@ -133,7 +133,7 @@ ul li {
   right: 3%;
   width: 11.5%;
   height: 12%;
-  background-image: url('../assets/ui/rjd_logo_white.png');
+  background-image: url('assets/ui/rjd_logo_white.png');
   background-repeat: no-repeat;
   background-size: contain;
 }
@@ -264,7 +264,7 @@ ul li {
   display: inline-block;
   width: 12rem;
   height: 12rem;
-  background-image: url('../assets/ui/train_demo_300.png');
+  background-image: url('assets/ui/train_demo_300.png');
   background-size: cover;
   vertical-align: top;
   background-repeat: no-repeat;
@@ -274,37 +274,37 @@ ul li {
   height: 10rem;
 }
 .page-wrapper.rules .rule-item-img.rule-img-2 {
-  background-image: url('../assets/ui/tips_1/rules_2.png');
+  background-image: url('assets/ui/tips_1/rules_2.png');
   background-size: cover;
   vertical-align: top;
 }
 .page-wrapper.rules .rule-item-img.rule-img-4 {
-  background-image: url('../assets/ui/tips_1/rules_4.png');
+  background-image: url('assets/ui/tips_1/rules_4.png');
   background-size: cover;
   vertical-align: top;
 }
 .page-wrapper.rules .rule-item-img.rule-img-5 {
-  background-image: url('../assets/ui/tips_1/rules_5.png');
+  background-image: url('assets/ui/tips_1/rules_5.png');
   background-size: contain;
   vertical-align: top;
 }
 .page-wrapper.rules .rule-item-img.rubbish {
-  background-image: url('../assets/ui/tips_1/rules_3.png');
+  background-image: url('assets/ui/tips_1/rules_3.png');
   background-size: cover;
   vertical-align: top;
 }
 .page-wrapper.rules .rule-item-img.walker {
-  background-image: url('../assets/ui/tips_1/rules_3_2.png');
+  background-image: url('assets/ui/tips_1/rules_3_2.png');
   background-size: cover;
   vertical-align: top;
 }
 .page-wrapper.rules .rule-item-img.children {
-  background-image: url('../assets/ui/tips_1/rules_3_3.png');
+  background-image: url('assets/ui/tips_1/rules_3_3.png');
   background-size: cover;
   vertical-align: top;
 }
 .page-wrapper.rules .rule-item-img.car {
-  background-image: url('../assets/ui/tips_1/rules_3_1.png');
+  background-image: url('assets/ui/tips_1/rules_3_1.png');
   background-size: cover;
   vertical-align: top;
 }
@@ -3226,21 +3226,21 @@ Copyright (c) 2015 Daniel Eden
   /* BttF */
 }
 .game-tip-window .tip-hero.hero-1 {
-  background-image: url('../assets/ui/hero_spider.png');
+  background-image: url('assets/ui/hero_spider.png');
 }
 .game-tip-window .tip-hero.hero-2 {
-  background-image: url('../assets/ui/hero_2.png');
+  background-image: url('assets/ui/hero_2.png');
 }
 .game-tip-window .tip-hero.hero-3 {
-  background-image: url('../assets/ui/hero_3.png');
+  background-image: url('assets/ui/hero_3.png');
 }
 .game-tip-window .tip-hero.hero-4 {
-  background-image: url('../assets/ui/hero_4.png');
+  background-image: url('assets/ui/hero_4.png');
 }
 .game-tip-window .tip-msg-wrap {
   width: 83rem;
   height: 13rem;
-  background-image: url('../assets/ui/tip_back.png');
+  background-image: url('assets/ui/tip_back.png');
   background-size: contain;
   background-repeat: no-repeat;
   position: absolute;
@@ -3262,7 +3262,7 @@ Copyright (c) 2015 Daniel Eden
   position: absolute;
   top: 0;
   left: 0;
-  background-image: url('../assets/ui/game_over.jpg');
+  background-image: url('assets/ui/game_over.jpg');
   background-size: cover;
   background-repeat: no-repeat;
 }
@@ -3287,17 +3287,17 @@ Copyright (c) 2015 Daniel Eden
   cursor: pointer;
 }
 .game-over-window .share-block .share-link.vk {
-  background-image: url('../assets/ui/social/vk.png');
+  background-image: url('assets/ui/social/vk.png');
 }
 .game-over-window .share-block .share-link.fb {
-  background-image: url('../assets/ui/social/fb.png');
+  background-image: url('assets/ui/social/fb.png');
 }
 .game-over-window .share-block .share-link.ok {
-  background-image: url('../assets/ui/social/ok.png');
+  background-image: url('assets/ui/social/ok.png');
   background-size: 97% 100%;
 }
 .game-over-window .share-block .share-link.tw {
-  background-image: url('../assets/ui/social/tw2.png');
+  background-image: url('assets/ui/social/tw2.png');
   background-size: 100% 98%;
 }
 .game-over-window .share-block .share-link .vk-path {
