@@ -1,12 +1,7 @@
 /* global PIXI */
 const use_webgpu = new URLSearchParams(window.location.search).get('webgpu') !== null;
 
-if (use_webgpu)
-{
-    PIXI.tilemap.CanvasTileRenderer.registerExtension();
-}
-
-async
+(async () =>
 {
     const app = new PIXI.Application();
 
@@ -22,8 +17,8 @@ async
     app.stage.addChild(tilemap);
 
     const loadAssets = async () => {
-        PIXI.Assets.add('atlas', 'assets/atlas.json');
-        PIXI.Assets.add('button', 'assets/button.png');
+        PIXI.Assets.add({ alias: 'atlas', src: 'assets/atlas.json' });
+        PIXI.Assets.add({ alias: 'button', src: 'assets/button.png' });
         await PIXI.Assets.load(['atlas', 'button']);
     };
 
@@ -122,4 +117,4 @@ async
     };
 
     runApp();
-}
+})();

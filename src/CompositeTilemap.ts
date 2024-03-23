@@ -1,8 +1,6 @@
-import { Container, Matrix, Renderer, Texture, TextureSource } from 'pixi.js';
+import { Container, Texture, TextureSource } from 'pixi.js';
 import { settings } from './settings';
 import { Tilemap } from './Tilemap';
-
-import type { TilemapPipe } from './TilemapPipe';
 
 /**
  * A tilemap composite that lazily builds tilesets layered into multiple tilemaps.

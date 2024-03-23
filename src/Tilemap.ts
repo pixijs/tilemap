@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { Bounds, Container, groupD8, Matrix, State, Texture, TextureSource } from 'pixi.js';
+import { Bounds, Container, groupD8, State, Texture, TextureSource } from 'pixi.js';
 import { settings } from './settings';
 import { TilemapPipe } from './TilemapPipe';
 import { TileTextureArray } from './TileTextureArray';

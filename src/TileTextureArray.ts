@@ -1,4 +1,4 @@
-import { BindGroup, Buffer, BufferUsage,Texture, TextureSource } from 'pixi.js';
+import { BindGroup, Buffer, BufferUsage, Texture, TextureSource } from 'pixi.js';
 
 export class TileTextureArray
 {

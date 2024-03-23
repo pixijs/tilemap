@@ -15,7 +15,9 @@
       "types": "./lib/index.d.ts"
     }
   },
-  "types": "./dist/index.d.ts",
+  "main": "lib/index.js",
+  "module": "lib/index.mjs",
+  "types": "lib/index.d.ts",
   "homepage": "http://www.rpgmakerweb.com/",
   "bugs": "https://github.com/pixijs/tilemap/issues",
   "license": "MIT",
@@ -63,17 +65,16 @@
   "extensionConfig": {
     "namespace": "PIXI.tilemap",
     "docsName": "PixiJS Tilemap",
-    "docsCopyright": "PixiJS and IvanPopelyshev © 2015-2024 ",
+    "docsCopyright": "PixiJS and IvanPopelyshev © 2015-2024",
     "docsGoogleAnalytics": "UA-103772589-3",
     "docsTitle": "PixiJS Tilemap API Documentation",
     "docsDescription": "Documentation for PixiJS Tilemap library",
     "docsKeyword": "docs, documentation, pixi, pixijs, filters, webgl, ascii, bloom, convolution, cross-hatch, dotfilter, emboss, pixelate, twist, tiltshift",
     "lint": [
       "src",
-      "examples",
       "scripts"
     ],
     "deployFiles": "{dist,screenshots,examples,docs,demo}/**",
-    "moduleSource": "src/{,*/}index.ts"
+    "moduleSource": "src/index.ts"
   }
 }

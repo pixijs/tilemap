@@ -64,8 +64,10 @@ export class TilemapPipe implements RenderPipe<Tilemap>, InstructionPipe<Tilemap
         this.renderer = renderer;
         this.adaptor = adaptor;
 
+        this.adaptor.init();
+
 	    this.indexBuffer = new Buffer({
-            data: null,
+            data: new Uint16Array([0, 1, 2, 0, 2, 3]),
             label: 'index-tilemap-buffer',
             usage: BufferUsage.INDEX | BufferUsage.COPY_DST,
         });
