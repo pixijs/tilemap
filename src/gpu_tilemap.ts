@@ -103,7 +103,8 @@ export class GpuTilemapAdaptor extends TilemapAdaptor
         renderer.encoder.draw({
             geometry: tilemap.vb,
             shader,
-            state: tilemap.state
+            state: tilemap.state,
+            size: tilemap.rects_count * 6
         });
         // TODO: does it need groups?
     }
