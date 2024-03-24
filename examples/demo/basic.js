@@ -103,9 +103,9 @@ const use_webgpu = new URLSearchParams(window.location.search).get('webgpu') !==
             // animate X and Y frames
             tilemap.tileAnim = [frame, frame];
             frame++;
-            if (useCanvas) {
-                frame = frame > 1 ? 0 : 1;
-            }
+            // if (useCanvas) {
+            //     frame = frame > 1 ? 0 : 1;
+            // }
         };
 
         setInterval(animShader, 100);

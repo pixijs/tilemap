@@ -141,7 +141,7 @@ export class TileTextureArray
         src.push(`if(texture_id < -0.5) return u_texture_size[${max_textures}];`);
         for (let i = 0; i < max_textures; i++)
         {
-            src.push(`if(texture_id < ${i}.5) return texture2D(u_textures[${i}], uv);`);
+            src.push(`if(texture_id < ${i}.5) return texture2D(u_textures[${i}], uv * u_texture_size[${i}].zw);`);
         }
         src.push('}');
 
@@ -176,7 +176,7 @@ export class TileTextureArray
             },
             u_texture_size: {
                 value: samplerSize,
-                type: 'vec4f',
+                type: 'vec4<f32>',
                 size: max_textures
             }
         };

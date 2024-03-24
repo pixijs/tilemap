@@ -65,14 +65,14 @@ export class Tilemap extends Container
     shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
     state = State.for2d();
 
-    old_valid = false;
+    is_valid = false;
 
     checkValid()
     {
         const v = this.tileset.count > 0 && this.pointsBuf.length > 0;
-        const res = this.old_valid !== v;
+        const res = this.is_valid !== v;
 
-        this.old_valid = v;
+        this.is_valid = v;
 
         return res !== v;
     }
@@ -412,13 +412,10 @@ export class Tilemap extends Container
             this.vb = vb;
             this.vbId = (vb as any).id;
             this.vbBuffer = null;
-            this.rects_count = 0;
         }
 
         // if layer was changed, re-upload vertices
         const vertices = rects_count * vb.vertPerQuad;
-
-        this.rects_count = vertices;
 
         plugin.checkIndexBuffer(rects_count);
 

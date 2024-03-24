@@ -4,7 +4,7 @@ import { Tilemap } from './Tilemap';
 import { TilemapAdaptor, TilemapPipe } from './TilemapPipe';
 import { TileTextureArray } from './TileTextureArray';
 
-const gl_tilemap_vertex = `#version 100
+const gl_tilemap_vertex = `
 precision highp float;
 attribute vec2 aVertexPosition;
 attribute vec2 aTextureCoord;
@@ -38,7 +38,7 @@ void main(void)
 }
 `;
 
-const gl_tilemap_fragment = `#version 100
+const gl_tilemap_fragment = `
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
 #else
@@ -55,7 +55,7 @@ void main(void)
 {
   float textureId = floor(vTextureId + 0.5);
   vec2 textureCoord = clamp(vTextureCoord, vFrame.xy, vFrame.zw);
-  vec4 color = sampleMultiTexture(textureId, textureCoord * u_texture_size[textureId].zw);
+  vec4 color = sampleMultiTexture(textureId, textureCoord);
   gl_FragColor = color * vAlpha;
 }
 `;
@@ -95,6 +95,7 @@ export class GlTilemapAdaptor extends TilemapAdaptor
             geometry: tilemap.vb,
             shader,
             state: tilemap.state,
+            size: tilemap.rects_count * 6
         });
 
         // TODO: support several tilemaps here, without re-setting extra uniforms
@@ -109,8 +110,8 @@ export class GlTilemapAdaptor extends TilemapAdaptor
                     TileTextureArray.generate_gl_textures(this.max_textures))
             }),
             resources: {
-                ...TileTextureArray.gl_gen_resources(this.max_textures),
-                pipe_uniforms: this.pipe_uniforms,
+                texture_uniforms: TileTextureArray.gl_gen_resources(this.max_textures),
+                pipe_uniforms: this.pipe_uniforms.uniformStructures,
             },
         });
     }

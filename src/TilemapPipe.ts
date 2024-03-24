@@ -133,12 +133,18 @@ export class TilemapPipe implements RenderPipe<Tilemap>, InstructionPipe<Tilemap
     {
         const batcher = this.renderer.renderPipes.batch;
 
-        batcher.break(instructionSet);
+        tilemap.updateBuffer(this);
+        tilemap.checkValid();
 
-        instructionSet.add({
-            renderPipeId: 'tilemap',
-            tilemap
-        } as TilemapInstruction);
+        if (tilemap.is_valid)
+        {
+            batcher.break(instructionSet);
+
+            instructionSet.add({
+                renderPipeId: 'tilemap',
+                tilemap
+            } as TilemapInstruction);
+        }
     }
 
     updateRenderable(renderable: Tilemap, _instructionSet?: InstructionSet | undefined): void
