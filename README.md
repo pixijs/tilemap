@@ -6,7 +6,9 @@
 <p/>
 
 This package provides a low-level rectangular tilemap implementation, optimized for high performance rendering and a
-out-of-the-box canvas fallback. It's designed to work with PixiJS 7. **We've migrated from pixi-tilemap to @pixi/tilemap on npm!**
+out-of-the-box canvas fallback. It's designed to work with PixiJS 8.
+
+For PixiJS v7 please see [v7 branch](https://github.com/pixijs/tilemap/tree/v7), npm version `4.1.0`.
 
 ## Installation :package:
 
@@ -56,28 +58,11 @@ import { settings } from '@pixi/tilemap';
 
 #### TEXTURES_PER_TILEMAP
 
-This is the limit on how many base-textures can be used in a tilemap. Using more than this limit will fail silently. `CompositeTilemap`
-gets around this by issuing new tilemaps whenever the tilemaps reach full capacity. This is 16 by default.
-
-```js
-settings.TEXTURES_PER_TILEMAP = 8;
-```
-
-Here, for example, the 9th tile texture will be rendered using a fresh tilemap. You can specify a bigger value if
-you want everything to be on the same z-index.
+Temporarily switched off
 
 #### TEXTILE_UNITS
 
-@pixi/tilemap also provides a texture packing optimization - it will upload multiple tile base-textures by laying them
-in a 2-column format inside a larger base-texture. By default, this is disabled and TEXTILE_UNITS is set 1. The recommended
-value is 4, if the feature is desired.
-
-This is old RpgMakerMV-compatible setting:
-
-```js
-settings.TEXTILE_UNITS = 4;
-settings.TEXTURES_PER_TILEMAP = 4;
-```
+Temporarily switched off
 
 #### use32bitIndex
 
