@@ -20,7 +20,7 @@ npm i --save @pixi/tilemap
 You can also use the UMD flavor:
 
 ```
-<script src="https://cdn.jsdelivr.net/npm/@pixi/tilemap@latest/dist/pixi-tilemap.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@pixi/tilemap@latest/dist/pixi-tilemap.js"></script>
 ```
 
 ## Usage
