@@ -140,11 +140,7 @@ export class TilemapPipe implements RenderPipe<Tilemap>, InstructionPipe<Tilemap
         if (tilemap.is_valid)
         {
             batcher.break(instructionSet);
-
-            instructionSet.add({
-                renderPipeId: 'tilemap',
-                tilemap
-            } as TilemapInstruction);
+            instructionSet.add(tilemap._instruction);
         }
     }
 
@@ -168,7 +164,7 @@ export class TilemapPipe implements RenderPipe<Tilemap>, InstructionPipe<Tilemap
         const { pipe_uniforms } = this.adaptor;
 
         const u_proj_trans = pipe_uniforms.uniforms.u_proj_trans;
-        const u_global = (this.renderer.globalUniforms.uniformGroup as GlobalUniformGroup).uniforms;
+        const u_global = ((this.renderer.globalUniforms as any)._activeUniforms.at(-1) as GlobalUniformGroup).uniforms;
         let anim_frame = this.tileAnim;
         const { u_anim_frame } = pipe_uniforms.uniforms;
 

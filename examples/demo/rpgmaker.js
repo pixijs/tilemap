@@ -1,101 +1,18 @@
 /* eslint-disable */
 
 function requireRpgMaker() {
-    // ZLayer API removed from @pixi/tilemap
-    PIXI.tilemap.ZLayer =  class ZLayer extends PIXI.Container {
-        constructor(tilemap, zIndex) {
-            super();ZLayer.prototype.__init.call(this);;
-            this.tilemap = tilemap;
-            this.z = zIndex;
-        }
-        __init() {this._lastAnimationFrame = -1;}
-
-        clear() {
-            let layers = this.children ;
-            for (let i = 0; i < layers.length; i++)
-                layers[i].clear();
-            this._previousLayers = 0;
-        }
-
-        // TODO: Move to @pixi/canvas-tilemap
-        cacheIfDirty(canvasRenderer) {
-            let tilemap = this.tilemap;
-            let layers = this.children ;
-            let modified = this._previousLayers !== layers.length;
-            this._previousLayers = layers.length;
-            let buf = this.canvasBuffer;
-            let tempRender = this._tempRender;
-            if (!buf) {
-                buf = this.canvasBuffer = document.createElement('canvas');
-
-                (canvasRenderer.constructor ).registerPlugin('tilemap', PIXI.tilemap.CanvasTileRenderer);
-                tempRender = this._tempRender = new (canvasRenderer.constructor )({width: 100, height: 100, view: buf});
-                tempRender.context = tempRender.rootContext;
-                tempRender.plugins.tilemap.dontUseTransform = true;
-            }
-            if (buf.width !== tilemap._layerWidth ||
-                buf.height !== tilemap._layerHeight) {
-                buf.width = tilemap._layerWidth;
-                buf.height = tilemap._layerHeight;
-                modified = true;
-            }
-            let i;
-            if (!modified) {
-                for (i = 0; i < layers.length; i++) {
-                    if (layers[i].isModified(this._lastAnimationFrame !== tilemap.animationFrame)) {
-                        modified = true;
-                        break;
-                    }
-                }
-            }
-            this._lastAnimationFrame = tilemap.animationFrame;
-            if (modified) {
-                if (tilemap._hackRenderer) {
-                    tilemap._hackRenderer(tempRender);
-                }
-                tempRender.context.clearRect(0, 0, buf.width, buf.height);
-                for (i = 0; i < layers.length; i++) {
-                    layers[i].clearModify();
-                    layers[i].renderCanvas(tempRender);
-                }
-            }
-            this.layerTransform = this.worldTransform;
-            for (i = 0; i < layers.length; i++) {
-                this.layerTransform = layers[i].worldTransform;
-                break;
-            }
-        }
-
-        renderCanvas(renderer) {
-            this.cacheIfDirty(renderer);
-            let wt = this.layerTransform;
-            renderer.context.setTransform(
-                wt.a,
-                wt.b,
-                wt.c,
-                wt.d,
-                wt.tx * renderer.resolution,
-                wt.ty * renderer.resolution
-            );
-            let tilemap = this.tilemap;
-            renderer.context.drawImage(this.canvasBuffer, 0, 0);
-        }
-    }
-
-
 //-----------------------------------------------------------------------------
     Graphics = {width: 300, height: 300};
     var Point = PIXI.Point;
-    var PluginManager= {
-        parameters : function() {
+    var PluginManager = {
+        parameters: function () {
             return {
                 "squareShader": 0
             }
         }
     };
 
-    if (PIXI.CanvasRenderer)
-    {
+    if (PIXI.CanvasRenderer) {
         PIXI.CanvasRenderer.registerPlugin('tilemap', PIXI.tilemap.CanvasTileRenderer);
     }
 
@@ -105,79 +22,84 @@ function requireRpgMaker() {
      * @class Tilemap
      * @constructor
      */
-    function Tilemap() {
-        this.initialize.apply(this, arguments);
+    class Tilemap extends PIXI.Container {
+
+        constructor() {
+            super();
+            this.initialize.apply(this, arguments);
+        }
+        initialize()
+        {
+
+            this._margin = 20;
+            this._width = Graphics.width + this._margin * 2;
+            this._height = Graphics.height + this._margin * 2;
+            this._tileWidth = 48;
+            this._tileHeight = 48;
+            this._mapWidth = 0;
+            this._mapHeight = 0;
+            this._mapData = null;
+            this._layerWidth = 0;
+            this._layerHeight = 0;
+            this._lastTiles = [];
+
+            /**
+             * The bitmaps used as a tileset.
+             *
+             * @property bitmaps
+             * @type Array
+             */
+            this.bitmaps = [];
+
+            /**
+             * The origin point of the tilemap for scrolling.
+             *
+             * @property origin
+             * @type Point
+             */
+            this.origin = new Point();
+
+            /**
+             * The tileset flags.
+             *
+             * @property flags
+             * @type Array
+             */
+            this.flags = [];
+
+            /**
+             * The animation count for autotiles.
+             *
+             * @property animationCount
+             * @type Number
+             */
+            this.animationCount = 0;
+
+            /**
+             * Whether the tilemap loops horizontal.
+             *
+             * @property horizontalWrap
+             * @type Boolean
+             */
+            this.horizontalWrap = false;
+
+            /**
+             * Whether the tilemap loops vertical.
+             *
+             * @property verticalWrap
+             * @type Boolean
+             */
+            this.verticalWrap = false;
+
+            this._createLayers();
+            this.refresh();
+        }
+
+        onAnimChange() {
+            this._needsRepaint = true;
+        }
+
     }
-
-    Tilemap.prototype = Object.create(PIXI.Container.prototype);
-    Tilemap.prototype.constructor = Tilemap;
-
-    Tilemap.prototype.initialize = function() {
-        PIXI.Container.call(this);
-
-        this._margin = 20;
-        this._width = Graphics.width + this._margin * 2;
-        this._height = Graphics.height + this._margin * 2;
-        this._tileWidth = 48;
-        this._tileHeight = 48;
-        this._mapWidth = 0;
-        this._mapHeight = 0;
-        this._mapData = null;
-        this._layerWidth = 0;
-        this._layerHeight = 0;
-        this._lastTiles = [];
-
-        /**
-         * The bitmaps used as a tileset.
-         *
-         * @property bitmaps
-         * @type Array
-         */
-        this.bitmaps = [];
-
-        /**
-         * The origin point of the tilemap for scrolling.
-         *
-         * @property origin
-         * @type Point
-         */
-        this.origin = new Point();
-
-        /**
-         * The tileset flags.
-         *
-         * @property flags
-         * @type Array
-         */
-        this.flags = [];
-
-        /**
-         * The animation count for autotiles.
-         *
-         * @property animationCount
-         * @type Number
-         */
-        this.animationCount = 0;
-
-        /**
-         * Whether the tilemap loops horizontal.
-         *
-         * @property horizontalWrap
-         * @type Boolean
-         */
-        this.horizontalWrap = false;
-
-        /**
-         * Whether the tilemap loops vertical.
-         *
-         * @property verticalWrap
-         * @type Boolean
-         */
-        this.verticalWrap = false;
-
-        this._createLayers();
-        this.refresh();
-    };
 
     /**
      * The width of the screen in pixels.
@@ -288,7 +210,13 @@ function requireRpgMaker() {
      */
     Tilemap.prototype.update = function() {
         this.animationCount++;
+        const old_frame = this.animationFrame;
         this.animationFrame = Math.floor(this.animationCount / 30);
+
+        if (old_frame !== this.animationFrame) {
+            this.onAnimChange();
+        }
+
         this.children.forEach(function(child) {
             if (child.update) {
                 child.update();
@@ -310,14 +238,13 @@ function requireRpgMaker() {
      * @method updateTransform
      * @private
      */
-    Tilemap.prototype.updateTransform = function() {
+    Tilemap.prototype.updateTransformTick = function() {
         var ox = Math.floor(this.origin.x);
         var oy = Math.floor(this.origin.y);
         var startX = Math.floor((ox - this._margin) / this._tileWidth);
         var startY = Math.floor((oy - this._margin) / this._tileHeight);
         this._updateLayerPositions(startX, startY);
-        if (this._needsRepaint || this._lastAnimationFrame !== this.animationFrame ||
-            this._lastStartX !== startX || this._lastStartY !== startY) {
+        if (this._needsRepaint || this._lastStartX !== startX || this._lastStartY !== startY) {
             this._frameUpdated = this._lastAnimationFrame !== this.animationFrame;
             this._lastAnimationFrame = this.animationFrame;
             this._lastStartX = startX;
@@ -326,7 +253,6 @@ function requireRpgMaker() {
             this._needsRepaint = false;
         }
         this._sortChildren();
-        PIXI.Container.prototype.updateTransform.call(this);
     };
 
     /**
@@ -1019,38 +945,28 @@ function requireRpgMaker() {
      * @class Tilemap
      * @constructor
      */
-    function ShaderTilemap() {
-        Tilemap.apply(this, arguments);
-        this.roundPixels = true;
-    };
+    class ShaderTilemap extends Tilemap {
+        constructor() {
+            super(arguments)
+            this.roundPixels = true;
+            this.tileAnim = [0, 0];
+        }
 
-    ShaderTilemap.prototype = Object.create(Tilemap.prototype);
-    ShaderTilemap.prototype.constructor = ShaderTilemap;
+        onAnimChange() {
+            var af = this.animationFrame % 4;
+            if (af === 3) af = 1;
+            if (this.lowerLayer) {
 
-    /**
-     * Uploads animation state in renderer
-     *
-     * @method _hackRenderer
-     * @private
-     */
-    ShaderTilemap.prototype._hackRenderer = function(renderer) {
-        var af = this.animationFrame % 4;
-        if (af==3) af = 1;
-        renderer.plugins.tilemap.tileAnim[0] = af * this._tileWidth;
-        renderer.plugins.tilemap.tileAnim[1] = (this.animationFrame % 3) * this._tileHeight;
-        return renderer;
-    };
+                const tileAnim = this.tileAnim;
 
-    /**
-     * PIXI render method
-     *
-     * @method renderCanvas
-     * @param {Object} pixi renderer
-     */
-    ShaderTilemap.prototype.renderCanvas = function(renderer) {
-        this._hackRenderer(renderer);
-        PIXI.Container.prototype.renderCanvas.call(this, renderer);
-    };
+                tileAnim[0] = af * this._tileWidth;
+                tileAnim[1] = (this.animationFrame % 3) * this._tileHeight;
+
+                this.lowerLayer.tileAnim = this.upperLayer.tileAnim = tileAnim;
+            }
+        }
+    }
+
 
 
     /**
@@ -1093,7 +1009,7 @@ function requireRpgMaker() {
      * @method updateTransform
      * @private
      */
-    ShaderTilemap.prototype.updateTransform = function() {
+    ShaderTilemap.prototype.updateTransformTick = function() {
         if (this.roundPixels) {
             var ox = Math.floor(this.origin.x);
             var oy = Math.floor(this.origin.y);
@@ -1112,7 +1028,6 @@ function requireRpgMaker() {
             this._needsRepaint = false;
         }
         this._sortChildren();
-        PIXI.Container.prototype.updateTransform.call(this);
     };
 
     /**
@@ -1129,17 +1044,13 @@ function requireRpgMaker() {
         var layerHeight = this._layerHeight = tileRows * this._tileHeight;
         this._needsRepaint = true;
 
-        if (!this.lowerZLayer) {
-            //@hackerham: create layers only in initialization. Doesn't depend on width/height
-            this.addChild(this.lowerZLayer = new PIXI.tilemap.ZLayer(this, 0));
-            this.addChild(this.upperZLayer = new PIXI.tilemap.ZLayer(this, 4));
+        if (!this.lowerLayer) {
+            // var parameters = PluginManager.parameters('ShaderTilemap');
+            // var useSquareShader = Number(parameters.hasOwnProperty('squareShader') ? parameters['squareShader'] : 1);
 
-            var parameters = PluginManager.parameters('ShaderTilemap');
-            var useSquareShader = Number(parameters.hasOwnProperty('squareShader') ? parameters['squareShader'] : 1);
-
-            this.lowerZLayer.addChild(this.lowerLayer = new PIXI.tilemap.CompositeRectTileLayer(0, [], useSquareShader));
+            this.addChild(this.lowerLayer = new PIXI.tilemap.CompositeTilemap(0, []));
             this.lowerLayer.shadowColor = new Float32Array([0.0, 0.0, 0.0, 0.5]);
-            this.upperZLayer.addChild(this.upperLayer = new PIXI.tilemap.CompositeRectTileLayer(4, [], useSquareShader));
+            this.addChild(this.upperLayer = new PIXI.tilemap.CompositeTilemap(4, []));
         }
     };
 
@@ -1157,10 +1068,10 @@ function requireRpgMaker() {
             ox = this.origin.x;
             oy = this.origin.y;
         }
-        this.lowerZLayer.position.x = startX * this._tileWidth - ox;
-        this.lowerZLayer.position.y = startY * this._tileHeight - oy;
-        this.upperZLayer.position.x = startX * this._tileWidth - ox;
-        this.upperZLayer.position.y = startY * this._tileHeight - oy;
+        this.lowerLayer.position.x = startX * this._tileWidth - ox;
+        this.lowerLayer.position.y = startY * this._tileHeight - oy;
+        this.upperLayer.position.x = startX * this._tileWidth - ox;
+        this.upperLayer.position.y = startY * this._tileHeight - oy;
     };
 
     /**
@@ -1170,8 +1081,8 @@ function requireRpgMaker() {
      * @private
      */
     ShaderTilemap.prototype._paintAllTiles = function(startX, startY) {
-        this.lowerZLayer.clear();
-        this.upperZLayer.clear();
+        this.lowerLayer.clear()
+        this.upperLayer.clear()
         var tileCols = Math.ceil(this._width / this._tileWidth) + 1;
         var tileRows = Math.ceil(this._height / this._tileHeight) + 1;
         for (var y = 0; y < tileRows; y++) {
@@ -1434,52 +1345,51 @@ function requireRpgMaker() {
         initialize: function() {
 
         },
-        load : function(name, cb) {
-            var tilesets = null;
+        load : async function(name) {
             var tileset = null;
             var tilesetNames = null;
-            var map = null;
-            var loader = new PIXI.Loader();
-            var self = this;
-            function progress(loader, resource) {
-                if (resource.name == 'tilesets') {
-                    //1. load the map
-                    loader.add(name, 'rpgmaker/data/'+name+'.json', {parentResource: resource });
-                    self.tilesetResource = resource;
-                    tilesets = resource.data;
-                } else
-                if (resource.name == name) {
-                    //2. load spritesheets
-                    map = resource.data;
-                    tileset = tilesets[map['tilesetId']];
-                    tilesetNames = tileset['tilesetNames'];
-                    tilesetNames.forEach(function(name) {
-                        if (name.length>0 && !PIXI.utils.TextureCache[name])
-                            loader.add(name, 'rpgmaker/img/'+name +".png", {parentResource: resource });
-                    })
-                }
-            }
-            loader.onProgress.add(progress);
-            //0. load tilesets
-            if (this.tilesetResource)
-                progress(loader, self.tilesetResource);
-            else
-                loader.add('tilesets', 'rpgmaker/data/Tilesets.json');
-            loader.load(function(loader, resources) {
-                var result = new ShaderTilemap(300, 300);
-                for (var i=0;i<tilesetNames.length;i++) {
-                    var tex = resources[tilesetNames[i]] && resources[tilesetNames[i]].texture;
-                    result.bitmaps.push(tex);
-                    if (tex) tex.baseTexture.mipmap = true;
-                }
-                while (result.bitmaps.length>0 && !result.bitmaps[result.bitmaps.length-1]) {
-                    result.bitmaps.pop();
-                }
-                result.flags = tileset.flags;
-                result.setData(map.width, map.height, map.data);
-                result.refresh();
-                cb(null, result);
+            var assets = PIXI.Assets;
+
+            assets.add({
+                alias: 'tilesets',
+                src: 'rpgmaker/data/Tilesets.json'
             })
+
+            const tilesets = await assets.load('tilesets');
+            assets.add({ alias: name, src: 'rpgmaker/data/'+name+'.json' })
+
+            const map = await assets.load(name)
+            tileset = tilesets[map['tilesetId']];
+            tilesetNames = tileset['tilesetNames'];
+            const all_tiles = [];
+            tilesetNames.forEach(function(name) {
+                if (name.length>0 && !PIXI.Cache.has(name)) {
+                    assets.add({ alias: name, src: 'rpgmaker/img/' + name + ".png" });
+                    all_tiles.push(name);
+                }
+            })
+
+            await assets.load(all_tiles);
+
+            var result = new ShaderTilemap(300, 300);
+            for (var i=0;i<tilesetNames.length;i++) {
+                const name = tilesetNames[i];
+                if (!name) {
+                    //TODO: allow to miss some bitmaps
+                    continue;
+                }
+                var tex = PIXI.Cache.get(name);
+                result.bitmaps.push(tex);
+                if (tex) tex.source.mipmap = true;
+            }
+            while (result.bitmaps.length>0 && !result.bitmaps[result.bitmaps.length-1]) {
+                result.bitmaps.pop();
+            }
+            result.flags = tileset.flags;
+            result.setData(map.width, map.height, map.data);
+            result.refresh();
+
+            return result;
         }
     };
 

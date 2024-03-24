@@ -1,4 +1,4 @@
-import { BindGroup, Buffer, BufferUsage, Texture, TextureSource } from 'pixi.js';
+import { BindGroup, Buffer, BufferUsage, Texture, TextureSource, UniformGroup } from 'pixi.js';
 
 export class TileTextureArray
 {
@@ -54,10 +54,13 @@ export class TileTextureArray
         {
             const tex = arr[i];
 
-            tex_sizes[(i * 4)] = tex.pixelWidth;
-            tex_sizes[(i * 4) + 1] = tex.pixelHeight;
-            tex_sizes[(i * 4) + 2] = 1.0 / tex.pixelWidth;
-            tex_sizes[(i * 4) + 3] = 1.0 / tex.pixelHeight;
+            if (tex)
+            {
+                tex_sizes[(i * 4)] = tex.pixelWidth;
+                tex_sizes[(i * 4) + 1] = tex.pixelHeight;
+                tex_sizes[(i * 4) + 2] = 1.0 / tex.pixelWidth;
+                tex_sizes[(i * 4) + 3] = 1.0 / tex.pixelHeight;
+            }
         }
 
         tex_sizes[max_textures * 4] = null_color[0];
@@ -83,12 +86,21 @@ export class TileTextureArray
 
         let bindIndex = 0;
 
-        bind_group_resources[bindIndex++] = this.null_color;
-        bind_group_resources[bindIndex++] = this.tex_sizes;
+        bind_group_resources[bindIndex++] = new UniformGroup({
+            u_texture_size: {
+                value: this.tex_sizes,
+                type: 'vec4<f32>',
+                size: max_textures
+            },
+            u_null_color: {
+                value: this.null_color,
+                type: 'vec4<f32>'
+            },
+        });
 
         for (let i = 0; i < max_textures; i++)
         {
-            const texture = i < count ? arr[i] : Texture.EMPTY.source;
+            const texture = (i < count ? arr[i] : null) || Texture.EMPTY.source;
 
             bind_group_resources[bindIndex++] = texture.source;
             bind_group_resources[bindIndex++] = texture.style;
@@ -107,8 +119,8 @@ export class TileTextureArray
         const src: string[] = [];
 
         src.push(`struct TextureArrayFields {`);
-        src.push(`    u_texture_size: array<vec4f, ${max_textures}>`);
-        src.push(`    u_null_color: vec4f;`);
+        src.push(`    u_texture_size: array<vec4f, ${max_textures}>,`);
+        src.push(`    u_null_color: vec4f`);
         src.push(`}`);
         src.push(`@group(1) @binding(0) var<uniform> taf: TextureArrayFields;`);
         for (let i = 0; i < max_textures; i++)
@@ -117,13 +129,13 @@ export class TileTextureArray
             src.push(`@group(1) @binding(${(i * 2) + 2}) var u_sampler_${i}: sampler;`);
         }
 
-        src.push('fn sampleMultiTexture(texture_id: u32, uv: vec2f, dx: vec2f, dy: vec2f) -> vec4f {');
+        src.push('fn sampleMultiTexture(texture_id: i32, uv: vec2f, dx: vec2f, dy: vec2f) -> vec4f {');
         src.push(`switch texture_id {`);
         for (let i = 0; i < max_textures; i++)
         {
-            src.push(`  case ${i}: return textureSampleGrad(source_${i}, u_sampler_${i}, uv, dx, dy);`);
+            src.push(`  case ${i}: { return textureSampleGrad(u_texture_${i}, u_sampler_${i}, uv, dx, dy); }`);
         }
-        src.push(`  default: return taf.u_null_color;`);
+        src.push(`  default: { return taf.u_null_color; }`);
         src.push('} }');
 
         return src.join('\n');
@@ -141,8 +153,9 @@ export class TileTextureArray
         src.push(`if(texture_id < -0.5) return u_texture_size[${max_textures}];`);
         for (let i = 0; i < max_textures; i++)
         {
-            src.push(`if(texture_id < ${i}.5) return texture2D(u_textures[${i}], uv * u_texture_size[${i}].zw);`);
+            src.push(`if(texture_id < ${i}.5) return texture(u_textures[${i}], uv * u_texture_size[${i}].zw);`);
         }
+        src.push(`return u_texture_size[${max_textures}];`);
         src.push('}');
 
         return src.join('\n');

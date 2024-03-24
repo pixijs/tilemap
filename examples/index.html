@@ -10,43 +10,15 @@
         body { background: white; margin: 0;}
 
         canvas {
-        }
-
-        .game-canvas {
-            position: absolute;
-            /*image-rendering: pixelated;
-            image-rendering: -moz-crisp-edges;
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: -o-crisp-edges;
-            image-rendering: optimize-contrast;
-            -ms-interpolation-mode: nearest-neighbor;*/
-        }
-
-        .outer-container {
-            position: absolute;
-            left: 0px;
-            right: 0px;
-            top: 0px;
-            bottom: 0px;
-            overflow: hidden;
-        }
-
-        .inner-container {
-            position: relative;
-            overflow: hidden;
-        }
-
-        #frontCanvas {
-            pointer-events: none;
+            margin: 0; padding: 0;
         }
     </style>
-    <script src="https://pixijs.download/dev/pixi-legacy.js"></script>
+    <script src="https://pixijs.download/dev/pixi.js"></script>
 <!--    <script src="lib/pixi.js"></script>-->
-    <script src="dist/pixi-tilemap.umd.js"></script>
+    <script src="../dist/pixi-tilemap.js"></script>
     <script src="demo/rpgmaker.js"></script>
     <script src="demo/main.js"></script>
 </head>
 <body onload="go()">
-   <canvas id="backCanvas" class="game-canvas"></canvas>
 </body>
 </html>

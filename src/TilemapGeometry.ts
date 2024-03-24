@@ -25,6 +25,8 @@ export class TilemapGeometry extends Geometry
 
         const stride = TilemapGeometry.stride;
 
+        // TODO: why location is like that in webgl? ascending?
+
 	    super({
             indexBuffer,
             attributes: {
@@ -33,49 +35,49 @@ export class TilemapGeometry extends Geometry
                     format: 'float32x2',
                     stride,
                     offset: 0,
-                    location: 0,
+                    // location: 6,
                 },
                 aTextureCoord: {
                     buffer: buf,
                     format: 'float32x2',
                     stride,
                     offset: 2 * 4,
-                    location: 1,
+                    // location: 4,
                 },
                 aFrame: {
                     buffer: buf,
                     format: 'float32x4',
                     stride,
                     offset: 4 * 4,
-                    location: 2,
+                    // location: 3,
                 },
                 aAnim: {
                     buffer: buf,
                     format: 'float32x2',
                     stride,
                     offset: 8 * 4,
-                    location: 3,
+                    // location: 1,
                 },
                 aTextureId: {
                     buffer: buf,
-                    format: 'float32',
+                    format: 'sint32',
                     stride,
                     offset: 10 * 4,
-                    location: 4
+                    // location: 5
                 },
                 aAnimDivisor: {
                     buffer: buf,
                     format: 'float32',
                     stride,
                     offset: 11 * 4,
-                    location: 5
+                    // location: 2
                 },
                 aAlpha: {
                     buffer: buf,
                     format: 'float32',
                     stride,
                     offset: 12 * 4,
-                    location: 6
+                    // location: 0
                 }
             },
         });

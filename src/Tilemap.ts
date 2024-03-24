@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { Bounds, Container, groupD8, State, Texture, TextureSource } from 'pixi.js';
 import { settings } from './settings';
-import { TilemapPipe } from './TilemapPipe';
+import { TilemapInstruction, TilemapPipe } from './TilemapPipe';
 import { TileTextureArray } from './TileTextureArray';
 
 import type { DestroyOptions } from 'pixi.js';
@@ -67,6 +67,18 @@ export class Tilemap extends Container
 
     is_valid = false;
 
+    public readonly renderPipeId = 'tilemap';
+    public readonly canBundle = true;
+
+    _instruction = {
+        renderPipeId: 'tilemap',
+        tilemap: this as Tilemap
+    } as TilemapInstruction;
+
+    /**
+     * @internal
+     * @ignore
+     */
     checkValid()
     {
         const v = this.tileset.count > 0 && this.pointsBuf.length > 0;
@@ -164,7 +176,7 @@ export class Tilemap extends Container
 
                 for (let i = 0; i < textureOrArray.length; i++)
                 {
-                    if (textureOrArray[i] !== ts.arr[i])
+                    if (textureOrArray[i]?.source !== ts.arr[i])
                     {
                         flag = false;
                         break;
@@ -181,7 +193,7 @@ export class Tilemap extends Container
 
             for (let i = 0; i < textureOrArray.length; i++)
             {
-                ts.push(textureOrArray[i]);
+                ts.push(textureOrArray[i]?.source);
             }
             this.didViewUpdate = true;
         }
@@ -246,10 +258,12 @@ export class Tilemap extends Container
         this.didViewUpdate = true;
         let baseTexture: TextureSource;
         let textureIndex = -1;
+        let was_num = false;
 
         if (typeof tileTexture === 'number')
         {
             textureIndex = tileTexture;
+            was_num = true;
             baseTexture = this.tileset.arr[textureIndex];
         }
         else
@@ -287,7 +301,7 @@ export class Tilemap extends Container
             baseTexture = texture.source;
         }
 
-        if (!baseTexture || textureIndex < 0)
+        if (!was_num && !baseTexture)
         {
             console.error('The tile texture was not found in the tilemap tileset.');
 
@@ -389,9 +403,6 @@ export class Tilemap extends Container
         }
     }
 
-    public readonly renderPipeId = 'tilemap';
-    public readonly canBundle = true;
-
     updateBuffer(plugin: TilemapPipe)
     {
         const points = this.pointsBuf;
@@ -437,6 +448,7 @@ export class Tilemap extends Container
         }
 
         const arr = this.vbArray;
+        const ints = this.vbInts;
         let sz = 0;
         let textureId = 0;
 
@@ -523,7 +535,7 @@ export class Tilemap extends Container
             arr[sz++] = v + h - eps;
             arr[sz++] = animXEncoded;
             arr[sz++] = animYEncoded;
-            arr[sz++] = textureId;
+            ints[sz++] = textureId;
             arr[sz++] = animDivisor;
             arr[sz++] = alpha;
 
@@ -537,7 +549,7 @@ export class Tilemap extends Container
             arr[sz++] = v + h - eps;
             arr[sz++] = animXEncoded;
             arr[sz++] = animYEncoded;
-            arr[sz++] = textureId;
+            ints[sz++] = textureId;
             arr[sz++] = animDivisor;
             arr[sz++] = alpha;
 
@@ -551,7 +563,7 @@ export class Tilemap extends Container
             arr[sz++] = v + h - eps;
             arr[sz++] = animXEncoded;
             arr[sz++] = animYEncoded;
-            arr[sz++] = textureId;
+            ints[sz++] = textureId;
             arr[sz++] = animDivisor;
             arr[sz++] = alpha;
 
@@ -565,7 +577,7 @@ export class Tilemap extends Container
             arr[sz++] = v + h - eps;
             arr[sz++] = animXEncoded;
             arr[sz++] = animYEncoded;
-            arr[sz++] = textureId;
+            ints[sz++] = textureId;
             arr[sz++] = animDivisor;
             arr[sz++] = alpha;
         }
@@ -579,7 +591,7 @@ export class Tilemap extends Container
      */
     isModified(anim: boolean): boolean
     {
-        if (this.rects_count !== this.pointsBuf.length
+        if (this.rects_count * POINT_STRUCT_SIZE !== this.pointsBuf.length
             || (anim && this.hasAnimatedTile))
         {
             return true;
@@ -596,7 +608,7 @@ export class Tilemap extends Container
      */
     clearModify(): void
     {
-        this.rects_count = this.pointsBuf.length;
+        this.rects_count = this.pointsBuf.length / POINT_STRUCT_SIZE;
     }
 
     public addBounds(bounds: Bounds)

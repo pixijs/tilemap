@@ -22,21 +22,21 @@ struct TilemapUniforms {
 
 struct VSOutput {
   @builtin(position) vPosition: vec4f,
-  @location(0) @interpolate(flat) vTextureId : u32,
-  @location(1) vec2 vTextureCoord : vec2f,
-  @location(2) @interpolate(flat) vec4 vFrame : vec4f,
-  @location(3) float vAlpha : f32
+  @location(0) @interpolate(flat) vTextureId : i32,
+  @location(1) vTextureCoord : vec2f,
+  @location(2) @interpolate(flat) vFrame : vec4f,
+  @location(3) vAlpha : f32
 };
 
 @vertex
-fn main(
-   @location(0) aVertexPosition: vec2f,
-   @location(1) aTextureCoord: vec2f,
-   @location(2) aFrame: vec4u,
-   @location(3) aAnim: vec2f,
-   @location(4) aAnimDivisor: f32,
-   @location(5) aTextureId: u32,
-   @location(6) aAlpha: f32,
+fn mainVert(
+   @location(6) aVertexPosition: vec2f,
+   @location(4) aTextureCoord: vec2f,
+   @location(3) aFrame: vec4f,
+   @location(1) aAnim: vec2f,
+   @location(2) aAnimDivisor: f32,
+   @location(5) aTextureId: i32,
+   @location(0) aAlpha: f32,
  ) -> VSOutput {
 
   var vPosition = vec4((loc.u_proj_trans * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);
@@ -56,14 +56,14 @@ const gpu_tilemap_fragment = `
 //include_textures
 
 @fragment
-fn main(
-  @location(0) @interpolate(flat) vTextureId : u32,
-  @location(1) vec2 vTextureCoord : vec2f,
-  @location(2) @interpolate(flat) vec4 vFrame : vec4f,
-  @location(3) float vAlpha : f32,
+fn mainFrag(
+  @location(0) @interpolate(flat) vTextureId : i32,
+  @location(1) vTextureCoord : vec2f,
+  @location(2) @interpolate(flat) vFrame : vec4f,
+  @location(3) vAlpha : f32,
   ) -> @location(0) vec4f {
   var textureCoord = clamp(vTextureCoord, vFrame.xy, vFrame.zw);
-  var uv = textureCoord * taf.u_texture_size[textureId].zw;
+  var uv = textureCoord * taf.u_texture_size[vTextureId].zw;
   var dx = dpdx(uv);
   var dy = dpdy(uv);
   var color = sampleMultiTexture(vTextureId, uv, dx, dy);
@@ -112,7 +112,7 @@ export class GpuTilemapAdaptor extends TilemapAdaptor
     {
         this._shader = new Shader({
             gpuProgram: GpuProgram.from({
-                vertex: { source: gpu_tilemap_vertex },
+                vertex: { source: gpu_tilemap_vertex, entryPoint: 'mainVert' },
                 fragment: {
                     source: gpu_tilemap_fragment
                         .replace('//include_textures', TileTextureArray.generate_gpu_textures(this.max_textures))

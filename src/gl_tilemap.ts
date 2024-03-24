@@ -1,26 +1,25 @@
-import {ExtensionType, GlProgram, Shader, UniformGroup, WebGLRenderer} from 'pixi.js';
+import { ExtensionType, GlProgram, Shader, UniformGroup, WebGLRenderer } from 'pixi.js';
 import { settings } from './settings';
 import { Tilemap } from './Tilemap';
 import { TilemapAdaptor, TilemapPipe } from './TilemapPipe';
 import { TileTextureArray } from './TileTextureArray';
 
 const gl_tilemap_vertex = `
-precision highp float;
-attribute vec2 aVertexPosition;
-attribute vec2 aTextureCoord;
-attribute vec4 aFrame;
-attribute vec2 aAnim;
-attribute float aAnimDivisor;
-attribute float aTextureId;
-attribute float aAlpha;
+in vec2 aVertexPosition;
+in vec2 aTextureCoord;
+in vec4 aFrame;
+in vec2 aAnim;
+in float aAnimDivisor;
+in float aTextureId;
+in float aAlpha;
 
 uniform mat3 u_proj_trans;
 uniform vec2 u_anim_frame;
 
-varying vec2 vTextureCoord;
-varying float vTextureId;
-varying vec4 vFrame;
-varying float vAlpha;
+out vec2 vTextureCoord;
+out float vTextureId;
+out vec4 vFrame;
+out float vAlpha;
 
 void main(void)
 {
@@ -44,10 +43,10 @@ precision highp float;
 #else
 precision mediump float;
 #endif
-varying vec2 vTextureCoord;
-varying vec4 vFrame;
-varying float vTextureId;
-varying float vAlpha;
+in vec2 vTextureCoord;
+in vec4 vFrame;
+in float vTextureId;
+in float vAlpha;
 
 //include_textures
 
@@ -56,7 +55,7 @@ void main(void)
   float textureId = floor(vTextureId + 0.5);
   vec2 textureCoord = clamp(vTextureCoord, vFrame.xy, vFrame.zw);
   vec4 color = sampleMultiTexture(textureId, textureCoord);
-  gl_FragColor = color * vAlpha;
+  finalColor = color * vAlpha;
 }
 `;
 
