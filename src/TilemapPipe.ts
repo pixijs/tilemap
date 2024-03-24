@@ -135,6 +135,7 @@ export class TilemapPipe implements RenderPipe<Tilemap>, InstructionPipe<Tilemap
 
         tilemap.updateBuffer(this);
         tilemap.checkValid();
+        tilemap.getTileset().update();
 
         if (tilemap.is_valid)
         {
@@ -147,9 +148,10 @@ export class TilemapPipe implements RenderPipe<Tilemap>, InstructionPipe<Tilemap
         }
     }
 
-    updateRenderable(renderable: Tilemap, _instructionSet?: InstructionSet | undefined): void
+    updateRenderable(tilemap: Tilemap, _instructionSet?: InstructionSet | undefined): void
     {
-        renderable.updateBuffer(this);
+        tilemap.updateBuffer(this);
+        tilemap.getTileset().update();
     }
 
     validateRenderable(renderable: Tilemap): boolean

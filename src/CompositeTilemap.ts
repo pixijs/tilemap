@@ -313,7 +313,7 @@ export class CompositeTilemap extends Container
                 // Otherwise, create a new tilemap initialized with that tile texture.
                 if (!tilemap)
                 {
-                    tilemap = new Tilemap(tileTexture.baseTexture);
+                    tilemap = new Tilemap(tileTexture.source);
                     tilemap.compositeParent = true;
 
                     this.addChild(tilemap);

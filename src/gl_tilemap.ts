@@ -1,4 +1,4 @@
-import { ExtensionType, GlProgram, Shader, WebGLRenderer } from 'pixi.js';
+import {ExtensionType, GlProgram, Shader, UniformGroup, WebGLRenderer} from 'pixi.js';
 import { settings } from './settings';
 import { Tilemap } from './Tilemap';
 import { TilemapAdaptor, TilemapPipe } from './TilemapPipe';
@@ -14,8 +14,8 @@ attribute float aAnimDivisor;
 attribute float aTextureId;
 attribute float aAlpha;
 
-uniform mat3 proj_trans_matrix;
-uniform vec2 anim_frame;
+uniform mat3 u_proj_trans;
+uniform vec2 u_anim_frame;
 
 varying vec2 vTextureCoord;
 varying float vTextureId;
@@ -24,10 +24,10 @@ varying float vAlpha;
 
 void main(void)
 {
-  gl_Position = vec4((proj_trans_matrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);
+  gl_Position = vec4((u_proj_trans * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);
   vec2 animCount = floor((aAnim + 0.5) / 2048.0);
   vec2 animFrameOffset = aAnim - animCount * 2048.0;
-  vec2 currentFrame = floor(anim_frame / aAnimDivisor);
+  vec2 currentFrame = floor(u_anim_frame / aAnimDivisor);
   vec2 loop_num = floor((currentFrame + 0.5) / animCount);
   vec2 animOffset = animFrameOffset * floor(currentFrame - loop_num * animCount);
 
@@ -84,7 +84,13 @@ export class GlTilemapAdaptor extends TilemapAdaptor
         const shader = this._shader;
         const tileset = tilemap.getTileset();
 
-        shader.resources.u_texture_size = tileset.tex_sizes;
+        const tu = shader.resources.texture_uniforms;
+
+        if (tu.uniforms.u_texture_size !== tileset.tex_sizes)
+        {
+            tu.uniforms.u_texture_size = tileset.tex_sizes;
+            tu.update();
+        }
 
         for (let i = 0; i < tileset.length; i++)
         {
@@ -110,7 +116,7 @@ export class GlTilemapAdaptor extends TilemapAdaptor
                     TileTextureArray.generate_gl_textures(this.max_textures))
             }),
             resources: {
-                texture_uniforms: TileTextureArray.gl_gen_resources(this.max_textures),
+                texture_uniforms: new UniformGroup(TileTextureArray.gl_gen_resources(this.max_textures), { isStatic: true }),
                 pipe_uniforms: this.pipe_uniforms.uniformStructures,
             },
         });

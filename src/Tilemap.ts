@@ -276,7 +276,7 @@ export class Tilemap extends Container
                 }
             }
 
-            if ('baseTexture' in texture)
+            if ('frame' in texture)
             {
                 options.u = options.u ?? texture.frame.x;
                 options.v = options.v ?? texture.frame.y;

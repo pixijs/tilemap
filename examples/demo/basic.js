@@ -13,7 +13,7 @@ const use_webgpu = new URLSearchParams(window.location.search).get('webgpu') !==
     });
     const tilemap = new PIXI.tilemap.CompositeTilemap();
 
-    document.body.appendChild(app.view);
+    document.body.appendChild(app.canvas);
     app.stage.addChild(tilemap);
 
     const loadAssets = async () => {
@@ -82,7 +82,7 @@ const use_webgpu = new URLSearchParams(window.location.search).get('webgpu') !==
                 orig.height = frame.width;
             }
 
-            const tmpTex = new PIXI.Texture(origTex.baseTexture, frame, orig, trim, rotate);
+            const tmpTex = new PIXI.Texture(origTex.source, frame, orig, trim, rotate);
 
             // Swap W and H in orig if you rotate%4 is not 0
             tilemap.tile(tmpTex, i % 4 * size, ((i >> 2) * size) + (5 * size));
