@@ -84,7 +84,7 @@ Canvas fallback is 5x slower than vanilla rpgmaker. Webgl version is faster and 
 
 [webgl](https://pixijs.io/tilemap/examples/): [zoomin](https://pixijs.io/tilemap/examples/?scale=0.6) and [zoomout](https://pixijs.io/tilemap/examples/?scale=1.4)
 
-[retina webgl](https://pixijs.io/tilemap/examples/?resolution=2): [zoomin](https://pixijs.io/tilemap/examples/?resolution=2&scale=0.6) and [zoomout](https://pixijs.io/tilemap/?resolution=2&scale=1.4)
+[retina webgl](https://pixijs.io/tilemap/examples/?resolution=2): [zoomin](https://pixijs.io/tilemap/examples/?resolution=2&scale=0.6) and [zoomout](https://pixijs.io/tilemap/examples/?resolution=2&scale=1.4)
 
 [canvas](https://pixijs.io/tilemap/examples/?canvas)
 
