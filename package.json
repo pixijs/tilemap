@@ -39,7 +39,7 @@
     "release": "xs release",
     "docs": "xs docs",
     "deploy": "xs deploy",
-    "test": "xs build,docs"
+    "test": "xs test"
   },
   "files": [
     "lib",
@@ -69,12 +69,6 @@
     "docsGoogleAnalytics": "UA-103772589-3",
     "docsTitle": "PixiJS Tilemap API Documentation",
     "docsDescription": "Documentation for PixiJS Tilemap library",
-    "docsKeyword": "docs, documentation, pixi, pixijs, filters, webgl, ascii, bloom, convolution, cross-hatch, dotfilter, emboss, pixelate, twist, tiltshift",
-    "lint": [
-      "src",
-      "scripts"
-    ],
-    "deployFiles": "{dist,screenshots,examples,docs,demo}/**",
-    "moduleSource": "src/index.ts"
+    "docsKeyword": "docs, documentation, pixi, pixijs, filters, webgl, ascii, bloom, convolution, cross-hatch, dotfilter, emboss, pixelate, twist, tiltshift"
   }
 }

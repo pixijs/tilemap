@@ -1,25 +1,22 @@
-import { describe, it, expect } from 'vitest';
-import { BaseTexture, Texture } from '@pixi/core';
+import { Texture } from 'pixi.js';
 import { Tilemap } from '../';
 
 describe('Tilemap', () =>
 {
     it('should calculate local bounds', () =>
     {
-        const texture = new Texture(new BaseTexture(null, {
-            width: 100,
-            height: 100,
-        }));
-        const tilemap = new Tilemap([texture.baseTexture]);
+        const canvas = Object.assign(document.createElement('canvas'), { width: 100, height: 100 });
+        const texture = Texture.from(canvas);
+        const tilemap = new Tilemap([texture.source]);
 
         tilemap.tile(texture, 0, 0);
         tilemap.tile(texture, 100, 0);
 
         const bounds = tilemap.getLocalBounds();
 
-        expect(bounds.x).to.equal(0);
-        expect(bounds.y).to.equal(0);
-        expect(bounds.width).to.equal(200);
-        expect(bounds.height).to.equal(100);
+        expect(bounds.x).toEqual(0);
+        expect(bounds.y).toEqual(0);
+        expect(bounds.width).toEqual(200);
+        expect(bounds.height).toEqual(100);
     });
 });

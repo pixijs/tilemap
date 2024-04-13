@@ -46,3 +46,4 @@ lib
 
 # Intellij
 *.iml
+example.api.json*

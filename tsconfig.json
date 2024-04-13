@@ -1,22 +1,17 @@
 {
+    "extends": "@pixi/extension-scripts/tsconfig",
     "compilerOptions": {
-        "target": "es6",
-        "noImplicitAny": true,
-        "removeComments": false,
-        "preserveConstEnums": true,
-        "sourceMap": true,
-        "inlineSources": true,
-        "declaration": true,
-        "esModuleInterop": true,
-        "moduleResolution": "node",
-        "allowSyntheticDefaultImports": true,
-        "skipLibCheck": true
+        // Avoid upstream issues with pixi.js
+        "skipLibCheck": true,
+        // TODO: Remove this when null checks are strict
+        "strictNullChecks": false
     },
     "include": [
         "src/**/*"
     ],
     "exclude": [
-        "node_modules/**/*",
-        "dist"
+        "node_modules",
+        "dist",
+        "lib"
     ]
 }
