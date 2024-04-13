@@ -1,6 +1,6 @@
 # @pixi/tilemap - PixiJS Tilemap Kit
 
-[![Node.js CI](https://github.com/pixijs/tilemap/actions/workflows/node.js.yml/badge.svg)](https://github.com/pixijs/tilemap/actions/workflows/node.js.yml)
+[![Automation CI](https://github.com/pixijs/tilemap/actions/workflows/main.yml/badge.svg)](https://github.com/pixijs/tilemap/actions/workflows/main.yml)
 <p align="center">
 <img src="https://i.imgur.com/hfoiBRk.png" width="1280px" />
 <p/>
