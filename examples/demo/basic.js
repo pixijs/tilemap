@@ -1,14 +1,13 @@
 /* global PIXI */
-const use_webgpu = new URLSearchParams(window.location.search).get('webgpu') !== null;
-
 (async () =>
 {
+    const searchParams = new URLSearchParams(window.location.search);
     const app = new PIXI.Application();
 
     await app.init({
         width: 800,
         height: 600,
-        preference: use_webgpu ? 'webgpu' : 'webgl',
+        preference: searchParams.get('preference') || 'webgl',
         hello: true
     });
     const tilemap = new PIXI.tilemap.CompositeTilemap();
