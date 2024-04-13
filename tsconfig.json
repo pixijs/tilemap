@@ -1,8 +1,6 @@
 {
     "extends": "@pixi/extension-scripts/tsconfig",
     "compilerOptions": {
-        // Avoid upstream issues with pixi.js
-        "skipLibCheck": true,
         // TODO: Remove this when null checks are strict
         "strictNullChecks": false
     },
