@@ -6,18 +6,25 @@
 <p/>
 
 This package provides a low-level rectangular tilemap implementation, optimized for high performance rendering and a
-out-of-the-box canvas fallback. It's designed to work with PixiJS 8.
+out-of-the-box canvas fallback.
 
-For PixiJS v7 please see [v7 branch](https://github.com/pixijs/tilemap/tree/v7), npm version `4.1.0`.
+## Version Compatiblity
+
+| PixiJS | PixiJS Tilemap Kit |
+|--------|--------------------|
+| v4.x   | v1.x               |
+| v5.x   | v2.x               |
+| v6.x   | v3.x               |
+| v7.x   | v4.x               |
+| v8.x   | v5.x               |
 
 ## Installation :package:
 
 ```bash
-# pixi-tilemap for older versions
-npm i --save @pixi/tilemap
+npm install --save @pixi/tilemap
 ```
 
-You can also use the UMD flavor:
+You can also use the browser bundle:
 
 ```
 <script src="https://cdn.jsdelivr.net/npm/@pixi/tilemap@latest/dist/pixi-tilemap.js"></script>
@@ -46,48 +53,36 @@ Assets.load(['atlas']).then(() =>
 textures (the tileset) it can render in one go. Usually, `CompositeTilemap` abstracts away this limitation in a robust
 enough manner.
 
-### Basic demo :pen:
+### Demos
 
-[webgl](https://pixijs.io/tilemap/examples/basic.html)
+* [Basic Demo](https://pixijs.io/tilemap/examples/basic.html)
 
-### Settings :page_facing_up:
+### Settings
 
 ```ts
 import { settings } from '@pixi/tilemap';
 ```
 
-#### TEXTURES_PER_TILEMAP
-
-Temporarily switched off
-
-#### TEXTILE_UNITS
-
-Temporarily switched off
-
-#### use32bitIndex
-
-There's also a limitation on 16k tiles per one tilemap. If you want to lift it, please use pixi v5.1.0 and following setting:
-
-```js
-settings.use32bitIndex = true;
-```
+| Setting | Description |
+|---------|-------------|
+| `TEXTURES_PER_TILEMAP` | Temporarily switched off |
+| `TEXTILE_UNITS` | Temporarily switched off |
+| `use32bitIndex` | There's also a limitation on 16k tiles per one tilemap. If you want to lift it, please use PixiJS v5.1.0 and following setting `settings.use32bitIndex = true;` |
 
 ## RPGMaker
 
-For RPGMaker MV please use [v4 branch](https://github.com/pixijs/pixi-tilemap/tree/v4.x) for pixi V4, npm version is `1.2.6`
-
-Please use [v3 branch](https://github.com/pixijs/pixi-tilemap/tree/pixiv3) for pixi V3.
-
-Canvas fallback is 5x slower than vanilla rpgmaker. Webgl version is faster and doesnt use extra textures.
+Canvas fallback is 5x slower than vanilla rpgmaker. WebGL version is faster and doesnt use extra textures.
 
 ### RPGMaker demo
 
-[webgl](https://pixijs.io/tilemap/examples/): [zoomin](https://pixijs.io/tilemap/examples/?scale=0.6) and [zoomout](https://pixijs.io/tilemap/examples/?scale=1.4)
+* [WebGL Demo](https://pixijs.io/tilemap/examples/)
+  * [60% Scale](https://pixijs.io/tilemap/examples/?scale=0.6)
+  * [140% Scale](https://pixijs.io/tilemap/examples/?scale=1.4)
+* [WebGL Retina Demo](https://pixijs.io/tilemap/examples/?resolution=2)
+  * [60% Scale](https://pixijs.io/tilemap/examples/?resolution=2&scale=0.6)
+  * [140% Scale](https://pixijs.io/tilemap/examples/?resolution=2&scale=1.4)
+* [Canvas Demo](https://pixijs.io/tilemap/examples/?canvas)
 
-[retina webgl](https://pixijs.io/tilemap/examples/?resolution=2): [zoomin](https://pixijs.io/tilemap/examples/?resolution=2&scale=0.6) and [zoomout](https://pixijs.io/tilemap/examples/?resolution=2&scale=1.4)
+## More Tutorials
 
-[canvas](https://pixijs.io/tilemap/examples/?canvas)
-
-## More tutorials :link:
-
-[Alan01252 tutorial](https://github.com/Alan01252/pixi-tilemap-tutorial)
+* [Alan01252 Tutorial](https://github.com/Alan01252/pixi-tilemap-tutorial)
