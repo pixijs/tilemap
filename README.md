@@ -55,7 +55,8 @@ enough manner.
 
 ### Demos
 
-* [Basic Demo](https://pixijs.io/tilemap/examples/basic.html)
+* [Basic Demo (WebGL)](https://pixijs.io/tilemap/examples/basic.html)
+* [Basic Demo (WebGPU)](https://pixijs.io/tilemap/examples/basic.html?preference=webgpu)
 
 ### Settings
 
@@ -73,7 +74,7 @@ import { settings } from '@pixi/tilemap';
 
 Canvas fallback is 5x slower than vanilla rpgmaker. WebGL version is faster and doesnt use extra textures.
 
-### RPGMaker demo
+### RPGMaker Demo
 
 * [WebGL Demo](https://pixijs.io/tilemap/examples/)
   * [60% Scale](https://pixijs.io/tilemap/examples/?scale=0.6)
